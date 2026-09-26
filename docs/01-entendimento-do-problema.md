@@ -49,6 +49,7 @@ Previsao + intervalo + ranking + explicacao
 | Criterio de entrada de canal | Minimo de 30 Shorts elegiveis; preferencia por 50 |
 | Canais do piloto | 12 canais: 3 marcas e 3 criadores em cada setor |
 | Volume do piloto | 1.902 Shorts elegiveis |
+| Estrategia de modelo do piloto | Modelo global multicanal; baseline calculado por canal |
 
 ## Casos de uso
 
@@ -129,6 +130,20 @@ Funcao Python, MCP e agente
 ```
 
 O processamento multimodal deve ser cacheado por `video_id`: downloads, frames, transcricoes, atributos visuais e embeddings nao devem ser recalculados sem necessidade.
+
+## Limitacao da API publica e evolucao com dados de parceiros
+
+A YouTube Data API publica entrega `view_count`, `like_count` e `comment_count`, mas nao entrega as metricas de distribuicao do video: impressoes da thumbnail, cliques, CTR de thumbnail, retencao, tempo de exibicao e origem do trafego. Em Shorts, `view_count` representa reproducoes e nao deve ser interpretado como numero de cliques na thumbnail.
+
+Se a Galaxies ou um parceiro autorizar acesso aos dados do proprio canal, um servidor MCP podera consultar a YouTube Analytics API e incorporar essas metricas ao mesmo esquema minimo de dados. O acesso deve ocorrer apenas por autenticacao autorizada pelo dono do canal; chaves, tokens e dados de canais externos nao devem ser armazenados no repositorio.
+
+| Dado autorizado do parceiro | Uso permitido no modelo |
+| --- | --- |
+| Impressoes e CTR de posts anteriores | Feature agregada do historico do canal |
+| Retencao e tempo assistido de posts anteriores | Feature agregada do historico e analise de formato |
+| Impressoes, CTR e retencao do post previsto | Resultado posterior a publicacao; usar apenas para avaliacao, nunca como feature da previsao daquele post |
+
+Essa integracao melhora a analise do parceiro, mas nao e requisito para o piloto com dados publicos.
 
 ## Roadmap: canais sem historico suficiente
 
