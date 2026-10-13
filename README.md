@@ -77,6 +77,44 @@ O coletor baixa a thumbnail referenciada pela API, valida a imagem e gera hash, 
 .\.venv\Scripts\python.exe scripts\run_baseline_experiments.py
 ```
 
+### 5. Tool preditiva (funcao Python + servidor MCP)
+
+O modelo servido e o CB_EMB do E-08 (CatBoost no desvio sobre a mediana do canal + embedding SigLIP 2 da thumbnail), treinado so com o split de treino. Roda em Linux, macOS ou Colab; no Windows do Inteli as DLLs nativas (CatBoost, Pydantic) sao bloqueadas.
+
+```bash
+pip install -r requirements-tool.txt
+python scripts/train_tool_model.py --validate      # gera artifacts/tool_model/<versao>/ e LATEST.json
+PYTHONPATH=src python -m pytest -q tests/test_tool.py
+PYTHONPATH=src python -m galaxies_agent.mcp_server  # servidor MCP (stdio)
+```
+
+Como funcao Python:
+
+```python
+from galaxies_agent import Predictor, CreativeInput
+out = Predictor().predict(CreativeInput(
+    creative="https://www.youtube.com/shorts/<id>",   # ou caminho/URL da thumbnail
+    caption="Titulo planejado", planned_datetime="2026-10-20T18:00",
+    channel_id="UC...", sector="automotivo"))
+print(out.predicted_metric, out.interval_low, out.interval_high, out.confidence_flag, out.explanation)
+```
+
+Configuracao de cliente MCP (ex.: Claude Desktop), com `cwd` na raiz do repo:
+
+```json
+{"mcpServers": {"galaxies-preditivo": {"command": "python", "args": ["-m", "galaxies_agent.mcp_server"],
+  "env": {"PYTHONPATH": "src"}}}}
+```
+
+| Tool | Entrada | Saida |
+| --- | --- | --- |
+| `prever_criativo` | `CreativeInput` (criativo, legenda, data planejada, `channel_id` ou `channel_stats`, setor) | previsao de curtidas, intervalo de 80%, `confidence_flag` e motivos, desempenho relativo ao canal e faixa, `top_drivers` (SHAP), Shorts comparaveis, explicacao, features usadas |
+| `ranquear_criativos` | 2 a 5 `CreativeInput` | mesma saida, ordenada pelo desempenho relativo ao canal |
+| `historico_canal` | `channel_id` | resumo e ultimos Shorts do canal |
+| `info_modelo` | - | versao, dados de treino, alvo e metodo do intervalo |
+
+Regras da tool: o numero vem sempre do modelo; o B0 usa so Shorts do canal publicados antes da data planejada (testado contra o Gold); intervalo por calibracao conformal (cobertura de 76% fora da amostra para meta de 80%); sem embedding da thumbnail (sem `torch`/`transformers` ou sem acesso ao Hugging Face e fora do cache), usa o modelo reserva e marca confianca baixa. Para criativos novos fora do cache, calcule o embedding no Colab ou passe um `.npz` extra em `Predictor(extra_embedding_cache=[...])`.
+
 ## Estrutura de dados
 
 | Camada | Conteudo | Regra principal |
