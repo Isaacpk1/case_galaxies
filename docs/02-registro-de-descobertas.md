@@ -189,3 +189,11 @@ Para cada item novo, anotar:
 - **O que descobrimos**: no E-12, LightGBM, XGBoost, ExtraTrees, ensemble, objetivo de ranking e peso por canal nao superam o CB_EMB (Holm). O Optuna melhorou as origens usadas na busca e piorou na origem 3 nao usada (sobreajuste a validacao). A unica ideia com sinal e a feature de comparaveis (p bruto 0,025, nao aprovada apos Holm).
 - **Decisao**: CatBoost com os hiperparametros do E-08 e o algoritmo final. Melhorias restantes vem de dados (comparaveis, rubrica Gemini), decididas uma unica vez no E-13 (protocolo em `docs/07`).
 
+### D-019 - Modelo final: embedding + comparaveis + rubrica Gemini (E-13), confirmado no teste
+
+- **Data**: 13/10/2026
+- **Tipo**: resultado de experimento
+- **Status**: decidida
+- **O que descobrimos**: com a rubrica Gemini coletada para 99,97% dos Shorts, o CB_FINAL (CB_EMB + comparaveis visuais + rubrica + fala) reduz o MAE do rolling-origin de 0,882 para 0,850 (p = 0,003, 21 de 26 canais). Sozinhos, comparaveis e rubrica nao sao significativos; juntos sao. No teste final, aberto uma unica vez, o CB_FINAL tem MAE 0,746 (B0 0,858; CB_EMB 0,780), acerta 58% dos pares do mesmo canal (B0 44%) e o intervalo de 80% cobre 79,9%.
+- **Decisao**: CB_FINAL e o modelo final da tool. O teste foi usado e nao deve orientar novas escolhas; melhorias futuras precisam de dados novos (mais canais, horizonte fixo) para nova avaliacao.
+

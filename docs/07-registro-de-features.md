@@ -288,6 +288,41 @@ Notebook `notebooks/10_e12_model_selection.ipynb` (Colab, CPU); artefatos em `ar
 - **Optuna (40 tentativas, TPE)**: melhor MAE 0,858 nas origens 1-2 usadas na busca, mas **pior na origem 3** nao usada (0,8985 vs 0,8947; +0,004, p = 0,76, 14/26 canais). Ganho na busca que nao se repete fora dela: sobreajuste a validacao. **Ficam os hiperparametros do E-08.**
 - **PyCaret**: a instalacao no Colab (Python 3.13) estourou o limite de 10 min; nao executado (era exploratorio, nao decide).
 
+### Resultado do E-13 (modelo final) - 13/10/2026
+
+Rubrica Gemini coletada para 3.003 de 3.004 Shorts (99,97%; 1 resposta invalida; nenhuma duplicada). Script `scripts/run_e13_final.py`; artefatos em `artifacts/feature_experiments/e13_final/`.
+
+**Rolling-origin (decide):**
+
+| Braco | MAE | Pares (justo) | vs CB_EMB (MAE) | p | Canais melhores |
+| --- | ---: | ---: | --- | ---: | ---: |
+| **CB_FINAL** (embedding + comparaveis + rubrica + fala) | **0,8498** | **0,617** | **-0,033** [-0,054; -0,012] | **0,003** | 21/26 |
+| CB_EMB_KNN (so comparaveis) | 0,8679 | 0,583 | -0,015 [-0,031; 0,001] | 0,089 | 16/26 |
+| CB_EMB_GEMINI (so rubrica + fala) | 0,8685 | 0,594 | -0,014 [-0,034; 0,004] | 0,162 | 14/26 |
+| CB_EMB (referencia) | 0,8824 | 0,581 | - | - | - |
+
+- **Regra pre-registrada:** CB_FINAL melhora o MAE com p = 0,003 (< 0,05). **CB_FINAL e o modelo final.**
+- **Ablacao (descritivo):** sozinhos, comparaveis e rubrica nao sao significativos; juntos sao. Os dois blocos trazem informacao diferente (o que o canal ja fez com visual parecido x o que acontece no video).
+
+**Teste final (aberto uma unica vez, 13/10/2026 23:54 UTC; 612 Shorts, 26 canais; `scripts/run_e13_test_final.py`):**
+
+| Metrica | B0 | CB_EMB | **CB_FINAL** |
+| --- | ---: | ---: | ---: |
+| MAE em log (macro por canal) | 0,858 | 0,780 | **0,746** |
+| MAE em log (global) | 0,805 | 0,731 | **0,698** |
+| Acuracia por pares no canal | 0,440 | 0,575 | **0,580** |
+| MAPE em log | 0,251 | 0,217 | **0,200** |
+| Erro relativo mediano (curtidas) | 58% | 52% | **52%** |
+| Previsao dentro de 2x do real | 58% | **64%** | 63% |
+| F1 macro das faixas | 0,109 | 0,299 | **0,327** |
+| Acuracia de faixa | 0,279 | 0,374 | **0,395** |
+| Cobertura do intervalo de 80% | - | - | **79,9%** |
+
+- **CB_FINAL x B0:** MAE -0,112 (-13%), IC95% [-0,238; -0,010], permutacao p = 0,065, 16/26 canais; pares +0,140 (p < 0,001, 21/26 canais).
+- **CB_FINAL x CB_EMB:** MAE -0,033 (mesmo tamanho do rolling-origin), IC95% [-0,089; 0,009], p = 0,23. O teste tem ~24 Shorts por canal e nao tem poder para confirmar sozinho um ganho desse tamanho; a direcao se repete.
+- **Intervalo:** calibrado so com residuos do rolling-origin, cobre 79,9% no teste (alvo 80%).
+- Leitura: o ganho visto na validacao se repete fora da amostra; o modelo final erra 13% menos que a mediana do canal e acerta a ordem de 58% dos pares do mesmo canal (B0: 44%).
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
@@ -314,3 +349,4 @@ Notebook `notebooks/10_e12_model_selection.ipynb` (Colab, CPU); artefatos em `ar
 | E-11 | Canal nao visto (leave-one-channel-out dentro do rolling-origin) | CB_EMB_loco: MAE 0,951 vs B0 0,934 (p=0,36); pares 0,553 > 0,5 (p=0,002, 22/26 canais); CB_BASE_loco no acaso | Nao executado | diagnostico | Generaliza para ordenar criativos de canal novo; nivel absoluto nao. |
 | E-10b | Embedding de texto (mpnet multilingue) sobre o CB_EMB | Titulo: MAE -0,004 (p=0,73); titulo+descricao: -0,006 (p=0,58) | Nao executado | `sem_ganho` | Texto semantico nao acrescenta ao embedding da thumbnail. |
 | E-12 | LGBM, XGB, ET, ensemble, YetiRank, comparaveis, peso por canal; Optuna; PyCaret | Nenhum aprovado apos Holm; CB_KNN MAE -0,020 (p bruto 0,025, Holm 0,148); Optuna pior na origem 3 (p=0,76); PyCaret nao instalou | Nao executado | `sem_ganho` (algoritmos, Optuna) / candidato (comparaveis) | Mantem CB_EMB com parametros do E-08; comparaveis vao ao E-13. |
+| E-13 | CB_EMB + comparaveis (KNN visual) + rubrica Gemini + fala | CB_FINAL MAE 0,850 vs 0,882 (-0,033, p=0,003, 21/26 canais); aprovado pela regra pre-registrada | **Aberto uma vez:** MAE 0,746 vs B0 0,858 e CB_EMB 0,780; pares 0,580 vs B0 0,440; intervalo 80% cobre 79,9% | `retida` | **CB_FINAL e o modelo final.** |

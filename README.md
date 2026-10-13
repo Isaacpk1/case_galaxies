@@ -2,7 +2,7 @@
 
 Inteli Academy x Galaxies (TAPI). Agente que preve, **antes da publicacao**, as curtidas de um YouTube Short de moda ou automotivo, com intervalo de predicao, ranking entre criativos e explicacao dos fatores. O numero vem de um modelo treinado em dados observados; o LLM so orquestra e explica. O fluxo e exposto como funcao Python, servidor MCP e agente LangGraph.
 
-**Resultado principal (validacao temporal, teste final ainda fechado):** CatBoost prevendo o desvio sobre a mediana do canal, com embedding visual SigLIP 2 da thumbnail, reduz o erro em relacao a mediana historica do canal (MAE 0,882 vs 0,934 em log, p = 0,0006, 18 de 26 canais) e acerta a ordem de ~57-58% dos pares de Shorts do mesmo canal (moeda = 50%). Em canais nunca vistos, continua ordenando acima do acaso (55%, p = 0,002).
+**Resultado principal (teste final, aberto uma unica vez, 612 Shorts):** o modelo final (CatBoost sobre o desvio da mediana do canal, com embedding SigLIP 2 da thumbnail, Shorts comparaveis e rubrica de video + fala do Gemini) erra 13% menos que a mediana historica do canal (MAE 0,746 vs 0,858 em log), acerta a ordem de 58% dos pares de Shorts do mesmo canal (mediana do canal: 44%) e seu intervalo de 80% cobre 79,9% dos casos. Na validacao temporal, a rubrica Gemini + comparaveis melhoraram o modelo com p = 0,003 (21 de 26 canais). Em canais nunca vistos, o modelo ainda ordena acima do acaso (55%, p = 0,002).
 
 ---
 
@@ -122,7 +122,7 @@ print(out.predicted_metric, out.interval_low, out.interval_high, out.confidence_
 | --- | --- |
 | Algoritmo | CatBoost, perda MAE |
 | Alvo | `log(1 + curtidas) - log(1 + mediana das curtidas dos Shorts anteriores do canal)` |
-| Features | historico do canal (B0, posts anteriores, dias desde o anterior), contexto (duracao, setor, marca/criador, hora, dia da semana, canal), texto resumido (tamanhos, tags), **embedding SigLIP 2 da thumbnail (PCA 16)** |
+| Features | historico do canal (B0, posts anteriores, dias desde o anterior), contexto (duracao, setor, marca/criador, hora, dia da semana, canal), texto resumido (tamanhos, tags), **embedding SigLIP 2 da thumbnail (PCA 16)**, **comparaveis** (desvio medio dos 5 Shorts anteriores do canal com thumbnail mais parecida, similaridade, novidade visual) e **rubrica Gemini** (8 notas 0-10, 8 sinais sim/nao, tom de narracao, quantidade e ritmo de fala) |
 | Hiperparametros | depth 6, learning_rate 0,03, l2_leaf_reg 5, random_strength 2, bagging_temperature 2, 1.390 arvores (busca aleatoria em holdout cronologico, E-08) |
 | Reserva | mesmo modelo sem embedding (quando a thumbnail nao pode ser processada; confianca baixa) |
 | Intervalo | 80%, conformal: quantis 10%/90% dos residuos fora da amostra do rolling-origin, por tipo de canal |
@@ -138,7 +138,7 @@ print(out.predicted_metric, out.interval_low, out.interval_high, out.confidence_
 - **Pre-registro:** a partir do E-10, candidatos e regra de escolha foram escritos em `docs/07` antes de rodar; multiplas comparacoes com correcao de Holm.
 - **Teste final:** aberto uma unica vez, depois de congelar o modelo (E-13).
 
-## 7. Resultados (validacao temporal)
+## 7. Resultados
 
 | Exp. | O que testou | Resultado |
 | --- | --- | --- |
@@ -151,7 +151,7 @@ print(out.predicted_metric, out.interval_low, out.interval_high, out.confidence_
 | E-10 | PCA 8/32, combinacao, embedding de texto | Nada supera o E-08 |
 | E-11 | Canal nunca visto | Ordena acima do acaso (pares 0,553, p = 0,002); nao supera o B0 em MAE |
 | E-12 | LightGBM, XGBoost, ExtraTrees, ensemble, YetiRank, comparaveis, peso por canal, Optuna | Nenhum aprovado apos Holm; comparaveis promissor (p = 0,025 bruto) |
-| E-13 | Modelo final (CB_EMB + comparaveis + rubrica Gemini) vs CB_EMB | Pre-registrado; roda com a rubrica >= 90% |
+| **E-13** | **Modelo final (CB_EMB + comparaveis + rubrica Gemini) vs CB_EMB** | **Aprovado: MAE 0,850 vs 0,882 (p = 0,003, 21/26 canais)** |
 
 Modelo de referencia (CB_EMB) no rolling-origin:
 
@@ -166,7 +166,19 @@ Modelo de referencia (CB_EMB) no rolling-origin:
 | F1 macro das faixas (abaixo/media/acima/viral) | 0,11 | **0,28** |
 | Cobertura do intervalo de 80% | - | **76%** (fora da amostra) |
 
-**Teste final:** a preencher apos o E-13 (uma unica avaliacao).
+**Teste final** (aberto uma unica vez depois da decisao do E-13; 612 Shorts mais recentes de 26 canais):
+
+| Metrica | B0 (mediana do canal) | CB_EMB | **Modelo final (CB_FINAL)** |
+| --- | ---: | ---: | ---: |
+| MAE em log (macro por canal) | 0,858 | 0,780 | **0,746** |
+| MAPE em log | 0,251 | 0,217 | **0,200** |
+| Erro relativo mediano (curtidas) | 58% | 52% | **52%** |
+| Previsao dentro de 2x do real | 58% | **64%** | 63% |
+| Acuracia por pares no canal | 44% | 57% | **58%** |
+| F1 macro das faixas | 0,11 | 0,30 | **0,33** |
+| Cobertura do intervalo de 80% | - | - | **79,9%** |
+
+Contra o B0: MAE -0,112 (IC95% [-0,238; -0,010], p = 0,065) e pares +14 p.p. (p < 0,001, 21 de 26 canais). Contra o CB_EMB, o ganho tem o mesmo tamanho do rolling-origin (-0,033), mas o teste (~24 Shorts por canal) nao tem poder para confirma-lo sozinho (p = 0,23).
 
 Diario completo e analises: [docs/07](docs/07-registro-de-features.md); decisoes: [docs/02](docs/02-registro-de-descobertas.md).
 
@@ -179,7 +191,7 @@ Diario completo e analises: [docs/07](docs/07-registro-de-features.md); decisoes
 | Embedding SigLIP 2 da thumbnail, PCA 16 (E-08, E-10) | TF-IDF (E-05); embedding de texto mpnet (E-10b) |
 | CatBoost (E-08, E-12) | Cor, brilho, OCR da thumbnail (E-06, E-08) |
 | Intervalo conformal (tool) | PCA 8 e 32 (E-10); LightGBM, XGBoost, ExtraTrees, ensemble, YetiRank, peso por canal (E-12) |
-| Em decisao (E-13): comparaveis e rubrica Gemini | Destilacao por canal (D-015); modelos por canal (D-004) |
+| Comparaveis visuais + rubrica e fala do Gemini (E-13) | Destilacao por canal (D-015); modelos por canal (D-004) |
 
 ## 9. Limitacoes
 
@@ -194,7 +206,7 @@ Diario completo e analises: [docs/07](docs/07-registro-de-features.md); decisoes
 
 ## 10. Evolucao
 
-1. Confirmar comparaveis e rubrica Gemini no E-13 e abrir o teste final.
+1. Avaliar o modelo final em dados novos (Shorts publicados depois da coleta), ja que o teste atual foi usado.
 2. Mais canais e o setor de beleza; recoleta periodica para manter o historico atual.
 3. Alvo em horizonte fixo (curtidas aos 7/30 dias) com coleta recorrente.
 4. Frames iniciais e audio (gancho, cortes, musica) quando houver coleta de video autorizada.
