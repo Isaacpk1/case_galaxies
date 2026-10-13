@@ -178,6 +178,6 @@ Para cada item novo, anotar:
 - **Data**: 12/10/2026
 - **Tipo**: resultado de experimento
 - **Status**: decidida
-- **O que descobrimos**: no E-11 (canal fora do treino), o CB_EMB acerta 55,3% dos pares dentro do canal (p=0,002, 22 de 26 canais acima do acaso), enquanto o modelo sem embedding fica no acaso. O MAE, porem, nao supera a mediana do canal (B0). No E-10, PCA 8/32 e a combinacao CB_FULL nao superam o CB_EMB com PCA 16.
+- **O que descobrimos**: no E-11 (canal fora do treino), o CB_EMB acerta 55,3% dos pares dentro do canal (p=0,002, 22 de 26 canais acima do acaso), enquanto o modelo sem embedding fica no acaso. O MAE, porem, nao supera a mediana do canal (B0). No E-10, PCA 8/32, a combinacao CB_FULL e o embedding de texto (titulo ou titulo + descricao) nao superam o CB_EMB com PCA 16 (todos p >= 0,46).
 - **Decisao**: CB_EMB (PCA 16) segue como referencia. Para clientes novos, comunicar a tool como ferramenta de **ordenacao** de criativos do mesmo canal; a previsao absoluta vem com confianca baixa (ja implementado). Base para a resposta a "funciona para clientes novos?" na banca.
 

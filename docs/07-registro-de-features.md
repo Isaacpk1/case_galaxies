@@ -208,6 +208,13 @@ Script: `scripts/run_e10_e11_experiments.py` (retomavel); artefatos em `artifact
 | CB_EMB_pca32 | 0,8879 | 0,571 | +0,006, p=0,57 |
 | CB_EMB_pca8 | 0,8885 | 0,566 | +0,006, p=0,50 |
 
+**E-10b** (embedding de texto `paraphrase-multilingual-mpnet-base-v2`, PCA 16, gerado no Colab com `notebooks/09_e10b_text_embedding.ipynb`; Silver `data/silver/features/text_mpnet_v1/20261013T020000Z/`):
+
+| Braco | MAE | Pares (justo) | vs CB_EMB_pca16 |
+| --- | ---: | ---: | --- |
+| CB_EMB + texto (titulo) | 0,8783 | 0,568 | MAE -0,004 (p=0,73); pares -0,013 (p=0,46) |
+| CB_EMB + texto (titulo + descricao + tags) | 0,8767 | 0,593 | MAE -0,006 (p=0,58); pares +0,012 (p=0,57) |
+
 Pela regra pre-registrada, nenhum braco substitui a referencia: **fica o CB_EMB com PCA 16**. As features manuais/texto do CB_FULL nao acrescentam nada com parametros fixos (a vantagem de ranking vista no E-08 nao se repete).
 
 **E-11** (deixa um canal fora; o modelo nunca viu o canal, `channel_id` fora das features; B0 do historico publico do canal):
@@ -248,3 +255,4 @@ Leitura para o produto: para um cliente novo (canal fora da base) a tool serve p
 | E-08 | CatBoost residual (perda MAE) + embedding SigLIP 2 da thumbnail; bracos BASE, THUMB, EMB, FULL | CB_EMB 0,8815 vs B0 0,9338 (delta -0,052, p=0,0006, 18/26 canais) e vs R_M2 (p=0,0002); vence B0 nas 3 origens; pares justo 0,57; controle de idade confirma sinal de conteudo | Nao executado: teste final segue fechado | `retida` (embedding) / `sem_ganho` (thumbnail manual) | CB_EMB vira referencia; calibrar intervalo (cobertura 50-53% para meta de 80%). |
 | E-10a/c | PCA 8/32 e CB_FULL com parametros fixos | Nenhum supera CB_EMB_pca16 (p >= 0,50) | Nao executado | `sem_ganho` | Mantem CB_EMB PCA 16 (regra pre-registrada). |
 | E-11 | Canal nao visto (leave-one-channel-out dentro do rolling-origin) | CB_EMB_loco: MAE 0,951 vs B0 0,934 (p=0,36); pares 0,553 > 0,5 (p=0,002, 22/26 canais); CB_BASE_loco no acaso | Nao executado | diagnostico | Generaliza para ordenar criativos de canal novo; nivel absoluto nao. |
+| E-10b | Embedding de texto (mpnet multilingue) sobre o CB_EMB | Titulo: MAE -0,004 (p=0,73); titulo+descricao: -0,006 (p=0,58) | Nao executado | `sem_ganho` | Texto semantico nao acrescenta ao embedding da thumbnail. |
