@@ -143,3 +143,32 @@ Para cada item novo, anotar:
 - **O que descobrimos**: o B0 vencia todos os Ridge porque (1) o Ridge prevê o nivel de curtidas do zero e (2) minimiza erro quadratico, prevendo a media, enquanto o MAE premia a mediana. Prevendo o desvio em relacao ao B0 com perda absoluta (E-07), o modelo melhora 0,052 de MAE sobre o M2 antigo (p=0,018, 21 de 26 canais) e empata com o B0.
 - **Decisao**: Gold passa a trazer `target_residual_log_likes`. A escolha de algoritmo (CatBoost/LightGBM etc.) continua na fase de modelagem; o Ridge foi usado so como regua de comparacao de features.
 
+
+### D-015 - Destilacao para modelos por canal (professor grande, alunos por canal)
+
+- **Data**: 12/10/2026
+- **Tipo**: ideia de arquitetura
+- **Status**: decidida (usar o modelo grande como extrator de features; destilacao de rotulos descartada)
+- **O que foi proposto**: um modelo grande ("professor") analisa o YouTube como um todo e gera previsoes de engajamento; essas previsoes, separadas por canal ou nicho, viram o alvo de treino de modelos pequenos por canal ("alunos", ex.: XGBoost), que rodariam barato no dia a dia.
+- **Pontos de atencao**:
+  1. Temos o rotulo real (`like_count`) para todo Short. Treinar o aluno na previsao do professor limita o aluno a qualidade do professor e herda seus vieses; destilacao so compensa quando falta rotulo ou o professor e comprovadamente melhor.
+  2. O TAP exige modelo treinado sobre dados observados e diz que o LLM "nunca chuta o numero"; usar a previsao do LLM como alvo e uma forma indireta de fazer isso.
+  3. Modelos por canal tem poucos dados (~92 Shorts de treino por canal em media, alguns com ~40); ver D-004.
+  4. Retencao, CTR e dados globais do YouTube nao estao disponiveis pela API publica (D-001).
+- **O que ja aproveitamos da ideia**:
+  - Modelo grande como professor de **atributos**, nao de rotulos: o Gemini assiste ao video e devolve a rubrica do TAP (`scripts/collect_gemini_video_features.py`); o CatBoost aprende essas colunas contra as curtidas reais. Custo do modelo grande pago uma vez por video; previsao barata depois.
+  - Personalizacao por canal via alvo residual (D-014): o B0 de cada canal se atualiza a cada post e o modelo global aprende so o desvio.
+  - Especializacao no nivel com dados suficientes: tipo de canal (M2) e setor (D-004). Por canal, a alternativa segura e pooling parcial (efeito do canal encolhido para a media global quando ha pouco historico).
+- **Teste que decide**: o piloto Gemini coleta `potencial_viral_0a10`, que e a "previsao do professor". Medir Spearman desse campo com `target_residual_log_likes` (dentro do canal). Perto de zero: o professor nao tem conhecimento a destilar. Com sinal: entra como feature no CatBoost (E-09). Cobre tambem a extensao opcional do TAP "Comparacao LLM zero-shot vs. modelo treinado".
+- **Resultado do teste (12/10/2026)**: piloto de 100 Shorts (`data/bronze/gemini_video/20261013T005518Z`, `gemini-3.5-flash-lite`, 100/100 ok, ~5,5 mil tokens de entrada por video). Somente linhas de treino (83 videos, 25 canais; as 19 de teste nao foram olhadas). `potencial_viral_0a10` tem Spearman 0,32 com `target_residual_log_likes` e 0,21 com o residuo centrado no canal (limiar de p<0,05 com n=83 e ~0,22). Outros campos com sinal parecido: `texto_na_tela` (0,28), `brilho_saturacao_0a10` (0,25), `forca_hook_0a10` (0,22). Ha 16 campos testados, entao isso e indicio, nao confirmacao.
+- **Conclusao**: o professor tem algum sinal, mas fraco e ruidoso, e as notas se concentram em 6-8. Confirma o uso correto: rubrica do Gemini como **features** do CatBoost treinado em curtidas reais (E-09), nao como alvo de treino de modelos por canal. A destilacao como proposta segue nao recomendada.
+- **Proximo passo**: coletar a rubrica para todos os Shorts do Gold e medir o ganho no E-09 contra o CB_EMB.
+
+### D-016 - Embedding visual da thumbnail supera o B0; CB_EMB vira referencia
+
+- **Data**: 12/10/2026
+- **Tipo**: resultado de experimento
+- **Status**: retida
+- **O que descobrimos**: no E-08, CatBoost no alvo residual com embedding SigLIP 2 da thumbnail (PCA 16) teve MAE 0,8815 contra 0,9338 do B0 (delta -0,052, IC 95% [-0,081; -0,025], p=0,0006, 18 de 26 canais) e venceu nas 3 origens. Sem o embedding, o CatBoost empata com o R_M2: o ganho vem do conteudo visual, nao do algoritmo. Ranking justo por pares 0,57-0,58 e Spearman intra-canal ~0,2. Controle por idade do video confirma sinal de conteudo.
+- **Decisao**: CB_EMB passa a ser a referencia para os proximos experimentos. Features manuais de thumbnail continuam `sem_ganho`.
+- **Pendencias**: intervalo de 80% cobre so 50-53% (calibrar com conformal); somar rubrica Gemini (E-09); abrir o teste final uma unica vez depois de congelar a configuracao. Detalhes em `docs/07` (E-08).

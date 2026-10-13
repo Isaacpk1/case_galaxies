@@ -82,6 +82,7 @@ O lote reduzido e mais promissor que E-01, mas ainda e `sem_ganho` para decisao 
 | M-01 | TF-IDF de titulo, descricao e tags | Vetorizacao unigramas/bigramas, no maximo 500 termos; dados disponiveis antes da publicacao | `sem_ganho` |
 | M-02a | atributos visuais da thumbnail (`thumbnail_v1`) | Thumbnails validadas na Silver; ver secao abaixo | `sem_ganho` (E-06) |
 | M-02b | texto na thumbnail via OCR (`thumbnail_ocr_v1`) | EasyOCR sobre o painel de conteudo; ver secao abaixo | `sem_ganho` (E-06) |
+| M-02d | embedding SigLIP 2 da thumbnail (`google/siglip2-base-patch16-224`, PCA 16) | Thumbnail com painel vertical recortado | `retida` (E-08) |
 | M-02c | frames do video | Download/cache de midia | `candidata` |
 | M-03 | transcricao, fala e audio | Extracao de audio e ASR | `candidata` |
 
@@ -153,6 +154,37 @@ Leitura:
 3. A melhora da thumbnail no E-06 vinha em boa parte de corrigir o vies do modelo antigo; na nova formulacao o ganho some em M1/M3 e fica fraco em M2. Thumbnail continua `sem_ganho`.
 4. A acuracia de ranking dentro do canal fica em torno de 0,52 (0,5 = moeda). Prever qual criativo vai performar melhor so com metadados e thumbnail ainda e dificil; isso reforca a prioridade de transcricao, moda nas features multimodais e mais canais.
 
+### Resultado do E-08 (CatBoost residual + embedding SigLIP 2 da thumbnail)
+
+Notebook: `notebooks/08_e08_catboost_residual_multimodal.ipynb` (Colab, GPU T4). Artefatos: `artifacts/feature_experiments/e08_catboost_residual/`. Gold `gold_v1_20261002T013000Z_663f502d`, 2.392 linhas de treino, 26 canais, moda e automotivo. Mesmo rolling-origin do E-07; hiperparametros por busca aleatoria (12 tentativas) em holdout cronologico dentro de cada janela; PCA (16 dim) do embedding ajustado so no treino de cada janela. Teste final fechado.
+
+| Modelo | MAE log | Pares (justo) | Spearman intra-canal | Origens vencendo B0 |
+| --- | ---: | ---: | ---: | ---: |
+| CB_EMB (BASE + embedding SigLIP 2) | **0,8815** | 0,569 | 0,198 | 3/3 |
+| CB_FULL (BASE + thumbnail manual + texto E-02 + embedding) | 0,8877 | **0,584** | **0,230** | 3/3 |
+| CB_THUMB (BASE + thumbnail manual/OCR) | 0,9210 | 0,547 | 0,119 | 2/3 |
+| CB_BASE (CatBoost, so BASE) | 0,9258 | 0,510 | 0,032 | 2/3 |
+| R_M2 (referencia E-07) | 0,9279 | 0,534 | 0,096 | 3/3 |
+| B0 | 0,9338 | 0,402 | -0,263 | - |
+
+| Comparacao (MAE, 26 canais) | Delta | IC 95% | p | Canais melhor |
+| --- | ---: | --- | ---: | ---: |
+| CB_EMB vs B0 | -0,052 | [-0,081; -0,025] | 0,0006 | 18 |
+| CB_EMB vs R_M2 | -0,046 | [-0,072; -0,025] | 0,0002 | 21 |
+| CB_EMB vs CB_BASE | -0,044 | [-0,066; -0,023] | 0,0005 | 21 |
+| CB_THUMB vs CB_BASE | -0,005 | [-0,028; 0,018] | 0,70 | 15 |
+| CB_BASE vs R_M2 | -0,002 | [-0,031; 0,027] | 0,89 | 12 |
+
+Leitura:
+1. Primeiro resultado que supera o B0 com significancia. O ganho vem do **embedding da thumbnail**, nao do algoritmo: CatBoost sem conteudo empata com o R_M2. No SHAP do modelo final, o grupo `thumb_embedding (PCA)` e de longe o maior, seguido de `duration_seconds` e `baseline_log_likes`.
+2. Features manuais da thumbnail (cor, brilho, OCR) seguem `sem_ganho`, coerente com E-06.
+3. Ranking: acuracia por pares justa (empate previsto = 0,5) sobe de 0,534 (R_M2) para 0,57-0,58. O criterio antigo punia empates e deixava o B0 em 0,26; no criterio justo ele fica em 0,40.
+4. Intervalo de 80% (CatBoost MultiQuantile) cobre so 50-53%: estreito demais. Precisa de calibracao (predicao conformal sobre os residuos do rolling-origin) antes de ir para a tool.
+5. **Controle de idade** (diagnostico, sem retreino): Spearman idade x curtidas dentro do canal e fraco (-0,06). Com o alvo ajustado pela idade do video na coleta, CB_EMB mantem Spearman 0,233 contra 0,124 do CB_BASE (delta +0,11, IC 95% [0,03; 0,19], p=0,013, 17 de 25 canais); a previsao do CB_EMB quase nao correlaciona com a idade (0,05). O sinal do embedding e de conteudo, nao de recencia.
+6. O Spearman negativo do B0 dentro do canal nao e efeito de idade; o mais provavel e regressao a media (a mediana movel sobe depois de uma sequencia de videos fortes, e os seguintes tendem a voltar ao normal).
+
+Status: embedding `retido`; CB_EMB vira a nova referencia. Proximo: calibrar intervalo, somar rubrica Gemini (E-09) e so entao abrir o teste final uma vez.
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
@@ -174,3 +206,4 @@ Leitura:
 | E-05 | TF-IDF de titulo, descricao e tags, combinado ao baseline | M1 caiu de 0,7798 para 0,7535; melhorou em 9 de 12 canais, mas IC 95% do delta E-05 - E-00 foi [-0,0646; 0,0012] e p=0,1162 | Nao executado: teste final segue fechado | `sem_ganho` | Sinal promissor, mas ainda insuficiente para reter; investigar representacao semantica mais robusta ou ampliar a amostra. |
 | E-06 | Thumbnail: `thumbnail_v1` + flags de `thumbnail_ocr_v1` (so automotivo, 14 canais, 1.124 linhas) | M1 -0,031 (IC 95% [-0,074; 0,010], p=0,19, 10 de 14 canais melhoram, melhora nas 3 origens); M3 -0,040 (p=0,11); M2 -0,008 (p=0,63). Nenhum modelo supera B0 | Nao executado: teste final segue fechado | `sem_ganho` | Direcao consistente mas nao significativa; manter como candidatas fortes e reavaliar com moda incluida e mais canais. |
 | E-07 | Nova formulacao: prever o desvio em relacao a mediana do canal (B0) com perda absoluta (LAD) | Todos os setores: R_M2 0,9275 vs B0 0,9346 e vs M2 0,9794 (delta vs M2 -0,052, p=0,018; 21 de 26 canais melhoram). Empata com B0 (delta -0,007, p=0,45), mas vence B0 nas 3 origens. Thumbnail em cima da nova formulacao: R_M2 -0,019 (p=0,22), M1/M3 ~0 | Nao executado: teste final segue fechado | `retida` (formulacao) / `sem_ganho` (thumbnail) | Adotar residual + LAD como nova referencia; proximas features devem ser comparadas contra R_M2, nao contra M2. |
+| E-08 | CatBoost residual (perda MAE) + embedding SigLIP 2 da thumbnail; bracos BASE, THUMB, EMB, FULL | CB_EMB 0,8815 vs B0 0,9338 (delta -0,052, p=0,0006, 18/26 canais) e vs R_M2 (p=0,0002); vence B0 nas 3 origens; pares justo 0,57; controle de idade confirma sinal de conteudo | Nao executado: teste final segue fechado | `retida` (embedding) / `sem_ganho` (thumbnail manual) | CB_EMB vira referencia; calibrar intervalo (cobertura 50-53% para meta de 80%). |
