@@ -266,6 +266,28 @@ Uma unica comparacao, escrita antes de rodar e depois de E-08 a E-12, para conso
 - **Descritivo (nao decide):** contribuicao de cada bloco por ablacao (CB_EMB + KNN, CB_EMB + Gemini) e SHAP do CB_FINAL; isso substitui o E-09 como analise de ganho multimodal.
 - **Depois da decisao:** treino final em todo o treino, calibracao conformal do intervalo com os residuos do rolling-origin do modelo escolhido, e **teste final aberto uma unica vez**.
 
+### Resultado do E-12 (selecao de modelo)
+
+Notebook `notebooks/10_e12_model_selection.ipynb` (Colab, CPU); artefatos em `artifacts/feature_experiments/e12_model_selection/`.
+
+| Braco | MAE | Pares (justo) | Spearman | vs CB_EMB (metrica da regra) | p | p Holm |
+| --- | ---: | ---: | ---: | --- | ---: | ---: |
+| CB_KNN (+ comparaveis) | **0,8625** | 0,589 | 0,230 | MAE -0,020 (17/26 canais) | 0,025 | 0,148 |
+| CB_W (peso igual por canal) | 0,8805 | **0,593** | **0,246** | MAE -0,002 | 0,81 | 1,0 |
+| **CB_EMB (referencia)** | 0,8825 | 0,581 | 0,235 | - | - | - |
+| CB_RANK (YetiRank) | 0,8837 | 0,582 | 0,229 | pares +0,001 | 0,96 | 1,0 |
+| ENS (CB_EMB + LAD) | 0,8846 | 0,567 | 0,193 | MAE +0,002 | 0,82 | 1,0 |
+| LGBM | 0,8890 | 0,576 | 0,219 | MAE +0,007 | 0,58 | 1,0 |
+| XGB | 0,8907 | 0,556 | 0,166 | MAE +0,008 | 0,38 | 1,0 |
+| ET | 0,9235 | 0,569 | 0,201 | MAE +0,041 (pior) | 0,002 | 0,012 |
+| B0 | 0,9338 | 0,402 | -0,263 | - | - | - |
+
+- **Regra pre-registrada: nenhum candidato aprovado; fica o CB_EMB.** O CatBoost e a escolha certa de algoritmo; LightGBM/XGBoost empatam ou pioram e ExtraTrees e significativamente pior.
+- **CB_KNN** (desvio medio dos 5 Shorts anteriores do canal com thumbnail mais parecida) e o unico com sinal (p bruto 0,025), mas nao sobrevive a correcao de Holm. Segue como candidato no E-13 (comparacao unica).
+- **Objetivo de ranking (YetiRank)** nao melhora a ordenacao.
+- **Optuna (40 tentativas, TPE)**: melhor MAE 0,858 nas origens 1-2 usadas na busca, mas **pior na origem 3** nao usada (0,8985 vs 0,8947; +0,004, p = 0,76, 14/26 canais). Ganho na busca que nao se repete fora dela: sobreajuste a validacao. **Ficam os hiperparametros do E-08.**
+- **PyCaret**: a instalacao no Colab (Python 3.13) estourou o limite de 10 min; nao executado (era exploratorio, nao decide).
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
@@ -291,3 +313,4 @@ Uma unica comparacao, escrita antes de rodar e depois de E-08 a E-12, para conso
 | E-10a/c | PCA 8/32 e CB_FULL com parametros fixos | Nenhum supera CB_EMB_pca16 (p >= 0,50) | Nao executado | `sem_ganho` | Mantem CB_EMB PCA 16 (regra pre-registrada). |
 | E-11 | Canal nao visto (leave-one-channel-out dentro do rolling-origin) | CB_EMB_loco: MAE 0,951 vs B0 0,934 (p=0,36); pares 0,553 > 0,5 (p=0,002, 22/26 canais); CB_BASE_loco no acaso | Nao executado | diagnostico | Generaliza para ordenar criativos de canal novo; nivel absoluto nao. |
 | E-10b | Embedding de texto (mpnet multilingue) sobre o CB_EMB | Titulo: MAE -0,004 (p=0,73); titulo+descricao: -0,006 (p=0,58) | Nao executado | `sem_ganho` | Texto semantico nao acrescenta ao embedding da thumbnail. |
+\n| E-12 | LGBM, XGB, ET, ensemble, YetiRank, comparaveis, peso por canal; Optuna; PyCaret | Nenhum aprovado apos Holm; CB_KNN MAE -0,020 (p bruto 0,025, Holm 0,148); Optuna pior na origem 3 (p=0,76); PyCaret nao instalou | Nao executado | `sem_ganho` (algoritmos, Optuna) / candidato (comparaveis) | Mantem CB_EMB com parametros do E-08; comparaveis vao ao E-13. |\n
