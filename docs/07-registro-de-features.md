@@ -185,6 +185,16 @@ Leitura:
 
 Status: embedding `retido`; CB_EMB vira a nova referencia. Proximo: calibrar intervalo, somar rubrica Gemini (E-09) e so entao abrir o teste final uma vez.
 
+### Protocolo pre-registrado: E-10 e E-11 (escrito antes de rodar, 12/10/2026)
+
+Referencia: CB_EMB do E-08 com os hiperparametros finais fixos (sem nova busca, para nao abrir mais graus de liberdade). Mesmo Gold, mesmo rolling-origin, teste final fechado.
+
+- **E-10a, dimensoes do PCA do embedding da thumbnail**: 8, 16 (referencia) e 32.
+- **E-10b, embedding de texto** (`paraphrase-multilingual-mpnet-base-v2`, PCA 16): CB_EMB + texto(titulo) e CB_EMB + texto(titulo + descricao).
+- **E-10c, combinacao**: CB_EMB + features manuais de thumbnail + texto E-02 (o CB_FULL do E-08) com os mesmos parametros fixos.
+- **Regra de escolha**: troca a referencia so se o MAE macro melhorar com p < 0,05 na permutacao pareada por canal contra o CB_EMB de 16 dimensoes; empate em MAE (p >= 0,05) e desempatado pela acuracia por pares justa so se a diferenca de pares tambem tiver p < 0,05. Caso contrario, fica o CB_EMB de 16. Sao 5 comparacoes; resultados com p entre 0,01 e 0,05 serao lidos com cautela (multiplas comparacoes).
+- **E-11, canal nao visto**: para cada canal e cada origem, treina com as janelas de treino dos OUTROS canais e preve a janela de validacao do canal deixado de fora. O B0 do canal continua vindo do historico publico dele; `channel_id` sai das features. Modelos: B0, CB_BASE e CB_EMB (parametros fixos). Pergunta: o ganho do embedding sobre o B0 se mantem em canais que o modelo nunca viu? Nao escolhe modelo; mede generalizacao.
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
