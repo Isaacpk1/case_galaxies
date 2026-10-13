@@ -195,6 +195,35 @@ Referencia: CB_EMB do E-08 com os hiperparametros finais fixos (sem nova busca, 
 - **Regra de escolha**: troca a referencia so se o MAE macro melhorar com p < 0,05 na permutacao pareada por canal contra o CB_EMB de 16 dimensoes; empate em MAE (p >= 0,05) e desempatado pela acuracia por pares justa so se a diferenca de pares tambem tiver p < 0,05. Caso contrario, fica o CB_EMB de 16. Sao 5 comparacoes; resultados com p entre 0,01 e 0,05 serao lidos com cautela (multiplas comparacoes).
 - **E-11, canal nao visto**: para cada canal e cada origem, treina com as janelas de treino dos OUTROS canais e preve a janela de validacao do canal deixado de fora. O B0 do canal continua vindo do historico publico dele; `channel_id` sai das features. Modelos: B0, CB_BASE e CB_EMB (parametros fixos). Pergunta: o ganho do embedding sobre o B0 se mantem em canais que o modelo nunca viu? Nao escolhe modelo; mede generalizacao.
 
+### Resultado do E-10a/E-10c (PCA e combinacao) e do E-11 (canal nao visto)
+
+Script: `scripts/run_e10_e11_experiments.py` (retomavel); artefatos em `artifacts/feature_experiments/e10_e11/` (`report.json`). Parametros fixos do CB_EMB do E-08.
+
+**E-10a/c** (rolling-origin, 26 canais):
+
+| Braco | MAE | Pares (justo) | vs CB_EMB_pca16 (MAE) |
+| --- | ---: | ---: | --- |
+| CB_EMB_pca16 (referencia) | 0,8824 | 0,581 | - (vs B0: -0,052, p=0,008, 21/26 canais) |
+| CB_FULL_fixed | 0,8836 | 0,579 | +0,001, p=0,86 |
+| CB_EMB_pca32 | 0,8879 | 0,571 | +0,006, p=0,57 |
+| CB_EMB_pca8 | 0,8885 | 0,566 | +0,006, p=0,50 |
+
+Pela regra pre-registrada, nenhum braco substitui a referencia: **fica o CB_EMB com PCA 16**. As features manuais/texto do CB_FULL nao acrescentam nada com parametros fixos (a vantagem de ranking vista no E-08 nao se repete).
+
+**E-11** (deixa um canal fora; o modelo nunca viu o canal, `channel_id` fora das features; B0 do historico publico do canal):
+
+| Modelo | MAE | Pares (justo) |
+| --- | ---: | ---: |
+| B0 | 0,9338 | 0,402 |
+| CB_BASE_loco (sem conteudo) | 1,0103 | 0,510 |
+| CB_EMB_loco (com embedding) | 0,9508 | **0,553** |
+
+- MAE: em canal nao visto o modelo **nao supera o B0** (+0,017, IC 95% [-0,014; 0,052], p=0,36). O ajuste fino ao nivel de cada canal depende de ter visto o canal no treino.
+- Ranking dentro do canal: o CB_EMB ordena acima do acaso em canais nunca vistos: 0,553 de pares (IC 95% [0,522; 0,580] contra 0,5; p=0,002; 22 de 26 canais acima de 0,5). Sem embedding fica no acaso (0,510, p=0,53).
+- O embedding melhora o modelo tambem fora da amostra de canais: CB_EMB_loco vs CB_BASE_loco, MAE -0,060 (p=0,003, 18/26) e pares +0,042 (p=0,048).
+
+Leitura para o produto: para um cliente novo (canal fora da base) a tool serve para **ordenar criativos do mesmo canal** com sinal modesto e real; a previsao absoluta de curtidas nao e melhor que a mediana do canal. A tool ja marca `confidence_flag = baixa` para canais fora da base.
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
@@ -217,3 +246,5 @@ Referencia: CB_EMB do E-08 com os hiperparametros finais fixos (sem nova busca, 
 | E-06 | Thumbnail: `thumbnail_v1` + flags de `thumbnail_ocr_v1` (so automotivo, 14 canais, 1.124 linhas) | M1 -0,031 (IC 95% [-0,074; 0,010], p=0,19, 10 de 14 canais melhoram, melhora nas 3 origens); M3 -0,040 (p=0,11); M2 -0,008 (p=0,63). Nenhum modelo supera B0 | Nao executado: teste final segue fechado | `sem_ganho` | Direcao consistente mas nao significativa; manter como candidatas fortes e reavaliar com moda incluida e mais canais. |
 | E-07 | Nova formulacao: prever o desvio em relacao a mediana do canal (B0) com perda absoluta (LAD) | Todos os setores: R_M2 0,9275 vs B0 0,9346 e vs M2 0,9794 (delta vs M2 -0,052, p=0,018; 21 de 26 canais melhoram). Empata com B0 (delta -0,007, p=0,45), mas vence B0 nas 3 origens. Thumbnail em cima da nova formulacao: R_M2 -0,019 (p=0,22), M1/M3 ~0 | Nao executado: teste final segue fechado | `retida` (formulacao) / `sem_ganho` (thumbnail) | Adotar residual + LAD como nova referencia; proximas features devem ser comparadas contra R_M2, nao contra M2. |
 | E-08 | CatBoost residual (perda MAE) + embedding SigLIP 2 da thumbnail; bracos BASE, THUMB, EMB, FULL | CB_EMB 0,8815 vs B0 0,9338 (delta -0,052, p=0,0006, 18/26 canais) e vs R_M2 (p=0,0002); vence B0 nas 3 origens; pares justo 0,57; controle de idade confirma sinal de conteudo | Nao executado: teste final segue fechado | `retida` (embedding) / `sem_ganho` (thumbnail manual) | CB_EMB vira referencia; calibrar intervalo (cobertura 50-53% para meta de 80%). |
+| E-10a/c | PCA 8/32 e CB_FULL com parametros fixos | Nenhum supera CB_EMB_pca16 (p >= 0,50) | Nao executado | `sem_ganho` | Mantem CB_EMB PCA 16 (regra pre-registrada). |
+| E-11 | Canal nao visto (leave-one-channel-out dentro do rolling-origin) | CB_EMB_loco: MAE 0,951 vs B0 0,934 (p=0,36); pares 0,553 > 0,5 (p=0,002, 22/26 canais); CB_BASE_loco no acaso | Nao executado | diagnostico | Generaliza para ordenar criativos de canal novo; nivel absoluto nao. |

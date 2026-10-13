@@ -172,3 +172,12 @@ Para cada item novo, anotar:
 - **O que descobrimos**: no E-08, CatBoost no alvo residual com embedding SigLIP 2 da thumbnail (PCA 16) teve MAE 0,8815 contra 0,9338 do B0 (delta -0,052, IC 95% [-0,081; -0,025], p=0,0006, 18 de 26 canais) e venceu nas 3 origens. Sem o embedding, o CatBoost empata com o R_M2: o ganho vem do conteudo visual, nao do algoritmo. Ranking justo por pares 0,57-0,58 e Spearman intra-canal ~0,2. Controle por idade do video confirma sinal de conteudo.
 - **Decisao**: CB_EMB passa a ser a referencia para os proximos experimentos. Features manuais de thumbnail continuam `sem_ganho`.
 - **Pendencias**: intervalo de 80% cobre so 50-53% (calibrar com conformal); somar rubrica Gemini (E-09); abrir o teste final uma unica vez depois de congelar a configuracao. Detalhes em `docs/07` (E-08).
+
+### D-017 - Em canal nunca visto, o modelo ordena criativos mas nao acerta o nivel
+
+- **Data**: 12/10/2026
+- **Tipo**: resultado de experimento
+- **Status**: decidida
+- **O que descobrimos**: no E-11 (canal fora do treino), o CB_EMB acerta 55,3% dos pares dentro do canal (p=0,002, 22 de 26 canais acima do acaso), enquanto o modelo sem embedding fica no acaso. O MAE, porem, nao supera a mediana do canal (B0). No E-10, PCA 8/32 e a combinacao CB_FULL nao superam o CB_EMB com PCA 16.
+- **Decisao**: CB_EMB (PCA 16) segue como referencia. Para clientes novos, comunicar a tool como ferramenta de **ordenacao** de criativos do mesmo canal; a previsao absoluta vem com confianca baixa (ja implementado). Base para a resposta a "funciona para clientes novos?" na banca.
+
