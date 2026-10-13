@@ -53,10 +53,10 @@ def params() -> dict:
     return {k: (int(v) if k in ("depth", "iterations") else v) for k, v in final.items()}
 
 
-def load() -> tuple[pd.DataFrame, np.ndarray, float]:
+def load(include_test: bool = False) -> tuple[pd.DataFrame, np.ndarray, float]:
     latest = json.loads((ROOT / "data" / "gold" / "snapshots" / "LATEST.json").read_text())
     gold = pd.read_csv(ROOT / latest["path"], parse_dates=["published_at"])
-    data = gold[gold["split"] == "train"].sort_values(["channel_id", "published_at", "video_id"]).reset_index(drop=True)
+    data = (gold if include_test else gold[gold["split"] == "train"]).sort_values(["channel_id", "published_at", "video_id"]).reset_index(drop=True)
     data["resid"] = data[TARGET] - data[BASELINE]
     z = np.load(THUMB_EMB, allow_pickle=True)
     emb = dict(zip(z["video_id"].astype(str), z["embeddings"].astype(np.float32)))
@@ -191,7 +191,7 @@ def main() -> None:
     previous = json.loads(stamp.read_text())["coverage"] if stamp.exists() else None
     if args.reset or (previous is not None and abs(previous - coverage) > 1e-9):
         for f in TASKS.glob("*.csv"):
-            f.unlink()
+            f.rename(f.with_suffix(".csv.old"))  # renomeia em vez de apagar (pastas sem permissao de exclusao)
         print("tarefas antigas descartadas (cobertura mudou ou --reset)")
     stamp.write_text(json.dumps({"coverage": coverage}))
     if args.report:
