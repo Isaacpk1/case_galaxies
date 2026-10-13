@@ -53,7 +53,7 @@ BRONZE = ROOT / "data" / "bronze" / "gemini_video"
 SILVER = ROOT / "data" / "silver" / "gemini_video"
 LOCK = BRONZE / ".collector.lock"
 API = "https://generativelanguage.googleapis.com/v1beta"
-EXTRACTOR_VERSION = "1.1.0"
+EXTRACTOR_VERSION = "1.1.1"
 PROMPT_VERSION = "rubrica_tap_v1"
 
 
@@ -191,7 +191,9 @@ def valid_saved_responses() -> dict[str, Path]:
 def resolved_ids(retry_unavailable: bool) -> tuple[set[str], set[str]]:
     manifests = read_manifests()
     done = {r["video_id"] for r in manifests if r.get("status") == "ok"} | set(valid_saved_responses())
-    unavailable = set() if retry_unavailable else {r["video_id"] for r in manifests if r.get("status") == "not_available"}
+    unavailable = set() if retry_unavailable else {r["video_id"] for r in manifests
+                                                   if r.get("status") in ("not_available", "blocked_content")
+                                                   or r.get("finish_reason") in ("PROHIBITED_CONTENT", "SAFETY")}
     return done, unavailable - done
 
 
@@ -451,8 +453,10 @@ def main() -> None:
     print(f"tokens de entrada estimados (~100/s em resolucao baixa): {seconds * 100:,.0f}")
     if args.dry_run or not batch:
         return
-    if budget <= 0:
-        print("Orcamento de 24 h esgotado; rode de novo mais tarde (ou --max-video-hours 0 no plano pago).")
+    first = float(batch[0].get("duration_seconds") or 0)
+    if budget <= 0 or first > budget:
+        print(f"Orcamento de 24 h esgotado ({used_24h / 3600:.2f} h enviadas); rode de novo mais tarde "
+              "ou use --max-video-hours 0 para seguir ate a propria API recusar.")
         return
 
     key = load_api_key()
@@ -499,9 +503,12 @@ def main() -> None:
                             record["error"] = "; ".join(problems)
                     except (KeyError, IndexError, TypeError, json.JSONDecodeError) as error:
                         record["status"], record["error"] = "invalid_json", repr(error)
-                        finish = (payload.get("candidates") or [{}])[0].get("finishReason")
+                        finish = (payload.get("candidates") or [{}])[0].get("finishReason") \
+                            or payload.get("promptFeedback", {}).get("blockReason")
                         if finish:
                             record["finish_reason"] = finish
+                        if finish in ("PROHIBITED_CONTENT", "SAFETY", "BLOCKLIST", "RECITATION"):
+                            record["status"] = "blocked_content"  # filtro do Gemini: nao adianta repetir
                     record["usage"] = payload.get("usageMetadata", {})
                 else:
                     record["status"] = status
