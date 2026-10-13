@@ -231,6 +231,18 @@ Pela regra pre-registrada, nenhum braco substitui a referencia: **fica o CB_EMB 
 
 Leitura para o produto: para um cliente novo (canal fora da base) a tool serve para **ordenar criativos do mesmo canal** com sinal modesto e real; a previsao absoluta de curtidas nao e melhor que a mediana do canal. A tool ja marca `confidence_flag = baixa` para canais fora da base.
 
+### Protocolo pre-registrado: E-12 (algoritmos, objetivo de ranking, comparaveis, Optuna) - 12/10/2026
+
+Notebook: `notebooks/10_e12_model_selection.ipynb` (Colab). Mesmo Gold, mesmo rolling-origin, teste final fechado. Todos os bracos preveem o desvio sobre o B0 com as mesmas features do CB_EMB (BASE + PCA 16 do SigLIP 2, PCA ajustado em cada janela), salvo onde indicado. Bracos com busca aleatoria usam 10 tentativas no holdout cronologico interno de cada janela (mesmo procedimento que gerou os parametros do CB_EMB).
+
+Candidatos (7): `LGBM` (LightGBM, perda L1), `XGB` (XGBoost, perda absoluta), `ET` (ExtraTrees), `ENS` (media CB_EMB + LAD linear com embedding), `CB_RANK` (CatBoost YetiRank agrupado por canal; nivel vem do CB_EMB, ordem dentro do canal vem do ranking), `CB_KNN` (CB_EMB + desvio medio dos 5 Shorts anteriores mais parecidos do mesmo canal + novidade visual em relacao ao canal), `CB_W` (CB_EMB com peso igual por canal).
+
+Regra de escolha: um candidato substitui o CB_EMB se o MAE macro melhorar com p < 0,05 apos correcao de Holm sobre os 7 candidatos (permutacao pareada por canal). Para `CB_RANK` o criterio e a acuracia por pares justa (mesma correcao). Se nenhum passar, fica o CB_EMB.
+
+Optuna (fase 2, so no vencedor ou no CB_EMB): 60 tentativas otimizando o MAE macro medio das origens 1 e 2; a configuracao escolhida e avaliada so na origem 3 contra a referencia (comparacao sem uso na escolha). Troca apenas se melhorar na origem 3 com p < 0,05.
+
+PyCaret: so exploratorio (ADR-001), com o split temporal; nao entra na regra de escolha.
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
