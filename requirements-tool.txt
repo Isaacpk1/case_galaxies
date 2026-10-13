@@ -6,6 +6,9 @@ pydantic>=2.6
 pillow>=10.0
 mcp>=1.2          # servidor MCP (compativel com SDK 1.x FastMCP e 2.x MCPServer)
 pytest>=8.0
+langgraph>=0.2      # agente orquestrador
+langchain-core>=0.3
+langchain-google-genai>=2.0   # LLM do agente (Gemini); sem chave o agente roda em modo deterministico
 # Opcional: embedding ao vivo de thumbnails novas (SigLIP 2). Sem isso, usa cache ou o modelo reserva.
 # torch
 # transformers>=4.49

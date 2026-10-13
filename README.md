@@ -115,6 +115,15 @@ Configuracao de cliente MCP (ex.: Claude Desktop), com `cwd` na raiz do repo:
 
 Regras da tool: o numero vem sempre do modelo; o B0 usa so Shorts do canal publicados antes da data planejada (testado contra o Gold); intervalo por calibracao conformal (cobertura de 76% fora da amostra para meta de 80%); sem embedding da thumbnail (sem `torch`/`transformers` ou sem acesso ao Hugging Face e fora do cache), usa o modelo reserva e marca confianca baixa. Para criativos novos fora do cache, calcule o embedding no Colab ou passe um `.npz` extra em `Predictor(extra_embedding_cache=[...])`.
 
+### 6. Agente (LangGraph)
+
+`src/galaxies_agent/agent.py` orquestra as tools: interpretar o pedido -> historico do canal -> atributos do video (rubrica Gemini, quando coletada) -> prever/ranquear -> explicar -> verificar. O LLM (Gemini via `langchain-google-genai`, chave `GEMINI_API_KEY`) so interpreta o pedido e escreve a explicacao; o no `verificar` confere que todo numero citado existe na saida das tools e, se nao existir, troca o texto pela explicacao deterministica do SHAP. Sem chave, o agente roda em modo deterministico com entrada estruturada.
+
+```bash
+PYTHONPATH=src python -m galaxies_agent.agent "Qual destes Shorts priorizar?" \
+  --criativos '[{"creative": "https://www.youtube.com/shorts/<id>", "planned_datetime": "2026-10-20T18:00", "channel_id": "UC...", "sector": "moda"}]'
+```
+
 ## Estrutura de dados
 
 | Camada | Conteudo | Regra principal |
