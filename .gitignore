@@ -8,3 +8,6 @@ data/bronze/
 data/silver/
 data/gold/
 artifacts/
+
+# Pacotes temporarios para Colab (contem dados da Gold)
+.tmp_transfer/
