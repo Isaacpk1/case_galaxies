@@ -185,6 +185,18 @@ Leitura:
 
 Status: embedding `retido`; CB_EMB vira a nova referencia. Proximo: calibrar intervalo, somar rubrica Gemini (E-09) e so entao abrir o teste final uma vez.
 
+### Metricas complementares do TAP (E-08, rolling-origin)
+
+Arquivo: `artifacts/feature_experiments/e08_catboost_residual/mape_f1_bands.json`. Faixas pelo desvio sobre a mediana do canal (log): abaixo < -0,3 <= na media <= 0,3 < acima <= 1,0 < viral. Distribuicao real: abaixo 37%, na media 29%, acima 20%, viral 14%.
+
+| Modelo | MAPE (log) | Erro relativo mediano (curtidas) | Dentro de 2x | F1 macro das faixas | Acuracia da faixa |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| B0 | 0,242 | 89% | 55% | 0,11 | 29% |
+| R_M2 | 0,237 | 83% | 56% | 0,23 | 32% |
+| CB_EMB | **0,229** | **77%** | **58%** | **0,28** | **35%** |
+
+MAPE em escala log exclui 10 Shorts com 0 curtida (denominador zero). O B0 preve sempre "na media", dai o F1 baixo. O CB_EMB raramente preve "viral" (6 de 173 virais acertados): o modelo encolhe para o centro, como esperado com perda MAE; a faixa deve ser comunicada como tendencia, nao como garantia.
+
 ### Protocolo pre-registrado: E-10 e E-11 (escrito antes de rodar, 12/10/2026)
 
 Referencia: CB_EMB do E-08 com os hiperparametros finais fixos (sem nova busca, para nao abrir mais graus de liberdade). Mesmo Gold, mesmo rolling-origin, teste final fechado.
@@ -242,6 +254,17 @@ Regra de escolha: um candidato substitui o CB_EMB se o MAE macro melhorar com p 
 Optuna (fase 2, so no vencedor ou no CB_EMB): 60 tentativas otimizando o MAE macro medio das origens 1 e 2; a configuracao escolhida e avaliada so na origem 3 contra a referencia (comparacao sem uso na escolha). Troca apenas se melhorar na origem 3 com p < 0,05.
 
 PyCaret: so exploratorio (ADR-001), com o split temporal; nao entra na regra de escolha.
+
+### Protocolo pre-registrado: E-13 (modelo final) - 12/10/2026
+
+Uma unica comparacao, escrita antes de rodar e depois de E-08 a E-12, para consolidar o modelo sem nova rodada de selecao.
+
+- **Referencia:** CB_EMB (E-08), parametros do E-08 (ou os do Optuna do E-12, so se ele tiver sido aprovado na origem 3).
+- **Candidato unico CB_FINAL:** CB_EMB + comparaveis (`knn5_resid_mean`, `knn5_sim_mean`, `visual_novelty`, do E-12) + rubrica Gemini (notas 0-10, flags e `tom_narracao` como categoria) + fala derivada da transcricao Gemini (`tem_fala`, palavras por segundo). Videos sem rubrica ficam com valor ausente e flag de cobertura.
+- **Pre-requisito:** rubrica Gemini em pelo menos 90% das linhas de treino.
+- **Regra:** CB_FINAL vira o modelo final se o MAE macro melhorar com p < 0,05 (permutacao pareada por canal, uma comparacao, sem correcao). Caso contrario, o modelo final e o CB_EMB.
+- **Descritivo (nao decide):** contribuicao de cada bloco por ablacao (CB_EMB + KNN, CB_EMB + Gemini) e SHAP do CB_FINAL; isso substitui o E-09 como analise de ganho multimodal.
+- **Depois da decisao:** treino final em todo o treino, calibracao conformal do intervalo com os residuos do rolling-origin do modelo escolhido, e **teste final aberto uma unica vez**.
 
 ## Protocolo de experimento
 
