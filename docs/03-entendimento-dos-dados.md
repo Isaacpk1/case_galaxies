@@ -90,7 +90,7 @@ Tambem devemos calcular qualquer estatistica de historico do canal usando apenas
 1. A API publica nao fornece impressoes, CTR de thumbnail, retencao, tempo assistido ou origem de trafego.
 2. As metricas sao uma fotografia no momento da coleta. Um video mais antigo teve mais tempo para acumular curtidas que um video mais recente, mesmo que ambos tenham pelo menos 30 dias.
 3. A classificacao como Short e uma aproximacao por duracao de ate 180 segundos; a API nao fornece uma flag publica exclusiva de Short.
-4. Ainda nao foram baixados video, audio, frames, transcricoes ou embeddings. Esses dados pertencem a etapa multimodal.
+4. A camada multimodal inicial possui transcricoes automaticas por `video_id` e a referencia de thumbnail. A cobertura de transcricoes nao e garantida; video, audio completo e frames continuam fora desta primeira arquitetura.
 5. O valor de inscritos disponivel e o da coleta, nao necessariamente o valor existente na data de publicacao de cada video.
 
 ## Hipoteses para a proxima etapa
