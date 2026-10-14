@@ -3,7 +3,7 @@
 Le artifacts/feature_experiments/e13_final/test_final/test_predictions.csv e cruza com o Gold e a rubrica.
 Saida: error_analysis.json na mesma pasta e um resumo em Markdown no terminal.
 
-    python scripts/analyze_e13_errors.py
+    python scripts/experimentos/analyze_e13_errors.py
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 TEST = ROOT / "artifacts" / "feature_experiments" / "e13_final" / "test_final"
 TARGET, BASELINE, PRED = "target_log_likes", "baseline_log_likes", "pred_CB_FINAL"
 BANDS = (-np.inf, -0.3, 0.3, 1.0, np.inf)

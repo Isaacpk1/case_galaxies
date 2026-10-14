@@ -30,7 +30,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 FEATURE_VERSION = "thumbnail_v1"
 DARK_LUMA = 0.20
 LIGHT_LUMA = 0.80

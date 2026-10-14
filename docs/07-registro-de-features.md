@@ -94,14 +94,14 @@ Fonte: `data/silver/thumbnail_manifest/20260930T025500Z` (1.506 thumbnails valid
 
 | Feature | Definicao | Script / saida |
 | --- | --- | --- |
-| `is_vertical_pillarbox` | 1 se a thumbnail e frame vertical com laterais desfocadas | `scripts/extract_thumbnail_features.py` -> `data/silver/features/thumbnail_v1/20261001T222256Z/` |
+| `is_vertical_pillarbox` | 1 se a thumbnail e frame vertical com laterais desfocadas | `scripts/pipeline/extract_thumbnail_features.py` -> `data/silver/features/thumbnail_v1/20261001T222256Z/` |
 | `letterbox_fraction`, `is_low_resolution` | Area de barras pretas; thumbnail sem `maxresdefault` (480x360) | idem |
 | `brightness_mean`, `brightness_std` | Luminancia media e contraste no painel de conteudo | idem |
 | `saturation_mean`, `colorfulness` | Saturacao HSV media; colorfulness de Hasler & Suesstrunk | idem |
 | `dark_pixel_pct`, `light_pixel_pct` | % de pixels com luma < 0,2 e > 0,8 | idem |
 | `edge_density` | % de pixels com gradiente forte (imagem "carregada") | idem |
 | `dominant_hue` | Faixa de cor dominante ou `neutral` | idem |
-| `has_text`, `ocr_word_count`, `ocr_char_count` | Ha texto (>= 3 caracteres) e quanto texto | `scripts/extract_thumbnail_ocr.py` -> `data/silver/features/thumbnail_ocr_v1/20261001T221500Z/` |
+| `has_text`, `ocr_word_count`, `ocr_char_count` | Ha texto (>= 3 caracteres) e quanto texto | `scripts/pipeline/extract_thumbnail_ocr.py` -> `data/silver/features/thumbnail_ocr_v1/20261001T221500Z/` |
 | `ocr_text_area_pct` | Fracao da area do painel coberta por caixas de texto | idem |
 | `ocr_uppercase_ratio`, `ocr_has_digits`, `ocr_has_question`, `ocr_has_exclamation` | Estilo do texto sobreposto | idem |
 | `ocr_mean_confidence`, `ocr_text` | Confianca media e texto bruto (para TF-IDF/embedding depois) | idem |
@@ -114,7 +114,7 @@ Fonte: `data/silver/thumbnail_manifest/20260930T025500Z` (1.506 thumbnails valid
 
 ### Resultado do E-06 (thumbnail)
 
-Script: `scripts/run_thumbnail_experiment.py`; artefatos em `artifacts/feature_experiments/e06_thumbnail/`. Mesmo protocolo do E-00 a E-05 (Ridge M1/M2/M3, rolling-origin com 3 origens, alpha escolhido em holdout cronologico, bootstrap e permutacao exata pareados por canal). Escopo restrito a automotivo (unico setor com thumbnails na Silver); os modelos de referencia sem thumbnail foram reajustados nas mesmas linhas.
+Script: `scripts/experimentos/run_thumbnail_experiment.py`; artefatos em `artifacts/feature_experiments/e06_thumbnail/`. Mesmo protocolo do E-00 a E-05 (Ridge M1/M2/M3, rolling-origin com 3 origens, alpha escolhido em holdout cronologico, bootstrap e permutacao exata pareados por canal). Escopo restrito a automotivo (unico setor com thumbnails na Silver); os modelos de referencia sem thumbnail foram reajustados nas mesmas linhas.
 
 | Comparacao | Delta MAE macro | IC 95% bootstrap | p (permutacao) | Canais melhor / pior |
 | --- | --- | --- | --- | --- |
@@ -130,7 +130,7 @@ Leitura: as features de thumbnail reduzem o erro de M1 e M3 nas tres origens e n
 
 ### Resultado do E-07 (formulacao residual + LAD)
 
-Script: `scripts/run_residual_experiment.py --scope {automotivo,all} --loss {ridge,lad}`; artefatos em `artifacts/feature_experiments/e07_residual_<loss>_<scope>/`.
+Script: `scripts/experimentos/run_residual_experiment.py --scope {automotivo,all} --loss {ridge,lad}`; artefatos em `artifacts/feature_experiments/e07_residual_<loss>_<scope>/`.
 
 **Por que o B0 ganhava de todos os modelos.** Duas causas somadas: (1) o Ridge prevê o nivel de curtidas do zero, entao gasta capacidade reaprendendo o tamanho de cada canal; (2) o Ridge minimiza erro quadratico e portanto prevê a **media**, enquanto o MAE (metrica principal) premia a **mediana**. Como os residuos em log sao assimetricos (poucos Shorts virais), a media fica deslocada e perde MAE para o B0, que ja e uma mediana. Sinal disso: B0 vencia em MAE mas perdia em RMSE.
 
@@ -209,7 +209,7 @@ Referencia: CB_EMB do E-08 com os hiperparametros finais fixos (sem nova busca, 
 
 ### Resultado do E-10a/E-10c (PCA e combinacao) e do E-11 (canal nao visto)
 
-Script: `scripts/run_e10_e11_experiments.py` (retomavel); artefatos em `artifacts/feature_experiments/e10_e11/` (`report.json`). Parametros fixos do CB_EMB do E-08.
+Script: `scripts/experimentos/run_e10_e11_experiments.py` (retomavel); artefatos em `artifacts/feature_experiments/e10_e11/` (`report.json`). Parametros fixos do CB_EMB do E-08.
 
 **E-10a/c** (rolling-origin, 26 canais):
 
@@ -290,7 +290,7 @@ Notebook `notebooks/10_e12_model_selection.ipynb` (Colab, CPU); artefatos em `ar
 
 ### Resultado do E-13 (modelo final) - 13/10/2026
 
-Rubrica Gemini coletada para 3.003 de 3.004 Shorts (99,97%; 1 resposta invalida; nenhuma duplicada). Script `scripts/run_e13_final.py`; artefatos em `artifacts/feature_experiments/e13_final/`.
+Rubrica Gemini coletada para 3.003 de 3.004 Shorts (99,97%; 1 resposta invalida; nenhuma duplicada). Script `scripts/experimentos/run_e13_final.py`; artefatos em `artifacts/feature_experiments/e13_final/`.
 
 **Rolling-origin (decide):**
 
@@ -304,7 +304,7 @@ Rubrica Gemini coletada para 3.003 de 3.004 Shorts (99,97%; 1 resposta invalida;
 - **Regra pre-registrada:** CB_FINAL melhora o MAE com p = 0,003 (< 0,05). **CB_FINAL e o modelo final.**
 - **Ablacao (descritivo):** sozinhos, comparaveis e rubrica nao sao significativos; juntos sao. Os dois blocos trazem informacao diferente (o que o canal ja fez com visual parecido x o que acontece no video).
 
-**Teste final (aberto uma unica vez, 13/10/2026 23:54 UTC; 612 Shorts, 26 canais; `scripts/run_e13_test_final.py`):**
+**Teste final (aberto uma unica vez, 13/10/2026 23:54 UTC; 612 Shorts, 26 canais; `scripts/experimentos/run_e13_test_final.py`):**
 
 | Metrica | B0 | CB_EMB | **CB_FINAL** |
 | --- | ---: | ---: | ---: |
@@ -325,7 +325,7 @@ Rubrica Gemini coletada para 3.003 de 3.004 Shorts (99,97%; 1 resposta invalida;
 
 ### Analise de erros do modelo final (teste final, 612 Shorts)
 
-Script `scripts/analyze_e13_errors.py`; saida em `artifacts/feature_experiments/e13_final/test_final/error_analysis.json`. Feita depois da decisao, so para descrever onde o modelo erra (nao orienta escolha de modelo).
+Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature_experiments/e13_final/test_final/error_analysis.json`. Feita depois da decisao, so para descrever onde o modelo erra (nao orienta escolha de modelo).
 
 | Grupo | n | MAE | MAE B0 | Vies (prev - real) | Cobertura 80% |
 | --- | ---: | ---: | ---: | ---: | ---: |

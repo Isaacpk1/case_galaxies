@@ -4,7 +4,7 @@ Ordem de busca:
 1. Silver `data/silver/gemini_video/gemini_video_features.csv` (Shorts da base, coletados em lote);
 2. cache local de chamadas ao vivo (`.cache/gemini_rubric/<video_id>.json`);
 3. Gemini ao vivo a partir da URL publica do YouTube (mesmo prompt, schema e modelo da coleta em lote,
-   importados de scripts/collect_gemini_video_features.py). Exige GEMINI_API_KEY;
+   importados de scripts/coleta/collect_gemini_video_features.py). Exige GEMINI_API_KEY;
 4. sem rubrica -> a tool usa o modelo sem rubrica (CB_EMB) e marca confianca baixa.
 
 O video nunca e baixado: o Gemini recebe so a URL publica.
@@ -53,7 +53,7 @@ class VideoRubric:
 
     def _load_collector(self):
         if self._collector is None:
-            path = self.root / "scripts" / "collect_gemini_video_features.py"
+            path = self.root / "scripts" / "coleta" / "collect_gemini_video_features.py"
             spec = importlib.util.spec_from_file_location("_gemini_collector", path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)

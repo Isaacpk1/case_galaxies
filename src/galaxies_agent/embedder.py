@@ -36,7 +36,7 @@ def youtube_id(creative: Optional[str]) -> Optional[str]:
 
 
 def is_pillarbox(luma: np.ndarray) -> bool:
-    """Mesma regra de scripts/extract_thumbnail_features.py (pillarbox_box)."""
+    """Mesma regra de scripts/pipeline/extract_thumbnail_features.py (pillarbox_box)."""
     h, w = luma.shape
     pw = h * 9 / 16
     if w < pw * 1.3:

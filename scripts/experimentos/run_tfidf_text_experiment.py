@@ -33,7 +33,7 @@ from run_baseline_experiments import (
 )
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 CONSUMPTION_PATH = ROOT / "data" / "gold" / "pilot_consumption_table.csv"
 READY_PATH = ROOT / "data" / "gold" / "pilot_model_ready.csv"
 BASE_NUMERIC = [

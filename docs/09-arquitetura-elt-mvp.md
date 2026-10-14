@@ -78,20 +78,20 @@ O alvo primario e `log(1 + like_count)` ou desempenho relativo a mediana de curt
 
 ### Silver unificada
 
-`scripts/materialize_silver.py` agora aceita varios runs de Bronze (um por setor). O run `20261002T013000Z` junta automotivo (`20260929T210254Z`) e moda (`20260928T213206Z`): 3.189 Shorts elegiveis de 31 canais, com thumbnail validada para todos (automotivo `20260930T022637Z`, moda `20261002T005131Z`). O run anterior `20261002T003000Z` era igual, mas sem as thumbnails de moda. Cada run usa o proprio horario de coleta como corte, e o video mais recente vence quando aparece em dois runs.
+`scripts/pipeline/materialize_silver.py` agora aceita varios runs de Bronze (um por setor). O run `20261002T013000Z` junta automotivo (`20260929T210254Z`) e moda (`20260928T213206Z`): 3.189 Shorts elegiveis de 31 canais, com thumbnail validada para todos (automotivo `20260930T022637Z`, moda `20261002T005131Z`). O run anterior `20261002T003000Z` era igual, mas sem as thumbnails de moda. Cada run usa o proprio horario de coleta como corte, e o video mais recente vence quando aparece em dois runs.
 
 ```bash
-python scripts/materialize_silver.py --youtube-run-id 20260929T210254Z 20260928T213206Z --thumbnail-run-id 20260930T022637Z 20261002T005131Z --silver-run-id 20261002T013000Z
-python scripts/consolidate_transcript_manifest.py --youtube-run-id 20261002T013000Z --silver-run-id 20261002T013000Z
+python scripts/pipeline/materialize_silver.py --youtube-run-id 20260929T210254Z 20260928T213206Z --thumbnail-run-id 20260930T022637Z 20261002T005131Z --silver-run-id 20261002T013000Z
+# consolidate_transcript_manifest.py (legendas): removido em 14/10/2026 na limpeza do repo; continua no historico do git; a fala agora vem do Gemini
 ```
 
 ### Coleta no Windows do Inteli
 
-A politica de Controle de Aplicativos bloqueia DLLs nativas (pandas, numpy, Pillow, PaddleOCR). Por isso os coletores que rodam no Windows usam so a biblioteca padrao do Python: `scripts/collect_youtube_thumbnails_stdlib.py` e `scripts/collect_youtube_captions_pilot.py --provider apify` (urllib no lugar de requests, csv no lugar de pandas). Validacao de imagem, features e OCR rodam fora do Windows. As thumbnails de moda foram coletadas assim em 02/10 (1.683/1.683).
+A politica de Controle de Aplicativos bloqueia DLLs nativas (pandas, numpy, Pillow, PaddleOCR). Por isso os coletores que rodam no Windows usam so a biblioteca padrao do Python: `scripts/coleta/collect_youtube_thumbnails_stdlib.py` e `scripts/coleta/collect_gemini_video_features.py` (o antigo coletor de legendas foi removido em 14/10/2026 na limpeza do repo; continua no historico do git) (urllib no lugar de requests, csv no lugar de pandas). Validacao de imagem, features e OCR rodam fora do Windows. As thumbnails de moda foram coletadas assim em 02/10 (1.683/1.683).
 
 ### Feature Store
 
-Codigo: `scripts/feature_store.py` (registro e regras) e `scripts/build_feature_store.py` (extratores).
+Codigo: `scripts/pipeline/feature_store.py` (registro e regras) e `scripts/pipeline/build_feature_store.py` (extratores).
 
 ```text
 data/feature_store/registry.json
@@ -109,14 +109,14 @@ data/feature_store/<nome>/<feature_set_id>/metadata.json   versao, fontes, hash,
 | `transcript_v1__1b208c6972` | D. Transcricao | 13 | 10% | 323 legendas; ver D-012 sobre traducoes |
 
 ```bash
-python scripts/build_feature_store.py --silver-run-id 20261002T013000Z
+python scripts/pipeline/build_feature_store.py --silver-run-id 20261002T013000Z
 ```
 
 Ainda nao implementado do desenho no Miro: inscritos do canal (o valor da API e de hoje, nao da data do post, entao vazaria futuro), embedding textual, embedding CLIP/SigLIP, rosto e produto em destaque, embedding da fala. Os hosts de modelos (Hugging Face) estao bloqueados nos ambientes atuais.
 
 ### Gold
 
-Codigo: `scripts/build_gold_snapshot.py`. Saida imutavel em `data/gold/snapshots/<dataset_version>/` com `training_snapshot.csv` e `manifest.json`; `data/gold/snapshots/LATEST.json` aponta para a versao atual.
+Codigo: `scripts/pipeline/build_gold_snapshot.py`. Saida imutavel em `data/gold/snapshots/<dataset_version>/` com `training_snapshot.csv` e `manifest.json`; `data/gold/snapshots/LATEST.json` aponta para a versao atual.
 
 Snapshot atual: `gold_v1_20261002T013000Z_663f502d` (o anterior `gold_v1_20261002T003000Z_fa5d11d1` nao tinha thumbnail de moda), com 3.004 Shorts de 26 canais (moda 1.589, automotivo 1.415), treino 2.392 e teste 612, e 74 colunas de features.
 
@@ -127,7 +127,7 @@ Snapshot atual: `gold_v1_20261002T013000Z_663f502d` (o anterior `gold_v1_2026100
 - Consistencia com o Gold piloto (`data/gold/pilot_consumption_table.csv`): 2.995 videos em comum, 99,7% com o mesmo split, B0 rolling-origin 0,9338 contra 0,9346. As diferencas vem da coleta de automotivo um dia mais recente. O Gold piloto fica intacto para reproduzir E-00 a E-07.
 
 ```bash
-python scripts/build_gold_snapshot.py --silver-run-id 20261002T013000Z
+python scripts/pipeline/build_gold_snapshot.py --silver-run-id 20261002T013000Z
 ```
 
 ## Decisoes e trade-offs

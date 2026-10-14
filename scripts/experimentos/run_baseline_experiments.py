@@ -27,7 +27,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 INPUT_PATH = ROOT / "data" / "gold" / "pilot_consumption_table.csv"
 OUTPUT_DIR = ROOT / "artifacts" / "baseline"
 TARGET = "target_log_likes"

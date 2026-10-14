@@ -26,10 +26,10 @@ Garantias para rodar em varias sessoes ate acabar a cota:
 - A chave vem de GEMINI_API_KEY (ambiente ou .env) e nunca e gravada.
 
 Exemplos:
-    python scripts/collect_gemini_video_features.py --list-models
-    python scripts/collect_gemini_video_features.py --all --dry-run
-    python scripts/collect_gemini_video_features.py --all            # repetir ate acabar; retoma sozinho
-    python scripts/collect_gemini_video_features.py --consolidate    # so regrava a Silver
+    python scripts/coleta/collect_gemini_video_features.py --list-models
+    python scripts/coleta/collect_gemini_video_features.py --all --dry-run
+    python scripts/coleta/collect_gemini_video_features.py --all            # repetir ate acabar; retoma sozinho
+    python scripts/coleta/collect_gemini_video_features.py --consolidate    # so regrava a Silver
 """
 
 from __future__ import annotations
@@ -48,7 +48,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 BRONZE = ROOT / "data" / "bronze" / "gemini_video"
 SILVER = ROOT / "data" / "silver" / "gemini_video"
 LOCK = BRONZE / ".collector.lock"

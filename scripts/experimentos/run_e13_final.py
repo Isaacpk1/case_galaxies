@@ -3,9 +3,9 @@
 CB_FINAL = CB_EMB + comparaveis (E-12) + rubrica Gemini + fala derivada da transcricao Gemini.
 Parametros fixos do E-08. Rolling-origin do projeto, teste final fechado.
 
-    python scripts/run_e13_final.py --max-seconds 160          # retomavel (tarefas por origem/braco)
-    python scripts/run_e13_final.py --report                   # decisao pela regra pre-registrada
-    python scripts/run_e13_final.py --report --preliminar      # roda mesmo com cobertura < 90% (nao decide)
+    python scripts/experimentos/run_e13_final.py --max-seconds 160          # retomavel (tarefas por origem/braco)
+    python scripts/experimentos/run_e13_final.py --report                   # decisao pela regra pre-registrada
+    python scripts/experimentos/run_e13_final.py --report --preliminar      # roda mesmo com cobertura < 90% (nao decide)
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor, Pool
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "artifacts" / "feature_experiments" / "e13_final"
 TASKS = OUT / "tasks"
 E08 = ROOT / "artifacts" / "feature_experiments" / "e08_catboost_residual"

@@ -11,8 +11,8 @@ Resumable: raw detections are appended to ocr_raw.jsonl; rerun with the same
 --run-id to continue.  Features are aggregated at the end.
 
 Usage:
-  python scripts/extract_thumbnail_ocr.py                      # latest manifest
-  python scripts/extract_thumbnail_ocr.py --image-root <dir>   # images elsewhere
+  python scripts/pipeline/extract_thumbnail_ocr.py                      # latest manifest
+  python scripts/pipeline/extract_thumbnail_ocr.py --image-root <dir>   # images elsewhere
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from extract_thumbnail_features import content_crop  # noqa: E402  same pillarbox rule as thumbnail_v1
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 FEATURE_VERSION = "thumbnail_ocr_v1"
 OCR_ENGINE = "easyocr-latin_g2"
 MIN_CONFIDENCE = 0.40  # boxes below this are kept in raw but excluded from features

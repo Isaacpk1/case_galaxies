@@ -101,7 +101,7 @@ Uma linha por video e instante de observacao. Esta tabela e necessaria para um a
 A thumbnail publica e obtida exclusivamente da `thumbnail_url` retornada pela YouTube Data API para um Short elegivel. Nao ha download de video, audio, frames ou midia de uma plataforma externa.
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\collect_youtube_thumbnails.py --source-run-id 20260929T210254Z --sector automotivo --limit 10
+.\.venv\Scripts\python.exe scripts\coleta\collect_youtube_thumbnails_stdlib.py --source-run-id 20260929T210254Z --sector automotivo --limit 10
 ```
 
 Saidas esperadas por `run_id`:
@@ -119,7 +119,7 @@ Para o MVP, a camada textual de fala dos Shorts usa `youtube-transcript-api` com
 O coletor e executado em lotes pequenos, com manifesto por `run_id`:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\collect_youtube_captions_pilot.py --video-id ID_1 ID_2 ID_3
+# coletor de legendas: removido em 14/10/2026 na limpeza do repo; continua no historico do git; substituido pelo Gemini (D-011)
 ```
 
 Cada registro usa `transcript_status` (`downloaded`, `rate_limited`, `not_available`, `blocked` ou `failed`), idioma, quantidade de trechos, caminho e hash do JSON. Falhas de cobertura nao devem excluir a linha de treino: o modelo recebe uma flag de disponibilidade e segue com as demais modalidades.

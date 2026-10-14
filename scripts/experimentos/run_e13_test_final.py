@@ -4,7 +4,7 @@ Treina CB_FINAL (modelo aprovado) e CB_EMB (referencia) em todo o treino, preve 
 e compara com B0. O intervalo de 80% usa os quantis q10/q90 dos residuos do rolling-origin do CB_FINAL
 (por channel_type), sem olhar o teste. Se o resultado ja existir, o script recusa rodar de novo.
 
-    python scripts/run_e13_test_final.py
+    python scripts/experimentos/run_e13_test_final.py
 """
 
 from __future__ import annotations

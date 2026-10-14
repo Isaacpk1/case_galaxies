@@ -19,7 +19,7 @@ import requests
 from dotenv import dotenv_values
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 API_KEY = dotenv_values(PROJECT_ROOT / ".env").get("YOUTUBE_API_KEY")
 BASE_URL = "https://www.googleapis.com/youtube/v3"
 MAX_UPLOADS_PER_CHANNEL = 300

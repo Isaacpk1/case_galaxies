@@ -40,7 +40,7 @@ from run_baseline_experiments import (
     validation_split,
 )
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 CONSUMPTION_PATH = ROOT / "data" / "gold" / "pilot_consumption_table.csv"
 VISUAL_DIR = ROOT / "data" / "silver" / "features" / "thumbnail_v1"
 OCR_DIR = ROOT / "data" / "silver" / "features" / "thumbnail_ocr_v1"

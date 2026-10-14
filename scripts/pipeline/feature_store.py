@@ -25,7 +25,7 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 STORE = ROOT / "data" / "feature_store"
 REGISTRY = STORE / "registry.json"
 FORBIDDEN = {"like_count", "view_count", "comment_count"}

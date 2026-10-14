@@ -7,8 +7,8 @@ the channel history aggregates look strictly at earlier posts, and the
 video's own likes/views/comments never become features.
 
 Usage:
-  python scripts/build_feature_store.py --silver-run-id 20261002T003000Z
-  python scripts/build_feature_store.py --silver-run-id ... --groups context text
+  python scripts/pipeline/build_feature_store.py --silver-run-id 20261002T003000Z
+  python scripts/pipeline/build_feature_store.py --silver-run-id ... --groups context text
 """
 
 from __future__ import annotations

@@ -19,7 +19,7 @@ import pandas as pd
 from PIL import Image
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 MAX_SHORT_DURATION_SECONDS = 180
 MIN_POST_AGE_DAYS = 30
 HISTORY_MONTHS = 18

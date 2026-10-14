@@ -12,8 +12,8 @@ Targets (never features):
   target_relative_to_prior_median  (likes+1) / (prior channel median + 1)
 
 Usage:
-  python scripts/build_gold_snapshot.py --silver-run-id 20261002T003000Z
-  python scripts/build_gold_snapshot.py --silver-run-id ... --feature-set-ids context_v1__a19f640408 text_v1__...
+  python scripts/pipeline/build_gold_snapshot.py --silver-run-id 20261002T003000Z
+  python scripts/pipeline/build_gold_snapshot.py --silver-run-id ... --feature-set-ids context_v1__a19f640408 text_v1__...
 """
 
 from __future__ import annotations

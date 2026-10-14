@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 RUNS = {
     "moda": "20260928T213206Z",
     "automotivo": "20260928T212753Z",

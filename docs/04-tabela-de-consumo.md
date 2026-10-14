@@ -7,7 +7,7 @@
 Ela e gerada de forma reproduzivel pelo comando abaixo:
 
 ```powershell
-.\\.venv\\Scripts\\python.exe scripts\\prepare_pilot_dataset.py
+.\\.venv\\Scripts\\python.exe scripts\\pipeline\\prepare_pilot_dataset.py
 ```
 
 ## Regras do contrato

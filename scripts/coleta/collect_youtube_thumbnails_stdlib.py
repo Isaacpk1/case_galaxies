@@ -3,12 +3,12 @@
 Why this exists: the Inteli Windows Application Control policy blocks the
 native DLLs of pandas/numpy/Pillow, so the original collector cannot even start
 there.  This version needs no third-party package.  It writes the same Bronze
-layout and run_summary.json contract as collect_youtube_thumbnails.py; image
+layout and run_summary.json contract as the former requests-based collector; image
 validation (Pillow) happens later in materialize_silver.py, on a machine where
 Pillow loads.
 
 Usage (PowerShell, inside case_galaxies):
-  python scripts/collect_youtube_thumbnails_stdlib.py --source-run-id 20260928T213206Z --sector moda
+  python scripts/coleta/collect_youtube_thumbnails_stdlib.py --source-run-id 20260928T213206Z --sector moda
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 USER_AGENT = "galaxies-elt-pilot/0.1 (thumbnail feature extraction)"
 MAX_BYTES = 10 * 1024 * 1024
 EXTENSIONS = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}

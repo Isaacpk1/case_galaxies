@@ -156,7 +156,7 @@ Para cada item novo, anotar:
   3. Modelos por canal tem poucos dados (~92 Shorts de treino por canal em media, alguns com ~40); ver D-004.
   4. Retencao, CTR e dados globais do YouTube nao estao disponiveis pela API publica (D-001).
 - **O que ja aproveitamos da ideia**:
-  - Modelo grande como professor de **atributos**, nao de rotulos: o Gemini assiste ao video e devolve a rubrica do TAP (`scripts/collect_gemini_video_features.py`); o CatBoost aprende essas colunas contra as curtidas reais. Custo do modelo grande pago uma vez por video; previsao barata depois.
+  - Modelo grande como professor de **atributos**, nao de rotulos: o Gemini assiste ao video e devolve a rubrica do TAP (`scripts/coleta/collect_gemini_video_features.py`); o CatBoost aprende essas colunas contra as curtidas reais. Custo do modelo grande pago uma vez por video; previsao barata depois.
   - Personalizacao por canal via alvo residual (D-014): o B0 de cada canal se atualiza a cada post e o modelo global aprende so o desvio.
   - Especializacao no nivel com dados suficientes: tipo de canal (M2) e setor (D-004). Por canal, a alternativa segura e pooling parcial (efeito do canal encolhido para a media global quando ha pouco historico).
 - **Teste que decide**: o piloto Gemini coleta `potencial_viral_0a10`, que e a "previsao do professor". Medir Spearman desse campo com `target_residual_log_likes` (dentro do canal). Perto de zero: o professor nao tem conhecimento a destilar. Com sinal: entra como feature no CatBoost (E-09). Cobre tambem a extensao opcional do TAP "Comparacao LLM zero-shot vs. modelo treinado".

@@ -1,3 +1,3 @@
-# Ambiente opcional so para scripts/extract_thumbnail_ocr.py (CPU).
+# Ambiente opcional so para scripts/pipeline/extract_thumbnail_ocr.py (CPU).
 # Os pesos latin_g2 e craft_mlt_25k sao baixados do GitHub do EasyOCR na primeira execucao.
 easyocr>=1.7

@@ -3,9 +3,9 @@
 Retomavel: cada tarefa grava suas previsoes em artifacts/feature_experiments/e10_e11/tasks/<tarefa>.csv e
 e pulada se ja existir. Rode varias vezes ate terminar e depois --report.
 
-    python scripts/run_e10_e11_experiments.py --max-seconds 160     # executa tarefas pendentes
-    python scripts/run_e10_e11_experiments.py --status
-    python scripts/run_e10_e11_experiments.py --report
+    python scripts/experimentos/run_e10_e11_experiments.py --max-seconds 160     # executa tarefas pendentes
+    python scripts/experimentos/run_e10_e11_experiments.py --status
+    python scripts/experimentos/run_e10_e11_experiments.py --report
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor, Pool
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "artifacts" / "feature_experiments" / "e10_e11"
 TASKS = OUT / "tasks"
 E08 = ROOT / "artifacts" / "feature_experiments" / "e08_catboost_residual"

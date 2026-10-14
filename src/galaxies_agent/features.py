@@ -1,11 +1,11 @@
-"""Features do modelo final (E-13) compartilhadas entre o treino (scripts/train_tool_model.py) e a tool.
+"""Features do modelo final (E-13) compartilhadas entre o treino (scripts/modelo/train_tool_model.py) e a tool.
 
 Blocos acima do CB_EMB:
 - comparaveis (KNN visual): desvio medio dos 5 Shorts ANTERIORES do mesmo canal com thumbnail mais
   parecida, a similaridade media desses 5 e a novidade visual (distancia ao centroide do canal);
 - rubrica Gemini: notas 0-10, sinais sim/nao, tom de narracao e fala derivada da transcricao.
 
-Mesmas definicoes de scripts/run_e13_final.py (o experimento que aprovou o modelo).
+Mesmas definicoes de scripts/experimentos/run_e13_final.py (o experimento que aprovou o modelo).
 """
 
 from __future__ import annotations

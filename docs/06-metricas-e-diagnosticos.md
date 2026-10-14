@@ -29,7 +29,7 @@ Valores negativos na diferenca favorecem o primeiro modelo. Como a unidade indep
 
 ## Diagnosticos visuais
 
-Os arquivos sao produzidos em `artifacts/baseline/figures/` ao executar `scripts/run_baseline_experiments.py`.
+Os arquivos sao produzidos em `artifacts/baseline/figures/` ao executar `scripts/experimentos/run_baseline_experiments.py`.
 
 | Grafico | Pergunta que responde | Sinal de atencao |
 | --- | --- | --- |

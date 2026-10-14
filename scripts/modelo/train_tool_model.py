@@ -17,8 +17,8 @@ rolling-origin (E-13 para o CB_FINAL; E-08 para as reservas), por tipo de canal.
 
 Saida imutavel: artifacts/tool_model/<model_version>/ e artifacts/tool_model/LATEST.json.
 
-    python scripts/train_tool_model.py               # treina em todo o Gold e empacota
-    python scripts/train_tool_model.py --train-only  # so split=train (modelo do teste final)
+    python scripts/modelo/train_tool_model.py               # treina em todo o Gold e empacota
+    python scripts/modelo/train_tool_model.py --train-only  # so split=train (modelo do teste final)
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor, Pool
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 from galaxies_agent.features import GEMINI_CAT, GEMINI_NUM, KNN_COLS, knn_features, rubric_features  # noqa: E402
 
