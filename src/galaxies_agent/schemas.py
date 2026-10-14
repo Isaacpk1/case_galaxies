@@ -80,7 +80,11 @@ class PredictionOutput(BaseModel):
     comparables: list[Comparable]
     features_used: dict
     model_version: str
+    model_variant: Literal["final", "with_embedding", "without_embedding"] = Field(
+        ..., description="final = thumbnail + video (Gemini) + comparaveis; as outras sao reservas")
     embedding_source: str
+    rubric_source: str = Field(..., description="cache | gemini_ao_vivo | motivo de nao ter a rubrica do video")
+    video_attributes: Optional[dict] = Field(None, description="Rubrica do video extraida pelo Gemini (entra no modelo final)")
 
 
 class RankedCreative(PredictionOutput):

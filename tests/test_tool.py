@@ -19,7 +19,7 @@ from galaxies_agent.predictor import ROOT
 
 @pytest.fixture(scope="module")
 def predictor() -> Predictor:
-    return Predictor()
+    return Predictor(live_rubric=False)  # testes offline: rubrica so do cache da base
 
 
 @pytest.fixture(scope="module")
@@ -66,17 +66,41 @@ def test_prediction_contract_and_shap(predictor, gold, silver):
     row = next(gold.sample(1, random_state=3).itertuples())
     item = as_input(row, sil.loc[row.video_id])
     out = predictor.predict(item)
-    assert out.embedding_source == "cache"
+    assert out.embedding_source == "cache" and out.rubric_source == "cache"
+    assert out.model_variant == "final" and out.confidence_flag in ("alta", "baixa")
+    assert out.video_attributes and "forca_hook_0a10" in out.video_attributes
     assert out.interval_low <= out.predicted_metric <= out.interval_high
     assert out.top_drivers and len(out.comparables) == 3
     assert row.video_id not in {c.video_id for c in out.comparables}  # o proprio Short nao e comparavel de si mesmo
     # SHAP: soma das contribuicoes + valor esperado = desvio previsto
-    features, _ = predictor.build_row(item)
-    vector, _ = predictor.embedder.embed(item.creative)
-    pcs = (vector - predictor.pca_mean) @ predictor.pca_components.T
-    pool = predictor._pool(features, True, pcs)
-    shap = predictor.model_emb.get_feature_importance(pool, type="ShapValues")[0]
-    assert shap.sum() == pytest.approx(predictor.model_emb.predict(pool)[0], abs=1e-4)
+    prepared = predictor.prepare(item)
+    pool = predictor._pool(prepared["row"], "final")
+    shap = predictor.models["final"].get_feature_importance(pool, type="ShapValues")[0]
+    assert shap.sum() == pytest.approx(predictor.models["final"].predict(pool)[0], abs=1e-4)
+    assert np.log(out.relative_to_channel) == pytest.approx(shap.sum(), abs=2e-3)
+
+
+def test_features_match_training_for_base_short(predictor, gold, silver):
+    """Comparaveis e rubrica recalculados na tool batem com o que o modelo viu no treino."""
+    from galaxies_agent.features import KNN_COLS
+    sil = silver.set_index("video_id")
+    late = gold.sort_values("published_at").groupby("channel_id").tail(1).head(5)
+    for row in late.itertuples():
+        prepared = predictor.prepare(as_input(row, sil.loc[row.video_id]))
+        assert prepared["variant"] == "final"
+        assert not np.isnan(prepared["row"]["knn5_resid_mean"])  # canal com >= 5 Shorts anteriores
+        assert prepared["row"]["gemini_coverage"] == 1.0
+        assert set(KNN_COLS) <= set(prepared["row"])
+
+
+def test_without_rubric_uses_embedding_fallback(predictor, gold, silver):
+    sil = silver.set_index("video_id")
+    row = next(gold.sample(1, random_state=5).itertuples())
+    item = as_input(row, sil.loc[row.video_id])
+    out = predictor.predict(item, attributes=(None, "sem_chave_gemini"))
+    assert out.model_variant == "with_embedding"
+    assert out.confidence_flag == "baixa"
+    assert any("Gemini" in r for r in out.confidence_reasons)
 
 
 def test_fallback_without_image_is_low_confidence(predictor, gold, silver):
@@ -86,6 +110,7 @@ def test_fallback_without_image_is_low_confidence(predictor, gold, silver):
     out = predictor.predict(item)
     assert out.confidence_flag == "baixa"
     assert out.embedding_source == "sem_imagem"
+    assert out.model_variant == "without_embedding"
     assert out.comparables == []
 
 
@@ -112,6 +137,53 @@ def test_ranking_is_sorted(predictor, gold, silver):
 
 
 def test_no_outcome_columns_in_model(predictor):
-    names = set(predictor.model_emb.feature_names_) | set(predictor.model_base.feature_names_)
+    names = set().union(*(set(m.feature_names_) for m in predictor.models.values()))
     assert not names & {"like_count", "view_count", "comment_count"}
     assert not any(n.startswith("target_") for n in names)
+
+
+def test_live_rubric_path_with_mocked_gemini(tmp_path, monkeypatch, predictor, gold, silver):
+    """Criativo fora do cache: a tool chama o Gemini (simulado), valida o JSON, grava cache e usa o modelo final."""
+    import io
+    import urllib.request
+
+    from galaxies_agent.video_rubric import VideoRubric
+
+    rubric_csv = ROOT / "data" / "silver" / "gemini_video" / "gemini_video_features.csv"
+    known = pd.read_csv(rubric_csv).iloc[0].to_dict()
+    flags = ("tem_rosto", "pessoa_fala_para_camera", "close_up_produto", "before_after_ou_transformacao",
+             "try_on_ou_demonstracao", "texto_na_tela", "tem_musica", "chamada_para_acao")
+    answer = {k: (bool(known[k]) if k in flags else known[k]) for k in known if k not in
+              ("video_id", "gemini_run_id", "model", "prompt_version", "prompt_tokens")}
+    answer["elementos_video_top5"] = str(answer["elementos_video_top5"]).split(" | ")
+    answer["elementos_audio_top5"] = str(answer["elementos_audio_top5"]).split(" | ")
+    answer = {k: ("" if isinstance(v, float) and np.isnan(v) else v) for k, v in answer.items()}
+    payload = {"candidates": [{"content": {"parts": [{"text": json.dumps(answer)}]}}]}
+    calls = []
+
+    class Resp(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+    def fake_urlopen(req, timeout=0):
+        calls.append(json.loads(req.data)["contents"][0]["parts"][0]["file_data"]["file_uri"])
+        return Resp(json.dumps(payload).encode())
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setenv("GEMINI_API_KEY", "teste")
+    vr = VideoRubric(tmp_path, live=True)  # raiz vazia: nada em cache
+    vr.root = tmp_path
+    vr._load_collector = lambda: VideoRubric(ROOT)._load_collector()
+    rubric, source = vr.get("AAAAAAAAAAA", "moda")
+    assert source == "gemini_ao_vivo" and calls == ["https://www.youtube.com/watch?v=AAAAAAAAAAA"]
+    assert rubric["tem_rosto"] in (0, 1) and isinstance(rubric["elementos_video_top5"], str)
+    assert vr.get("AAAAAAAAAAA", "moda")[1] == "cache" and len(calls) == 1  # segunda vez: cache, sem nova chamada
+
+    p = predictor
+    sil = silver.set_index("video_id")
+    row = next(gold.sample(1, random_state=7).itertuples())
+    out = p.predict(as_input(row, sil.loc[row.video_id]), attributes=(rubric, source))
+    assert out.model_variant == "final" and out.rubric_source == "gemini_ao_vivo"

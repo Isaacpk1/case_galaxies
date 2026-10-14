@@ -3,7 +3,7 @@
     python -m galaxies_agent.mcp_server          # com PYTHONPATH=src, na raiz do repo
 
 Tools:
-- prever_criativo: previsao, intervalo, confianca, drivers SHAP, comparaveis e explicacao de um criativo.
+- prever_criativo: analisa o video (Gemini), previsao, intervalo, confianca, drivers SHAP, comparaveis e explicacao.
 - ranquear_criativos: mesma saida para 2 a 5 criativos, ordenados pelo desempenho relativo ao canal.
 - historico_canal: resumo do historico de um canal da base (para o agente contextualizar a resposta).
 - info_modelo: versao, dados de treino, alvo, metodo do intervalo (inspecao exigida pelo TAP).
@@ -32,8 +32,9 @@ def predictor() -> Predictor:
 @mcp.tool()
 def prever_criativo(criativo: CreativeInput) -> dict:
     """Preve curtidas de um YouTube Short ANTES da publicacao, com intervalo de 80%, confianca,
-    desempenho relativo ao canal, fatores (SHAP) e Shorts comparaveis. O numero vem do modelo treinado;
-    nao o altere ao explicar."""
+    desempenho relativo ao canal, fatores (SHAP) e Shorts comparaveis. Para URL/id de um Short do YouTube,
+    o video e analisado pelo Gemini (rubrica + fala) e entra no modelo final. O numero vem do modelo
+    treinado; nao o altere ao explicar."""
     return predictor().predict(criativo).model_dump(mode="json")
 
 

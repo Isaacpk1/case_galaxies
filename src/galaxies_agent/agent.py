@@ -2,6 +2,10 @@
 
 Fluxo: interpretar -> contextualizar canal -> atributos do video -> prever/ranquear -> explicar -> verificar.
 
+- `atributos` processa o video: rubrica da secao 6.2 do TAP (gancho, rosto, produto, texto na tela, ritmo,
+  audio, estetica) e transcricao da fala, pelo Gemini a partir da URL publica (ou do cache da base).
+  A rubrica entra no modelo final (E-13); sem ela, a tool usa o modelo reserva e marca confianca baixa.
+
 - O LLM (Gemini via langchain-google-genai, ou qualquer chat model LangChain) so faz duas coisas:
   transformar um pedido em linguagem natural em `CreativeInput` e escrever a explicacao para o publico.
 - O numero vem SEMPRE do modelo treinado (tools da `Predictor`). O no `verificar` confere que todo numero
@@ -18,7 +22,6 @@ Fluxo: interpretar -> contextualizar canal -> atributos do video -> prever/ranqu
 
 from __future__ import annotations
 
-import csv
 import json
 import os
 import re
@@ -30,10 +33,6 @@ from pydantic import ValidationError
 
 from .predictor import ROOT, Predictor
 from .schemas import CreativeInput
-
-RUBRIC_CSV = ROOT / "data" / "silver" / "gemini_video" / "gemini_video_features.csv"
-RUBRIC_FIELDS = ("hook_primeiros_3s", "forca_hook_0a10", "tem_rosto", "pessoa_fala_para_camera", "texto_na_tela",
-                 "tem_musica", "tom_narracao", "chamada_para_acao", "elementos_video_top5", "elementos_audio_top5")
 
 PARSE_PROMPT = """Converta o pedido em JSON para a tool de previsao de YouTube Shorts.
 Responda SOMENTE um JSON: {{"criativos": [{{"creative": str|null, "creative_id": str|null, "caption": str,
@@ -48,7 +47,8 @@ Regras obrigatorias:
 1. Use SOMENTE os numeros que aparecem nos DADOS abaixo; nao calcule, arredonde de outro jeito nem invente numeros.
 2. Diga que e uma estimativa antes da publicacao, cite o intervalo de 80% e a confianca (e os motivos se for baixa).
 3. Explique os principais fatores (top_drivers) em linguagem simples e use os Shorts comparaveis como evidencia.
-4. Se houver atributos do video (rubrica), use-os como observacao qualitativa, sem dizer que entraram no modelo.
+4. Os atributos do video (rubrica do Gemini, em video_attributes) entram no modelo; so diga que um atributo pesou
+   se ele estiver em top_drivers. Os demais podem ser citados como descricao do video.
 5. Em ranking, diga qual criativo priorizar e se a diferenca e decisiva ou nao (veja a nota do ranking).
 6. Portugues do Brasil, no maximo 180 palavras, sem titulos.
 DADOS:
@@ -63,6 +63,7 @@ class AgentState(TypedDict, total=False):
     entradas: list[CreativeInput]
     historico: dict
     atributos: dict
+    atributos_lista: list
     resultado: dict
     explicacao: str
     explicacao_fonte: str
@@ -157,17 +158,6 @@ def verify_numbers(text: str, *sources: Any) -> dict:
     return {"ok": not unknown, "numeros_nao_encontrados": unknown}
 
 
-def load_rubric(video_ids: list[str]) -> dict:
-    if not RUBRIC_CSV.exists() or not video_ids:
-        return {}
-    wanted, out = set(video_ids), {}
-    with open(RUBRIC_CSV, encoding="utf-8") as handle:
-        for row in csv.DictReader(handle):
-            if row["video_id"] in wanted:
-                out[row["video_id"]] = {k: row[k] for k in RUBRIC_FIELDS if k in row}
-    return out
-
-
 # ------------------------------------------------------------------ grafo
 
 def build_agent(predictor: Optional[Predictor] = None, llm: Any = "auto"):
@@ -202,16 +192,22 @@ def build_agent(predictor: Optional[Predictor] = None, llm: Any = "auto"):
         return {"historico": historico}
 
     def atributos(state: AgentState) -> AgentState:
-        from .embedder import youtube_id
-
-        ids = [youtube_id(i.creative) for i in state["entradas"]]
-        return {"atributos": load_rubric([v for v in ids if v])}
+        """Analisa o video de cada criativo (Gemini ao vivo ou cache) antes da previsao."""
+        lista, resumo = [], {}
+        for pos, item in enumerate(state["entradas"]):
+            rubric, fonte = predictor.video_attributes(item)
+            lista.append((rubric, fonte))
+            key = item.creative_id or item.creative or f"criativo_{pos + 1}"
+            resumo[key] = {"fonte": fonte, "gancho": (rubric or {}).get("hook_primeiros_3s"),
+                           "tom_narracao": (rubric or {}).get("tom_narracao")}
+        return {"atributos_lista": lista, "atributos": resumo}
 
     def prever(state: AgentState) -> AgentState:
-        entradas = state["entradas"]
+        entradas, attrs = state["entradas"], state.get("atributos_lista")
         if len(entradas) == 1:
-            return {"resultado": {"tipo": "previsao", **predictor.predict(entradas[0]).model_dump(mode="json")}}
-        return {"resultado": {"tipo": "ranking", **predictor.rank(entradas).model_dump(mode="json")}}
+            out = predictor.predict(entradas[0], attrs[0] if attrs else None)
+            return {"resultado": {"tipo": "previsao", **out.model_dump(mode="json")}}
+        return {"resultado": {"tipo": "ranking", **predictor.rank(entradas, attrs).model_dump(mode="json")}}
 
     def deterministic(resultado: dict) -> str:
         if resultado["tipo"] == "previsao":
@@ -223,8 +219,7 @@ def build_agent(predictor: Optional[Predictor] = None, llm: Any = "auto"):
         resultado = state["resultado"]
         if llm is None or not state.get("usar_llm", True):
             return {"explicacao": deterministic(resultado), "explicacao_fonte": "deterministica"}
-        dados = {"resultado": resultado, "atributos_do_video": state.get("atributos", {}),
-                 "historico_canal": state.get("historico", {})}
+        dados = {"resultado": resultado, "historico_canal": state.get("historico", {})}
         try:
             text = _text(llm.invoke(EXPLAIN_PROMPT.format(dados=json.dumps(dados, ensure_ascii=False))))
         except Exception as error:

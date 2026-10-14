@@ -18,7 +18,7 @@ from galaxies_agent.predictor import ROOT
 
 @pytest.fixture(scope="module")
 def predictor() -> Predictor:
-    return Predictor()
+    return Predictor(live_rubric=False)
 
 
 @pytest.fixture(scope="module")
@@ -34,6 +34,8 @@ def test_deterministic_single(predictor, creatives):
     out = build_agent(predictor, llm=None).invoke({"criativos": creatives[:1]})
     assert out["resultado"]["tipo"] == "previsao"
     assert out["explicacao_fonte"] == "deterministica"
+    assert out["resultado"]["model_variant"] == "final"  # video da base: rubrica vem do cache
+    assert list(out["atributos"].values())[0]["fonte"] == "cache"
     assert out["verificacao"]["ok"], out["verificacao"]  # o texto deterministico so usa numeros das tools
 
 

@@ -11,3 +11,6 @@ artifacts/
 
 # Pacotes temporarios para Colab (contem dados da Gold)
 .tmp_transfer/
+
+# Cache local das analises ao vivo do Gemini
+.cache/
