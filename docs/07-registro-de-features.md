@@ -323,6 +323,28 @@ Rubrica Gemini coletada para 3.003 de 3.004 Shorts (99,97%; 1 resposta invalida;
 - **Intervalo:** calibrado so com residuos do rolling-origin, cobre 79,9% no teste (alvo 80%).
 - Leitura: o ganho visto na validacao se repete fora da amostra; o modelo final erra 13% menos que a mediana do canal e acerta a ordem de 58% dos pares do mesmo canal (B0: 44%).
 
+### Analise de erros do modelo final (teste final, 612 Shorts)
+
+Script `scripts/analyze_e13_errors.py`; saida em `artifacts/feature_experiments/e13_final/test_final/error_analysis.json`. Feita depois da decisao, so para descrever onde o modelo erra (nao orienta escolha de modelo).
+
+| Grupo | n | MAE | MAE B0 | Vies (prev - real) | Cobertura 80% |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Todos | 612 | 0,698 | 0,805 | -0,03 | 80% |
+| Moda | 324 | 0,601 | 0,655 | -0,17 | 86% |
+| Automotivo | 288 | 0,807 | 0,974 | +0,13 | 73% |
+| Marca | 325 | 0,761 | 0,871 | +0,02 | 82% |
+| Criador | 287 | 0,627 | 0,731 | -0,08 | 78% |
+| Real abaixo da media do canal | 232 | 0,751 | 0,977 | +0,72 | 73% |
+| Real na media | 171 | 0,276 | 0,123 | +0,07 | 99% |
+| Real acima | 116 | 0,517 | 0,607 | -0,44 | 91% |
+| Real viral (> 2,7x a mediana) | 93 | 1,568 | 1,879 | -1,57 | 47% |
+
+- **Encolhe para a media do canal.** O modelo erra pouco quando o Short fica na media e subestima os virais: preve viral em so 6 dos 93 virais (matriz de faixas em `error_analysis.json`). E o comportamento esperado de um alvo com perda MAE e de uma decisao feita antes da publicacao, quando o que faz um Short estourar (distribuicao do algoritmo, midia paga, repercussao) ainda nao existe. Mesmo assim, nos virais ele erra menos que o B0 (1,57 vs 1,88).
+- **Os maiores erros sao lancamentos de marca com midia provavel.** Os 10 piores erros sao Shorts de marcas com mediana baixa de curtidas (14 a 74) que passaram de 300 a 3.600 curtidas: lancamentos ("Novo Hyundai i20", "Novo Jeep Avenger", "Nissan Kicks"), collab e campanhas. O conteudo nao revela investimento em midia; esse dado nao existe na base publica.
+- **Automotivo e mais dificil que moda** (MAE 0,81 vs 0,60), e o intervalo cobre menos em automotivo (73%) e mais em moda (86%). A calibracao pre-registrada e por tipo de canal; calibrar tambem por setor e uma melhoria para dados novos.
+- **Canais:** o modelo ganha do B0 em 18 dos 26 canais. Os que pioram sao, em geral, canais com poucos Shorts no teste (6 a 14: BYD, Toyota, Fiat, NiinaSecrets, Maria Bardela) ou canais estaveis, onde a mediana ja acerta muito. Os maiores ganhos estao em canais volateis (Renault, Jeep, De Carona com Leandro, Vique, Edi Ribeiro).
+- **Idade do Short na coleta** (30 a 240+ dias) nao mostra padrao claro de erro, o que reduz a preocupacao com metricas medidas em idades diferentes.
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.

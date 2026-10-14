@@ -180,6 +180,19 @@ Modelo de referencia (CB_EMB) no rolling-origin:
 
 Contra o B0: MAE -0,112 (IC95% [-0,238; -0,010], p = 0,065) e pares +14 p.p. (p < 0,001, 21 de 26 canais). Contra o CB_EMB, o ganho tem o mesmo tamanho do rolling-origin (-0,033), mas o teste (~24 Shorts por canal) nao tem poder para confirma-lo sozinho (p = 0,23).
 
+**Onde o modelo erra** (teste final; detalhes em [docs/07](docs/07-registro-de-features.md)):
+
+| Grupo | n | MAE modelo | MAE B0 | Cobertura 80% |
+| --- | ---: | ---: | ---: | ---: |
+| Moda | 324 | 0,60 | 0,66 | 86% |
+| Automotivo | 288 | 0,81 | 0,97 | 73% |
+| Shorts que viralizaram (> 2,7x a mediana do canal) | 93 | 1,57 | 1,88 | 47% |
+| Shorts na media do canal | 171 | 0,28 | 0,12 | 99% |
+
+- O modelo puxa a previsao para a media do canal: subestima os virais (preve viral em 6 de 93) e superestima os Shorts fracos.
+- Os 10 maiores erros sao lancamentos e campanhas de marcas com mediana baixa (ex.: "Novo Jeep Avenger", 1.058 curtidas reais vs 30 previstas), provavelmente impulsionados por midia paga, que nao aparece nos dados publicos.
+- Ganha do B0 em 18 de 26 canais; perde em canais com poucos Shorts no teste ou muito estaveis.
+
 Diario completo e analises: [docs/07](docs/07-registro-de-features.md); decisoes: [docs/02](docs/02-registro-de-descobertas.md).
 
 ## 8. O que testamos e o que entrou
@@ -195,7 +208,8 @@ Diario completo e analises: [docs/07](docs/07-registro-de-features.md); decisoes
 
 ## 9. Limitacoes
 
-- **Valor absoluto e incerto:** o intervalo de 80% cobre um fator de ~9x; a tool serve melhor para **ordenar** criativos do mesmo canal do que para cravar um numero.
+- **Valor absoluto e incerto:** o intervalo de 80% cobre um fator de ~5x entre o limite inferior e o superior para criadores e ~23x para marcas; a tool serve melhor para **ordenar** criativos do mesmo canal do que para cravar um numero.
+- **Virais e midia paga:** o modelo subestima Shorts que estouram (cobertura do intervalo de 47% nos virais); impulsionamento pago e distribuicao do algoritmo nao sao observaveis antes da publicacao.
 - **Canal novo:** sem o canal no treino, o nivel absoluto nao supera a mediana do canal; a tool marca confianca baixa.
 - **Metricas como fotografia:** curtidas medidas na data da coleta, nao em horizonte fixo; videos antigos tiveram mais tempo para acumular.
 - **Recorte:** 2 setores, 26 canais, 3.004 Shorts (meta ampla do TAP: 5-15 mil e 60+ canais); beleza fora.
