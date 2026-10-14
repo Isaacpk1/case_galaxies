@@ -27,7 +27,7 @@ Detalhes e decisoes em [docs/01](docs/01-entendimento-do-problema.md).
 | Origem | YouTube Data API v3 (metadados e metricas publicas); thumbnails publicas; rubrica de video e transcricao via Gemini a partir da URL publica |
 | Periodo | 01/04/2025 a 30/08/2026 (18 meses de historico, Shorts com pelo menos 30 dias na data da coleta, 28-29/09/2026) |
 | Volume | 3.004 Shorts, 26 canais (moda 1.589, automotivo 1.415; marcas e criadores) - Gold `gold_v1_20261002T013000Z_663f502d` |
-| Split | Treino 2.392 / teste 612 (os 20% mais recentes de cada canal; **teste final fechado**) |
+| Split | Treino 2.392 / teste 612 (os 20% mais recentes de cada canal); **teste aberto uma unica vez**, depois da decisao do E-13 |
 | Licenca e uso | Dados publicos coletados sob os Termos da YouTube API; nao redistribuidos (camadas `data/` fora do git). Gemini recebe apenas URLs publicas; nenhum video e baixado |
 
 **O que a base nao representa:** beleza (fora do recorte); canais com menos de 30 Shorts; metricas de distribuicao (impressoes, CTR, retencao - nao existem na API publica); curtidas como "fotografia" da data de coleta, nao em horizonte fixo; mercado brasileiro em portugues.
@@ -48,12 +48,14 @@ URL publica ───────► Gemini (rubrica + fala) ───► Silver
               Gold: snapshot temporal (alvo separado, checagens antivazamento)
                                    │
                                    ▼
-     CatBoost (desvio sobre B0) + PCA do embedding + intervalo conformal + SHAP
+     CatBoost final (desvio sobre B0): PCA do embedding + comparaveis visuais + rubrica Gemini
+     + intervalo conformal + SHAP  (reservas: sem rubrica / sem imagem)
                                    │
             ┌──────────────────────┼───────────────────────┐
             ▼                      ▼                       ▼
    Funcao Python (Predictor)   Servidor MCP          Agente LangGraph
-   contrato Pydantic           4 tools               interpretar → prever → explicar → verificar numeros
+   contrato Pydantic           4 tools               interpretar → atributos do video (Gemini ao vivo)
+                                                     → prever → explicar → verificar numeros
 ```
 
 Camadas e contratos: [docs/09](docs/09-arquitetura-elt-mvp.md). Decisao de stack: [docs/10 (ADR-001)](docs/10-stack-e-selecao-de-modelo.md).
@@ -78,12 +80,13 @@ Copy-Item .env.example .env              # YOUTUBE_API_KEY e GEMINI_API_KEY (nun
 | 4. Rubrica de video + fala (Gemini) | `python scripts/collect_gemini_video_features.py --all` (retomavel, sem duplicados; `--dry-run` mostra o status) |
 | 5. Feature Store e Gold | `python scripts/build_feature_store.py --silver-run-id <ID>` e `python scripts/build_gold_snapshot.py --silver-run-id <ID>` |
 | 6. Embedding da thumbnail | `notebooks/08_e08_catboost_residual_multimodal.ipynb` (Colab, GPU) |
-| 7. Experimentos | notebooks 05-10 e `scripts/run_*` (ver secao 7) |
-| 8. Pacote do modelo da tool | `python scripts/train_tool_model.py --validate` |
+| 7. Experimentos | notebooks 05-10 e `scripts/run_*` (ver secao 7); E-13: `python scripts/run_e13_final.py` e `--report` |
+| 7b. Teste final (uma vez) e erros | `python scripts/run_e13_test_final.py` (recusa rodar de novo) e `python scripts/analyze_e13_errors.py` |
+| 8. Pacote do modelo da tool | `python scripts/train_tool_model.py` (todo o Gold; `--train-only` reproduz o modelo do teste) |
 | 9. Testes | `PYTHONPATH=src python -m pytest -q tests/` |
 | 10. Servidor MCP | `PYTHONPATH=src python -m galaxies_agent.mcp_server` |
 | 11. Agente | `PYTHONPATH=src python -m galaxies_agent.agent "Qual destes Shorts priorizar?" --criativos '[...]'` |
-| 12. Demo | `notebooks/11_demo_agente.ipynb` (Colab; arraste `demo_bundle.tar.gz`) |
+| 12. Demo | `notebooks/11_demo_agente.ipynb` (Colab; arraste `demo_bundle.tar.gz` e cadastre `GEMINI_API_KEY` nos Secrets) |
 
 Coleta de legendas antiga (`collect_youtube_captions_pilot.py`, providers transcript-api/yt-dlp/apify) foi substituida pelo Gemini por bloqueio de IP (D-011).
 
@@ -96,6 +99,7 @@ out = Predictor().predict(CreativeInput(
     caption="Titulo planejado", planned_datetime="2026-10-20T18:00",
     channel_id="UC...", sector="automotivo"))           # canal fora da base: channel_stats={...}
 print(out.predicted_metric, out.interval_low, out.interval_high, out.confidence_flag, out.explanation)
+print(out.model_variant, out.rubric_source, out.video_attributes)   # o que o Gemini viu no video
 ```
 
 ### Uso via MCP (ex.: Claude Desktop; `cwd` na raiz do repo)
@@ -107,26 +111,28 @@ print(out.predicted_metric, out.interval_low, out.interval_high, out.confidence_
 
 | Tool | Entrada | Saida |
 | --- | --- | --- |
-| `prever_criativo` | criativo, legenda, data planejada, `channel_id` ou `channel_stats`, setor | `predicted_metric`, `interval_low/high` (80%), `confidence_flag` + motivos, `relative_to_channel`, faixa, `top_drivers` (SHAP), `comparables`, `explanation`, features usadas |
+| `prever_criativo` | criativo, legenda, data planejada, `channel_id` ou `channel_stats`, setor | `predicted_metric`, `interval_low/high` (80%), `confidence_flag` + motivos, `relative_to_channel`, faixa, `top_drivers` (SHAP), `comparables`, `explanation`, `video_attributes` (rubrica do Gemini), `model_variant`, features usadas |
 | `ranquear_criativos` | 2 a 5 criativos | mesma saida, ordenada pelo desempenho relativo ao canal |
 | `historico_canal` | `channel_id` | resumo e ultimos Shorts do canal |
-| `info_modelo` | - | versao, dados de treino, alvo, metodo do intervalo |
+| `info_modelo` | - | versao, dados de treino, resultado do teste final, modelos e features, alvo, metodo do intervalo |
 
 ### Agente (LangGraph)
 
-`interpretar` (LLM transforma o pedido em `CreativeInput`) → `contextualizar` (historico do canal) → `atributos` (rubrica Gemini, quando coletada) → `prever`/`ranquear` (modelo) → `explicar` (LLM) → `verificar` (todo numero do texto precisa existir na saida das tools; senao, usa a explicacao deterministica do SHAP). Sem chave do Gemini, roda em modo deterministico.
+`interpretar` (LLM transforma o pedido em `CreativeInput`) → `contextualizar` (historico do canal) → `atributos` (o Gemini assiste ao Short pela URL publica e preenche a rubrica do TAP + transcricao; Shorts da base usam o cache) → `prever`/`ranquear` (modelo) → `explicar` (LLM) → `verificar` (todo numero do texto precisa existir na saida das tools; senao, usa a explicacao deterministica do SHAP). Sem chave do Gemini, a previsao usa o modelo reserva sem rubrica (confianca baixa) e a explicacao e a deterministica.
 
 ## 5. Modelo e configuracao
 
 | Item | Configuracao |
 | --- | --- |
-| Algoritmo | CatBoost, perda MAE |
+| Algoritmo | CatBoost, perda MAE (modelo final = CB_FINAL do E-13) |
 | Alvo | `log(1 + curtidas) - log(1 + mediana das curtidas dos Shorts anteriores do canal)` |
 | Features | historico do canal (B0, posts anteriores, dias desde o anterior), contexto (duracao, setor, marca/criador, hora, dia da semana, canal), texto resumido (tamanhos, tags), **embedding SigLIP 2 da thumbnail (PCA 16)**, **comparaveis** (desvio medio dos 5 Shorts anteriores do canal com thumbnail mais parecida, similaridade, novidade visual) e **rubrica Gemini** (8 notas 0-10, 8 sinais sim/nao, tom de narracao, quantidade e ritmo de fala) |
 | Hiperparametros | depth 6, learning_rate 0,03, l2_leaf_reg 5, random_strength 2, bagging_temperature 2, 1.390 arvores (busca aleatoria em holdout cronologico, E-08) |
-| Reserva | mesmo modelo sem embedding (quando a thumbnail nao pode ser processada; confianca baixa) |
-| Intervalo | 80%, conformal: quantis 10%/90% dos residuos fora da amostra do rolling-origin, por tipo de canal |
-| Explicacao | SHAP por previsao + Shorts comparaveis por similaridade visual |
+| Reservas | sem rubrica (CB_EMB: criativo que nao e Short do YouTube, sem chave ou Gemini fora) e sem imagem (CB_BASE); a tool marca confianca baixa e diz o motivo |
+| Rubrica do video | `gemini-3.5-flash-lite`, URL publica do YouTube (o video nao e baixado), resolucao baixa, JSON com schema fixo (`rubrica_tap_v1`), temperatura 0; ~5,5 mil tokens por Short |
+| Treino do pacote | todo o Gold (3.004 Shorts, 26 canais), depois do teste final; `--train-only` reproduz o modelo avaliado |
+| Intervalo | 80%, conformal: quantis 10%/90% dos residuos fora da amostra do rolling-origin (E-13), por tipo de canal; cobriu 79,9% no teste final |
+| Explicacao | SHAP por previsao (embedding agrupado; rubrica e comparaveis com rotulos legiveis) + Shorts comparaveis por similaridade visual |
 | Pacote | `artifacts/tool_model/<versao>/` (modelos, PCA, calibracao, historico, comparaveis, `metadata.json` com hashes) |
 
 ## 6. Metodologia
@@ -153,7 +159,7 @@ print(out.predicted_metric, out.interval_low, out.interval_high, out.confidence_
 | E-12 | LightGBM, XGBoost, ExtraTrees, ensemble, YetiRank, comparaveis, peso por canal, Optuna | Nenhum aprovado apos Holm; comparaveis promissor (p = 0,025 bruto) |
 | **E-13** | **Modelo final (CB_EMB + comparaveis + rubrica Gemini) vs CB_EMB** | **Aprovado: MAE 0,850 vs 0,882 (p = 0,003, 21/26 canais)** |
 
-Modelo de referencia (CB_EMB) no rolling-origin:
+Modelo anterior (CB_EMB, E-08) no rolling-origin, para referencia (o CB_FINAL tem MAE 0,850 e pares 61,7% no mesmo protocolo):
 
 | Metrica | B0 | CB_EMB |
 | --- | ---: | ---: |
@@ -216,7 +222,8 @@ Diario completo e analises: [docs/07](docs/07-registro-de-features.md); decisoes
 - **Modalidades:** thumbnail estatica + rubrica/fala do Gemini; sem frames, cortes de cena ou audio bruto (o video nao e baixado).
 - **Split de teste por canal**, nao por data global.
 - **Embedding opaco:** o SHAP indica que o estilo visual pesou, nao qual aspecto; comparaveis e rubrica complementam.
-- **Ambiente:** modelo e agente nao rodam no Windows do Inteli (DLLs bloqueadas); o embedding ao vivo exige `torch` e acesso ao Hugging Face.
+- **Ambiente:** modelo e agente nao rodam no Windows do Inteli (DLLs bloqueadas); o embedding ao vivo exige `torch` e acesso ao Hugging Face, e a rubrica ao vivo exige `GEMINI_API_KEY` (cada Short novo custa uma chamada, ~5 s).
+- **Rubrica gerada por LLM:** as notas do Gemini sao subjetivas e podem mudar com a versao do modelo; a versao do prompt e do modelo ficam registradas no pacote.
 
 ## 10. Evolucao
 
