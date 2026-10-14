@@ -79,14 +79,14 @@ Copy-Item .env.example .env              # YOUTUBE_API_KEY e GEMINI_API_KEY (nun
 | 3. Thumbnails | `python scripts/coleta/collect_youtube_thumbnails_stdlib.py --source-run-id <RUN> --sector moda` |
 | 4. Rubrica de video + fala (Gemini) | `python scripts/coleta/collect_gemini_video_features.py --all` (retomavel, sem duplicados; `--dry-run` mostra o status) |
 | 5. Feature Store e Gold | `python scripts/pipeline/build_feature_store.py --silver-run-id <ID>` e `python scripts/pipeline/build_gold_snapshot.py --silver-run-id <ID>` |
-| 6. Embedding da thumbnail | `notebooks/08_e08_catboost_residual_multimodal.ipynb` (Colab, GPU) |
+| 6. Embedding da thumbnail | `notebooks/04_modelo_colab/08_e08_catboost_residual_multimodal.ipynb` (Colab, GPU) |
 | 7. Experimentos | notebooks 05-10 e `scripts/experimentos/` (ver secao 7); E-13: `python scripts/experimentos/run_e13_final.py` e `--report` |
 | 7b. Teste final (uma vez) e erros | `python scripts/experimentos/run_e13_test_final.py` (recusa rodar de novo) e `python scripts/experimentos/analyze_e13_errors.py` |
 | 8. Pacote do modelo da tool | `python scripts/modelo/train_tool_model.py` (todo o Gold; `--train-only` reproduz o modelo do teste) |
 | 9. Testes | `PYTHONPATH=src python -m pytest -q tests/` |
 | 10. Servidor MCP | `PYTHONPATH=src python -m galaxies_agent.mcp_server` |
 | 11. Agente | `PYTHONPATH=src python -m galaxies_agent.agent "Qual destes Shorts priorizar?" --criativos '[...]'` |
-| 12. Demo | `notebooks/11_demo_agente.ipynb` (Colab; arraste `demo_bundle.tar.gz` e cadastre `GEMINI_API_KEY` nos Secrets) |
+| 12. Demo | `notebooks/05_demo/11_demo_agente.ipynb` (Colab; arraste `demo_bundle.tar.gz` e cadastre `GEMINI_API_KEY` nos Secrets) |
 
 A coleta de legendas antiga (transcript-api/yt-dlp/apify) foi substituida pelo Gemini por bloqueio de IP (D-011); os scripts sem uso foram removidos em 14/10/2026 e continuam no historico do git.
 
@@ -245,7 +245,7 @@ scripts/coleta/          YouTube Data API, thumbnails (so biblioteca padrao) e r
 scripts/pipeline/        Bronze -> Silver -> Feature Store -> Gold, features de thumbnail e OCR
 scripts/experimentos/    E-00 a E-13, teste final (uma vez) e analise de erros
 scripts/modelo/          treino e empacotamento do modelo servido pela tool
-notebooks/               analises, experimentos no Colab e demo
+notebooks/               01_dados, 02_baseline, 03_features, 04_modelo_colab (E-08/E-10/E-12), 05_demo
 tests/                   contrato, antivazamento, modelo, agente e rubrica (pytest)
 data/feature_store/      features versionadas por hash (versionadas no git); bronze/silver/gold ficam fora do git
 docs/                    entendimento, decisoes (D-xxx), metricas, registro de experimentos, arquitetura
@@ -264,16 +264,18 @@ docs/                    entendimento, decisoes (D-xxx), metricas, registro de e
 | [09](docs/09-arquitetura-elt-mvp.md) | Arquitetura ELT |
 | [10](docs/10-stack-e-selecao-de-modelo.md) | ADR-001: stack e selecao de modelo |
 
-| Notebook | Conteudo |
-| --- | --- |
-| 01 | Descoberta de dados (coleta piloto, canais, volume) |
-| 02 | Exploracao da tabela de consumo |
-| 03 | Experimentos de baseline (B0, M1-M3) |
-| 04 | Metricas e diagnosticos do baseline |
-| 05 | Validacao rolling-origin |
-| 06 | Analise para decisao de features |
-| 07 | Resultado da ablacao E-02 |
-| 08 | E-08: CatBoost + embedding SigLIP 2 (Colab) |
-| 09 | E-10b: embedding de texto (Colab) |
-| 10 | E-12: selecao de modelo + Optuna + PyCaret (Colab) |
-| 11 | Demo do agente e da tool MCP (Colab) |
+| Pasta | Notebook | Conteudo | Onde roda |
+| --- | --- | --- | --- |
+| `notebooks/01_dados/` | 01 | Descoberta de dados (coleta piloto, canais, volume) | local |
+| | 02 | Exploracao da tabela de consumo | local |
+| `notebooks/02_baseline/` | 03 | Experimentos de baseline (B0, M1-M3; executa `scripts/experimentos/run_baseline_experiments.py`) | local |
+| | 04 | Metricas e diagnosticos do baseline | local |
+| | 05 | Validacao rolling-origin | local |
+| `notebooks/03_features/` | 06 | Analise para decisao de features | local |
+| | 07 | Resultado da ablacao E-02 | local |
+| `notebooks/04_modelo_colab/` | 08 | E-08: CatBoost + embedding SigLIP 2 da thumbnail | Colab (GPU) |
+| | 09 | E-10b: embedding de texto | Colab |
+| | 10 | E-12: selecao de modelo + Optuna + PyCaret | Colab |
+| `notebooks/05_demo/` | 11 | **Demo do agente e da tool MCP** (modelo final, Gemini ao vivo) | Colab |
+
+Os notebooks locais encontram a raiz do repo sozinhos (podem ser abertos de qualquer pasta). Os de Colab recebem um pacote `.tar.gz` arrastado para o painel Arquivos.

@@ -156,7 +156,7 @@ Leitura:
 
 ### Resultado do E-08 (CatBoost residual + embedding SigLIP 2 da thumbnail)
 
-Notebook: `notebooks/08_e08_catboost_residual_multimodal.ipynb` (Colab, GPU T4). Artefatos: `artifacts/feature_experiments/e08_catboost_residual/`. Gold `gold_v1_20261002T013000Z_663f502d`, 2.392 linhas de treino, 26 canais, moda e automotivo. Mesmo rolling-origin do E-07; hiperparametros por busca aleatoria (12 tentativas) em holdout cronologico dentro de cada janela; PCA (16 dim) do embedding ajustado so no treino de cada janela. Teste final fechado.
+Notebook: `notebooks/04_modelo_colab/08_e08_catboost_residual_multimodal.ipynb` (Colab, GPU T4). Artefatos: `artifacts/feature_experiments/e08_catboost_residual/`. Gold `gold_v1_20261002T013000Z_663f502d`, 2.392 linhas de treino, 26 canais, moda e automotivo. Mesmo rolling-origin do E-07; hiperparametros por busca aleatoria (12 tentativas) em holdout cronologico dentro de cada janela; PCA (16 dim) do embedding ajustado so no treino de cada janela. Teste final fechado.
 
 | Modelo | MAE log | Pares (justo) | Spearman intra-canal | Origens vencendo B0 |
 | --- | ---: | ---: | ---: | ---: |
@@ -220,7 +220,7 @@ Script: `scripts/experimentos/run_e10_e11_experiments.py` (retomavel); artefatos
 | CB_EMB_pca32 | 0,8879 | 0,571 | +0,006, p=0,57 |
 | CB_EMB_pca8 | 0,8885 | 0,566 | +0,006, p=0,50 |
 
-**E-10b** (embedding de texto `paraphrase-multilingual-mpnet-base-v2`, PCA 16, gerado no Colab com `notebooks/09_e10b_text_embedding.ipynb`; Silver `data/silver/features/text_mpnet_v1/20261013T020000Z/`):
+**E-10b** (embedding de texto `paraphrase-multilingual-mpnet-base-v2`, PCA 16, gerado no Colab com `notebooks/04_modelo_colab/09_e10b_text_embedding.ipynb`; Silver `data/silver/features/text_mpnet_v1/20261013T020000Z/`):
 
 | Braco | MAE | Pares (justo) | vs CB_EMB_pca16 |
 | --- | ---: | ---: | --- |
@@ -245,7 +245,7 @@ Leitura para o produto: para um cliente novo (canal fora da base) a tool serve p
 
 ### Protocolo pre-registrado: E-12 (algoritmos, objetivo de ranking, comparaveis, Optuna) - 12/10/2026
 
-Notebook: `notebooks/10_e12_model_selection.ipynb` (Colab). Mesmo Gold, mesmo rolling-origin, teste final fechado. Todos os bracos preveem o desvio sobre o B0 com as mesmas features do CB_EMB (BASE + PCA 16 do SigLIP 2, PCA ajustado em cada janela), salvo onde indicado. Bracos com busca aleatoria usam 10 tentativas no holdout cronologico interno de cada janela (mesmo procedimento que gerou os parametros do CB_EMB).
+Notebook: `notebooks/04_modelo_colab/10_e12_model_selection.ipynb` (Colab). Mesmo Gold, mesmo rolling-origin, teste final fechado. Todos os bracos preveem o desvio sobre o B0 com as mesmas features do CB_EMB (BASE + PCA 16 do SigLIP 2, PCA ajustado em cada janela), salvo onde indicado. Bracos com busca aleatoria usam 10 tentativas no holdout cronologico interno de cada janela (mesmo procedimento que gerou os parametros do CB_EMB).
 
 Candidatos (7): `LGBM` (LightGBM, perda L1), `XGB` (XGBoost, perda absoluta), `ET` (ExtraTrees), `ENS` (media CB_EMB + LAD linear com embedding), `CB_RANK` (CatBoost YetiRank agrupado por canal; nivel vem do CB_EMB, ordem dentro do canal vem do ranking), `CB_KNN` (CB_EMB + desvio medio dos 5 Shorts anteriores mais parecidos do mesmo canal + novidade visual em relacao ao canal), `CB_W` (CB_EMB com peso igual por canal).
 
@@ -268,7 +268,7 @@ Uma unica comparacao, escrita antes de rodar e depois de E-08 a E-12, para conso
 
 ### Resultado do E-12 (selecao de modelo)
 
-Notebook `notebooks/10_e12_model_selection.ipynb` (Colab, CPU); artefatos em `artifacts/feature_experiments/e12_model_selection/`.
+Notebook `notebooks/04_modelo_colab/10_e12_model_selection.ipynb` (Colab, CPU); artefatos em `artifacts/feature_experiments/e12_model_selection/`.
 
 | Braco | MAE | Pares (justo) | Spearman | vs CB_EMB (metrica da regra) | p | p Holm |
 | --- | ---: | ---: | ---: | --- | ---: | ---: |
