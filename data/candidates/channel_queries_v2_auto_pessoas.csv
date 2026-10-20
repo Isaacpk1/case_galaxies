@@ -1,20 +1,86 @@
-channel_name,sector,channel_type,handle,query
-Autoesporte,automotivo,creator,@autoesporte,Autoesporte
-Quatro Rodas,automotivo,creator,@quatrorodas,Quatro Rodas
-Motor1 Brasil,automotivo,creator,@motor1brasil,Motor1 Brasil
-AutoPapo,automotivo,creator,@autopapo,AutoPapo
-Webmotors,automotivo,creator,@webmotors,Webmotors
-Mobiauto,automotivo,creator,@mobiauto,Mobiauto
-Garagem do Bellote,automotivo,creator,@garagemdobellote,Garagem do Bellote
-Carplace,automotivo,creator,@carplace,Carplace
-iCarros,automotivo,creator,@icarros,iCarros
-Revista Carro,automotivo,creator,@revistacarro,Revista Carro
-Autos Segredos,automotivo,creator,@autossegredos,Autos Segredos
-Noticias Automotivas,automotivo,creator,@noticiasautomotivas,Noticias Automotivas
-Vrum,automotivo,creator,@vrum,Vrum
-Car and Driver Brasil,automotivo,creator,@caranddriverbrasil,Car and Driver Brasil
-Jornal do Carro,automotivo,creator,@jornaldocarro,Jornal do Carro
-Carros na Web,automotivo,creator,@carrosnaweb,Carros na Web
-Primeira Marcha,automotivo,creator,@primeiramarcha,Primeira Marcha
-AutoMais,automotivo,creator,@automais,AutoMais
-Minuto Motor,automotivo,creator,@minutomotor,Minuto Motor
+channel_name,sector,channel_type,handle,query,notes
+A Vida de Renato Garcia,automotivo,creator,@vidarenatogarcia,A Vida de Renato Garcia,pessoa - caminhoneiro
+Opiniao Sincera,automotivo,creator,@opiniãosincera,Opiniao Sincera,pessoa - reviews
+Veneto Studio,automotivo,creator,@venetostudio,Veneto Studio,pessoa - verificar aderencia
+Felipe Franco,automotivo,creator,@fefrancopro,Felipe Franco,pessoa - verificar aderencia
+Leo Borges,automotivo,creator,@leonardoborgescanal,Leo Borges,pessoa - reviews
+Meu Carro LifeStyle,automotivo,creator,@meucarrolifestyle,Meu Carro LifeStyle,pessoa
+AnderShow,automotivo,creator,@andershow1,AnderShow,pessoa
+LetraJota,automotivo,creator,@letrajota,LetraJota,pessoa
+Canal High Torque,automotivo,creator,@canalhightorque,Canal High Torque,pessoa
+Tudo Leilao,automotivo,creator,@tudoleilao,Tudo Leilao,pessoa - leilao de carros
+Victor041,automotivo,creator,@victor041,Victor041,pessoa - motos
+TCAR,automotivo,creator,@tcarimports,TCAR,pessoa
+samuelbradoke,automotivo,creator,@samuelbradoke,samuelbradoke,pessoa - motos
+Tavares160,automotivo,creator,@tavares160,Tavares160,pessoa - motos
+Daiane Pimenta,automotivo,creator,@daianepimenta,Daiane Pimenta,pessoa - caminhoneira
+DiaTV,automotivo,creator,@diatv,DiaTV,pessoa
+Hayka Ritbox,automotivo,creator,@haykaritbox,Hayka Ritbox,pessoa - verificar aderencia
+Rodolfinho da Z,automotivo,creator,@rodolfinhodaz,Rodolfinho da Z,pessoa - motos
+Ueldo Tutoriais,automotivo,creator,@ueldotutoriais,Ueldo Tutoriais,pessoa - mecanica
+Manual do Transito,automotivo,creator,@manualdotransito,Manual do Transito,pessoa - transito
+Thays Lessa,automotivo,creator,@thayslessacanal,Thays Lessa,pessoa
+Canal Motoplay,automotivo,creator,@motoplay,Canal Motoplay,pessoa - motos
+GUI50,automotivo,creator,@gui50,GUI50,pessoa - motos
+Ta Escrito na Estela,automotivo,creator,@taescritonaestela,Ta Escrito na Estela,pessoa
+Tonimek,automotivo,creator,@tonimek,Tonimek,pessoa - mecanica
+Marlon Luz,automotivo,creator,@marlonluz_,Marlon Luz,pessoa
+MundoSobreRodas,automotivo,creator,@mundosobrerodasbr,MundoSobreRodas,pessoa
+Leilao Descomplicado,automotivo,creator,@leilãodescomplicado,Leilao Descomplicado,pessoa - leilao de carros
+Ricardo e CIA,automotivo,creator,@ricardoeciaonline,Ricardo e CIA,pessoa
+Marcelo Tonella,automotivo,creator,@marcelotonella,Marcelo Tonella,pessoa
+Rodrigo Platinum,automotivo,creator,@rodrigoplatinum,Rodrigo Platinum,pessoa
+DR Auto Mecanica,automotivo,creator,@drautomecânica,DR Auto Mecanica,pessoa - mecanica
+Kokinho Noticias,automotivo,creator,@kokinhonotícias,Kokinho Noticias,pessoa
+Aquiles Tv,automotivo,creator,@aquiles.tv_dicas,Aquiles Tv,pessoa - dicas
+Mega Dicas Automotivas,automotivo,creator,@megadicasautomotivas,Mega Dicas Automotivas,pessoa - dicas
+Macchina,automotivo,creator,@macchina,Macchina,pessoa
+High RPM,automotivo,creator,@altarpm,High RPM,pessoa
+Escolha Certa,automotivo,creator,@escolhacertaa,Escolha Certa,pessoa - verificar aderencia
+Deia e Tiba,automotivo,creator,@deiaetiba,Deia e Tiba,pessoa
+Garagem do Bellote,automotivo,creator,@garagemdobellotetv,Garagem do Bellote,pessoa
+A Roda,automotivo,creator,@arodatv,A Roda,pessoa
+Fernando Floripa,automotivo,creator,@fernandofloripa,Fernando Floripa,pessoa - motorista de app
+Falando de Carro,automotivo,creator,@falandodecarro,Falando de Carro,pessoa
+O Mecanico,automotivo,creator,@omecaniconline,O Mecanico,pessoa - mecanica
+BF MS,automotivo,creator,@bfms,BF MS,pessoa
+Duas Rodas,automotivo,creator,@duasrodasbr,Duas Rodas,pessoa - motos
+Felipe Carvalho,automotivo,creator,@felipecarvalhocacadordecarros,Felipe Carvalho,pessoa
+Samuel Vagner,automotivo,creator,@contatosamuelvagner,Samuel Vagner,pessoa
+David Silva,automotivo,creator,@david-silva,David Silva,pessoa - verificar aderencia
+Rodrigo Moreira,automotivo,creator,@canalrodrigomoreira,Rodrigo Moreira,pessoa
+Reginaldo de Campinas,automotivo,creator,@reginaldodecampinas,Reginaldo de Campinas,pessoa - caminhoneiro
+Trocar Autos Antigos,automotivo,creator,@trocarautosantigos,Trocar Autos Antigos,pessoa - antigos
+Mario Sete Galo,automotivo,creator,@mariosetegalo,Mario Sete Galo,pessoa - verificar aderencia
+Carvideo BR,automotivo,creator,@carvideobr,Carvideo BR,pessoa
+Anderson Dick,automotivo,creator,@andersondick,Anderson Dick,pessoa
+Edson Viana,automotivo,creator,@buscadordecarro,Edson Viana,pessoa
+Canal PL,automotivo,creator,@canalpltv,Canal PL,pessoa
+Sexto Round,automotivo,creator,@sextoround,Sexto Round,pessoa
+Auto Ignicao,automotivo,creator,@autoignicao,Auto Ignicao,pessoa
+BUW Life,automotivo,creator,@buwlife,BUW Life,pessoa
+Sheriff Barion,automotivo,creator,@sheriffbarion,Sheriff Barion,pessoa
+Dan Silva Compra Planejada,automotivo,creator,@dansilvacompraplanejada,Dan Silva Compra Planejada,pessoa
+Edumartins Car,automotivo,creator,@edumartinscar,Edumartins Car,pessoa
+Lucas Corsato,automotivo,creator,@lucascorsato,Lucas Corsato,pessoa
+Top Drive,automotivo,creator,@topdrivebrasil,Top Drive,pessoa
+MacMasi,automotivo,creator,@macmasi,MacMasi,pessoa
+Amigos por Carros,automotivo,creator,@amigosporcarros,Amigos por Carros,pessoa
+Doutor Carro,automotivo,creator,@doutorcarro,Doutor Carro,pessoa
+Fullpower TV,automotivo,creator,@fullpowertv,Fullpower TV,pessoa
+Exclusivos no Brasil,automotivo,creator,@exclusivosbr,Exclusivos no Brasil,pessoa
+Planeta Caminhao,automotivo,creator,@planetacaminhaotv,Planeta Caminhao,midia - caminhoes
+Autoesporte,automotivo,creator,@autoesporte,Autoesporte,midia
+Quatro Rodas,automotivo,creator,@quatrorodas,Quatro Rodas,midia
+Motor1 Brasil,automotivo,creator,@motor1brasil,Motor1 Brasil,midia
+Vrum,automotivo,creator,@portalvrum,Vrum,midia
+AUTO+,automotivo,creator,@automaisoficial,AUTO+,midia
+Portal Rodoviario,automotivo,creator,@portalrodoviario,Portal Rodoviario,midia
+AutoPapo,automotivo,creator,@autopapo,AutoPapo,midia
+Carplace,automotivo,creator,@carplace,Carplace,midia
+Revista Carro,automotivo,creator,@revistacarro,Revista Carro,midia
+Autos Segredos,automotivo,creator,@autossegredos,Autos Segredos,midia
+Noticias Automotivas,automotivo,creator,@noticiasautomotivas,Noticias Automotivas,midia
+Car and Driver Brasil,automotivo,creator,@caranddriverbrasil,Car and Driver Brasil,midia
+Jornal do Carro,automotivo,creator,@jornaldocarro,Jornal do Carro,midia
+Doutor Multas,automotivo,creator,@DoutormultasBr,Doutor Multas,midia
