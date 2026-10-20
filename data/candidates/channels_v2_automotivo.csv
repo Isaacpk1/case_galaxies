@@ -1,0 +1,120 @@
+channel_id,channel_name,sector,market,channel_type,notes,handle
+UCRojKYdkvZcRQX1Vu7wEU5g,Chevrolet Brasil,automotivo,BR,brand,marca | base v1,
+UCBXtBstNh5iIgm07keup0Gw,Volkswagen do Brasil,automotivo,BR,brand,marca | base v1,
+UCww4HYJZlIk3fRgqTWEW4cA,Fiat Automoveis Brasil,automotivo,BR,brand,marca | base v1,
+UCnBYf03jmMPiABvbSYbxMcA,Hyundai Motor Brasil,automotivo,BR,brand,marca | base v1,
+UCsitysA6ZME95b0j5uoAe9Q,Toyota do Brasil,automotivo,BR,brand,marca | base v1,
+UCFy0Z7HS5OQGHeb-sTnjsNA,Honda Automoveis,automotivo,BR,brand,marca | base v1,
+UC1ZHtRLTK0Lrl1N6DVGshgg,Renault Brasil,automotivo,BR,brand,marca | base v1,
+UChpihrq2RRLyzgLtpcoMVbw,Nissan Brasil,automotivo,BR,brand,marca | base v1,
+UCZuERLdGT7WEPKgEPTmbSHg,Jeep Brasil,automotivo,BR,brand,marca | base v1,
+UCIgu1mo2iCZzTZjeJltuFLQ,BYD Auto Brasil,automotivo,BR,brand,marca | base v1,
+UCGBIIPnw0AYM3BFsmTsjeAw,Acelerados,automotivo,BR,creator,pessoa | base v1,
+UC08IZDh4NSFHl8KYpYNdoVg,Auto Super,automotivo,BR,creator,pessoa | base v1,
+UCi7NjYyIQk6hPRbZ4BVKHyw,FlatOut Brasil,automotivo,BR,creator,pessoa | base v1,
+UChU6qQR8Af0Xd3LSbQHN2sA,Carros com Camanzi,automotivo,BR,creator,pessoa | base v1,
+UCM7Ysb5r_tVbxGabjTSQgkA,De Carona com Leandro,automotivo,BR,creator,pessoa | base v1,
+UCkwdxQQyi39HcRnmuZvURww,Mecanica Online,automotivo,BR,creator,pessoa | base v1,
+UC9Pbtn0wi6CXxTHMPbolwPA,ComprecarTV,automotivo,BR,creator,pessoa | base v1,
+UClUN2J5hwEsE6_sKW3SPlMg,A VIDA DE RENATO GARCIA ,automotivo,BR,creator,pessoa | v2 | pessoa - caminhoneiro,@vidarenatogarcia
+UCc0cU92Tf7rvd2gr-CpVO4Q,Opinião Sincera,automotivo,BR,creator,pessoa | v2 | pessoa - reviews,@opiniaosincera
+UC6Z6eTBcU0K3yR2N7Did1iA,Veneto Studio,automotivo,BR,creator,pessoa | v2 | pessoa - verificar aderencia,@venetostudio
+UCRwUbpPiiCKv2CDlXEal4Gw,Felipe Franco,automotivo,BR,creator,pessoa | v2 | pessoa - verificar aderencia,@fefrancopro
+UCKvmugm9StTunFWKtggppQw,Léo Borges,automotivo,BR,creator,pessoa | v2 | pessoa - reviews,@leonardoborgescanal
+UCeSu6-j3LxdlBLZZfmEpcpg,Meu Carro LifeStyle,automotivo,BR,creator,pessoa | v2 | pessoa,@meucarrolifestyle
+UCMw8Io1IaswCBIPOfScEf1g,AnderShow,automotivo,BR,creator,pessoa | v2 | pessoa,@andershow1
+UC0FF8rI64vIy1NKJg7OIJng,LetraJota,automotivo,BR,creator,pessoa | v2 | pessoa,@letrajota
+UCRuBopQ2ei22ZgXlOfd5eDQ,Canal High Torque,automotivo,BR,creator,pessoa | v2 | pessoa,@canalhightorque
+UCcCMQFw2GtysXaNO3YlCTyA,Tudo Leilão,automotivo,BR,creator,pessoa | v2 | pessoa - leilao de carros,@tudoleilao
+UCGYbX0WewaSvrm1g4uKwGzw,Victor041,automotivo,BR,creator,pessoa | v2 | pessoa - motos,@victor041
+UCZlCYjDdwkE3TvSP9e82BMQ,TCAR ,automotivo,BR,creator,pessoa | v2 | pessoa,@tcarimports
+UCFJeR5gloEnL9oHGGnBHyYA,samuelbradoke,automotivo,BR,creator,pessoa | v2 | pessoa - motos,@samuelbradoke
+UCT9l-uSHSEm1yfsRkDmM6fw,Tavares160,automotivo,BR,creator,pessoa | v2 | pessoa - motos,@tavares160
+UCsMDJc3aq2qxh0bu53gToFQ,Daiane Pimenta,automotivo,BR,creator,pessoa | v2 | pessoa - caminhoneira,@daianepimenta
+UCKnMcgDLxDeq9HqUgLhtYbQ,DiaTV,automotivo,BR,creator,pessoa | v2 | pessoa,@diatv
+UCaERNpxxV4fslPafVpO-qUA,Hayka Ritbox,automotivo,BR,creator,pessoa | v2 | pessoa - verificar aderencia,@haykaritbox
+UCu3Flfnk8zagChhyh4A5DbA,Rodolfinho da Z,automotivo,BR,creator,pessoa | v2 | pessoa - motos,@rodolfinhodaz
+UCYwy6M312xWnd6azSijdnyQ,Ueldo Tutoriais,automotivo,BR,creator,pessoa | v2 | pessoa - mecanica,@ueldotutoriais
+UCbjgkL_sE5WLK2MWuo12lbQ,Manual do Trânsito,automotivo,BR,creator,pessoa | v2 | pessoa - transito,@manualdotransito
+UCy_SQRSaxw47hgkmqKnVrTw,Thays Lessa,automotivo,BR,creator,pessoa | v2 | pessoa,@thayslessacanal
+UCdvtAyfO0ZVfA-UV-lssMQw,Canal Motoplay,automotivo,BR,creator,pessoa | v2 | pessoa - motos,@motoplay
+UCLtXQue9aG8ZhLYES678CVg,GUI50,automotivo,BR,creator,pessoa | v2 | pessoa - motos,@gui50
+UC1QO_EbRmxU66zi89rhyVAw,Tá Escrito na Estela,automotivo,BR,creator,pessoa | v2 | pessoa,@taescritonaestela
+UCwRM1SXROyxSSJqrOTQzILw,Tonimek,automotivo,BR,creator,pessoa | v2 | pessoa - mecanica,@tonimek
+UCTHuWvQ21wbpYtZz92EUVjA,Marlon Luz,automotivo,BR,creator,pessoa | v2 | pessoa,@marlonluz_
+UCm9cwbUWu11fD0LJ49YdUTw,MundoSobreRodas,automotivo,BR,creator,pessoa | v2 | pessoa,@mundosobrerodasbr
+UCzxUD3rCj7-RaBJPrcu_UOg,Leilão Descomplicado,automotivo,BR,creator,pessoa | v2 | pessoa - leilao de carros,@leilaodescomplicado
+UC-P9yYUlHhue-iWf5yb0m0w,Ricardo e CIA,automotivo,BR,creator,pessoa | v2 | pessoa,@ricardoeciaonline
+UCJZ75yOincDOGYJ0R53sjyw,Marcelo Tonella,automotivo,BR,creator,pessoa | v2 | pessoa,@marcelotonella
+UC0bS-s1hkl2vmIHpVprlV3A,Rodrigo Platinum,automotivo,BR,creator,pessoa | v2 | pessoa,@rodrigoplatinum
+UC1zrLz8G9gWaQ96Me9JhbjA,DR Auto Mecânica,automotivo,BR,creator,pessoa | v2 | pessoa - mecanica,@drautomecanica
+UCJjfbwSyOaE0hb4UaH9bqpA,KOKINHO NOTÍCIAS,automotivo,BR,creator,pessoa | v2 | pessoa,@kokinhonoticias
+UCaT8flhmoMZV_fcAl8uABGg,Aquiles Tv,automotivo,BR,creator,pessoa | v2 | pessoa - dicas,@aquiles.tv_dicas
+UCaZwxPWQnwHxgaM1tUbgaVA,MEGA DICAS AUTOMOTIVAS,automotivo,BR,creator,pessoa | v2 | pessoa - dicas,@megadicasautomotivas
+UCqtPuAH8q5CgZyp8hklSpNA,Macchina,automotivo,BR,creator,pessoa | v2 | pessoa,@macchina
+UCledB0SeULMkjN_eBh4rPHQ,ALTARPM,automotivo,BR,creator,pessoa | v2 | pessoa,@altarpm
+UChfRTFlFK0IL43tf0DvHTPg,Escolha Certa,automotivo,BR,creator,pessoa | v2 | pessoa - verificar aderencia,@escolhacertaa
+UCOx0fS_4_4ZtppmXxgMRhbg,Déia e Tiba,automotivo,BR,creator,pessoa | v2 | pessoa,@deiaetiba
+UCCykAaNbtxUpGwvkSYWWSKg,Renato Bellote,automotivo,BR,creator,pessoa | v2 | pessoa,@garagemdobellotetv
+UCt_oS5q8BA5iiXv_mmqSByQ,A Roda,automotivo,BR,creator,pessoa | v2 | pessoa,@arodatv
+UCAwc4QgjwBmUFFtxJPnOefw,Fernando Floripa Motorista Uber,automotivo,BR,creator,pessoa | v2 | pessoa - motorista de app,@fernandofloripa
+UCfyWVInB4nPkZGgiVwGtAiw,Falando de Carro,automotivo,BR,creator,pessoa | v2 | pessoa,@falandodecarro
+UCSKY-NAn989Oq5MFJauevhw,O Mecânico,automotivo,BR,creator,pessoa | v2 | pessoa - mecanica,@omecaniconline
+UC6an9PllWh3s_8VcKf1VNUA,BF///MS,automotivo,BR,creator,pessoa | v2 | pessoa,@bfms
+UCoenHRLtKKtutvOQGZzqpCQ,Duas Rodas,automotivo,BR,creator,pessoa | v2 | pessoa - motos,@duasrodasbr
+UCQmkM00VARUgkaOsLbWOsHg,Felipe Carvalho,automotivo,BR,creator,pessoa | v2 | pessoa,@felipecarvalhocacadordecarros
+UCRMzSIeeeGJssup9oJIhcDg,Samuel Vagner,automotivo,BR,creator,pessoa | v2 | pessoa,@contatosamuelvagner
+UCXphTtPJi-Ikn_DqYRO8-vg,David Silva,automotivo,BR,creator,pessoa | v2 | pessoa - verificar aderencia,@david-silva
+UC37Ij-kMrbM_83CJiMFGL7A,Rodrigo Moreira,automotivo,BR,creator,pessoa | v2 | pessoa,@canalrodrigomoreira
+UClA3Es8saL8UivGRBwn4uLg,Reginaldo de Campinas,automotivo,BR,creator,pessoa | v2 | pessoa - caminhoneiro,@reginaldodecampinas
+UCcB81oyqz6lkYJSX7qym5dw,TROCAR AUTOS ANTIGOS,automotivo,BR,creator,pessoa | v2 | pessoa - antigos,@trocarautosantigos
+UCJRW_EdVgbawGg7fd4p2FQw,Mario 7 Galo Caçador De Relíquias! ,automotivo,BR,creator,pessoa | v2 | pessoa - verificar aderencia,@mariosetegalo
+UCXlMDjwzUnb6UfJsuyJyCtw,CARVIDEO BR,automotivo,BR,creator,pessoa | v2 | pessoa,@carvideobr
+UCFRmfy25-amVZWHI5rZJQnw,Anderson Dick,automotivo,BR,creator,pessoa | v2 | pessoa,@andersondick
+UCeYZ_7-LERMef3BC9dnS_HA,Edson Viana,automotivo,BR,creator,pessoa | v2 | pessoa,@buscadordecarro
+UC2z0Folvh2T5rDfq9Ik6FqQ,CANAL PL,automotivo,BR,creator,pessoa | v2 | pessoa,@canalpltv
+UCiwWdTRdCF2xojICoeFgg3Q,Sexto Round,automotivo,BR,creator,pessoa | v2 | pessoa,@sextoround
+UCFcVyB3qN7PMy28ra9ZcNhw,Auto Ignição,automotivo,BR,creator,pessoa | v2 | pessoa,@autoignicao
+UCnQ9rsj2-tFuGymK2JfYTAQ,BUW LIFE,automotivo,BR,creator,pessoa | v2 | pessoa,@buwlife
+UCvwVG4fxzhfEAGINi-BxxpQ,Sheriff Barion - Barbarius,automotivo,BR,creator,pessoa | v2 | pessoa,@sheriffbarion
+UCVlD-F0RDQD8SeSmm5LMgoA,Dan Silva - Compra Planejada,automotivo,BR,creator,pessoa | v2 | pessoa,@dansilvacompraplanejada
+UCj9CrsU51aGvvD4mYvsIy_w,Edumartins Car,automotivo,BR,creator,pessoa | v2 | pessoa,@edumartinscar
+UCBR3596VRk8Y9l1OidpN2NA,Lucas Corsato,automotivo,BR,creator,pessoa | v2 | pessoa,@lucascorsato
+UCJazSm4SMrAajR1OsdXaa0g,Top Drive - @victorpicolli,automotivo,BR,creator,pessoa | v2 | pessoa,@topdrivebrasil
+UC-9rcQnfJinZcrohexfxblA,Breno Masi,automotivo,BR,creator,pessoa | v2 | pessoa,@macmasi
+UCKUZ9NIYCOwBeeOnGoLph3Q,DOUTOR CARRO,automotivo,BR,creator,pessoa | v2 | pessoa,@doutorcarro
+UCfReg1ecXWG9Gscjba-dGgw,FullpowerTV,automotivo,BR,creator,pessoa | v2 | pessoa,@fullpowertv
+UC01iL7PqYOABqSAFbat07dQ,Planeta Caminhão,automotivo,BR,creator,midia | v2 | midia - caminhoes,@planetacaminhaotv
+UCWYuQ9_2boHBxm59n6lSzDA,Autoesporte,automotivo,BR,creator,midia | v2 | midia,@autoesporte
+UCIvQJmPaDR2lMDDNhb4--bA,Quatro Rodas,automotivo,BR,creator,midia | v2 | midia,@quatrorodas
+UC6Rk7BKVPWkFJ9FiBrts5Vg,Motor1 Brasil,automotivo,BR,creator,midia | v2 | midia,@motor1brasil
+UCcNXh7N80Y19t7ajwkrI2Qg,Vrum,automotivo,BR,creator,midia | v2 | midia,@portalvrum
+UCGhErKQ6LBiCsXE8fWtokfg,AUTO+,automotivo,BR,creator,midia | v2 | midia,@automaisoficial
+UCPvCaclA14_pOgo97QYz6cw,Portal Rodovíario,automotivo,BR,creator,midia | v2 | midia,@portalrodoviario
+UChUvS75BR7ziAr7WhrecVsA,AutoPapo,automotivo,BR,creator,midia | v2 | midia,@autopapo
+UCWnrcSOPif0tHfBg9Wz0u8A,Revista Carro,automotivo,BR,creator,midia | v2 | midia,@revistacarrooficial
+UChRWJELUc49Usp7VrPEfs3g,Autos Segredos,automotivo,BR,creator,midia | v2 | midia,@autossegredosoficial
+UC2GAl9dPlJCbsl9_mO7WwFQ,Doutor Multas - Maior Especialista em Multas,automotivo,BR,creator,midia | v2 | midia,@doutormultasbr
+UCtDew4iI18GOrvPXrvhXzhw,Peugeot Brasil,automotivo,BR,brand,marca | v2 | marca,@peugeotbrasil
+UC8YKpC9NJy3BKPoWYYWc6EA,Citroën do Brasil,automotivo,BR,brand,marca | v2 | marca,@citroen
+UCEmi0v44ZknNFkzc2_a2Uhw,Mitsubishi Motors BR,automotivo,BR,brand,marca | v2 | marca,@mitsubishimotors
+UCo3iqVlz3pzmXlSoipcAWEw,CAOA Chery,automotivo,BR,brand,marca | v2 | marca,@caoachery
+UC1yLUcwlC_f2vaSBoaOLcgg,Mercedes-Benz Brasil,automotivo,BR,brand,marca | v2 | marca,@mercedesbenzbrasil
+UCNdmMv0UNG470K6YHYznwKA,BMW Brasil,automotivo,BR,brand,marca | v2 | marca,@bmwtvbrasil
+UCeoxJyBwpgNhAB8ZQEhyb9w,Volvo Car Brasil,automotivo,BR,brand,marca | v2 | marca,@volvocarbrasil
+UCdlSVdgDNGRTRljyk-hhWSQ,Audi Brasil,automotivo,BR,brand,marca | v2 | marca,@audibraudibrasil
+UCV1aAz5q_yh3jMOnLa-lk7Q,Ford Brasil,automotivo,BR,brand,marca | v2 | marca,@fordbrasil
+UCA7fZzws4W1DDfZcYbsXm0A,OMODA JAECOO Brasil,automotivo,BR,brand,marca | v2 | marca,@omodajaecoobrasil
+UCBfvceulEkHn9XaFTJ1-ckA,Porsche Brasil,automotivo,BR,brand,marca | v2 | marca,@porschebrasiloficial
+UCcL1xAFzwrWEMqOzHkoT6Zg,Land Rover Brasil,automotivo,BR,brand,marca | v2 | marca,@landroverbr
+UCNLsELTMgMu9npG2jnugoZw,Honda Motos Brasil,automotivo,BR,brand,marca | v2 | marca,@hondamotosbrasil
+UCAE9dOyJngbL6gJbgryXzdw,Yamaha Motor do Brasil,automotivo,BR,brand,marca | v2 | marca,@yamahamotorbrasil
+UCz2Bb7YdduN4x7qN9oFrJjQ,Webmotors,automotivo,BR,brand,marca | v2 | marca,@webmotors
+UCzySGyh1QVkPar3ZjV0TiZA,Mobiauto,automotivo,BR,brand,marca | v2 | marca,@mobiautocanal
+UCnSQ937NANN7dJ6HVFLhVew,icarros,automotivo,BR,brand,marca | v2 | marca,@icarros
+UCPCLvJCGCOkrdK1kJHv6drw,OLX Brasil,automotivo,BR,brand,marca | v2 | marca,@olxbrasil
+UCih5OCQysXeJwyTtvjWYHBA,Localiza,automotivo,BR,brand,marca | v2 | marca,@localizaoficial
+UCIzg278bDtVvX7krOHawA2g,Movida Aluguel de Carros,automotivo,BR,brand,marca | v2 | marca,@movidaalugueldecarros
+UCwlNt_Np_CtjbkIpmotb0vg,FuelTech,automotivo,BR,brand,marca | v2 | marca,@fueltechoficial
+UCzeWVI2I7eUkCnbDDGKwOTg,Star Motors Rio,automotivo,BR,brand,marca | v2 | marca,@starmotorsrio
+UCHuUllXdq3UHMiOCWHy-5nA,Upmotors Centro de Formação Automotiva,automotivo,BR,brand,marca | v2 | marca,@eunaupmotors
