@@ -1,42 +1,4 @@
 channel_name,sector,channel_type,handle,query
-Eudora,beleza,brand,@eudora,Eudora oficial
-Quem disse Berenice,beleza,brand,@quemdisseberenice,Quem disse Berenice
-Avon Brasil,beleza,brand,@avonbrasil,Avon Brasil
-Vult,beleza,brand,@vultcosmetica,Vult maquiagem
-Mari Maria Makeup,beleza,brand,@marimariamakeup,Mari Maria Makeup
-Boca Rosa Beauty,beleza,brand,@bocarosabeauty,Boca Rosa Beauty
-Bruna Tavares,beleza,brand,@brunatavares,Bruna Tavares maquiagem
-Ruby Rose,beleza,brand,@rubyrosemaquiagem,Ruby Rose maquiagem
-Oceane,beleza,brand,@oceanebrasil,Oceane Brasil
-Payot,beleza,brand,@payotbrasil,Payot Brasil
-Salon Line,beleza,brand,@salonline,Salon Line
-Wepink,beleza,brand,@wepink,Wepink
-Principia,beleza,brand,@principiaskin,Principia skincare
-L'Oreal Paris Brasil,beleza,brand,@lorealparisbrasil,L'Oreal Paris Brasil
-Maybelline Brasil,beleza,brand,@maybellinebrasil,Maybelline Brasil
-Nivea Brasil,beleza,brand,@niveabrasil,Nivea Brasil
-Dailus,beleza,brand,@dailus,Dailus maquiagem
-Sallve,beleza,brand,@sallve,Sallve skincare
-Creamy,beleza,brand,@creamyskincare,Creamy skincare
-Granado,beleza,brand,@granado,Granado Pharmacias
-Lola Cosmetics,beleza,brand,@lolacosmetics,Lola Cosmetics
-Garnier Brasil,beleza,brand,@garnierbrasil,Garnier Brasil
-Dove Brasil,beleza,brand,@dovebrasil,Dove Brasil
-Vizzela,beleza,brand,@vizzela,Vizzela cosmeticos
-Max Love,beleza,brand,@maxlove,Max Love maquiagem
-Mari Maria,beleza,creator,@marimaria,Mari Maria maquiadora
-Alice Salazar,beleza,creator,@alicesalazar,Alice Salazar
-Karen Bachini,beleza,creator,@karenbachini,Karen Bachini
-Franciny Ehlke,beleza,creator,@francinyehlke,Franciny Ehlke
-Camila Nunes,beleza,creator,@camilanunes,Camila Nunes maquiagem
-Rayza Nicacio,beleza,creator,@rayzanicacio,Rayza Nicacio
-Mariana Saad,beleza,creator,@marianasaad,Mariana Saad
-Pausa para Feminices,beleza,creator,@pausaparafeminices,Pausa para Feminices
-Juliana Goes,beleza,creator,@julianagoes,Juliana Goes
-Bianca Andrade,beleza,creator,@biancaandrade,Bianca Andrade Boca Rosa
-Bruna Malheiros,beleza,creator,@brunamalheiros,Bruna Malheiros
-Taciele Alcolea,beleza,creator,@tacielealcolea,Taciele Alcolea
-Nah Cardoso,beleza,creator,@nahcardoso,Nah Cardoso
 Shein Brasil,moda,brand,@sheinbrasil,SHEIN Brasil
 Marisa,moda,brand,@lojasmarisa,Lojas Marisa
 Dafiti,moda,brand,@dafiti,Dafiti
@@ -84,3 +46,41 @@ iCarros,automotivo,creator,@icarros,iCarros
 Revista Carro,automotivo,creator,@revistacarro,Revista Carro
 Autos Segredos,automotivo,creator,@autossegredos,Autos Segredos
 Noticias Automotivas,automotivo,creator,@noticiasautomotivas,Noticias Automotivas
+Shoulder,moda,brand,@shoulder,Shoulder moda
+Lanca Perfume,moda,brand,@lancaperfume,Lanca Perfume moda
+Morena Rosa,moda,brand,@morenarosa,Morena Rosa moda
+Carmen Steffens,moda,brand,@carmensteffens,Carmen Steffens
+Vizzano,moda,brand,@vizzano,Vizzano calcados
+Moleca,moda,brand,@moleca,Moleca calcados
+Beira Rio,moda,brand,@beirario,Beira Rio calcados
+Usaflex,moda,brand,@usaflex,Usaflex
+Osklen,moda,brand,@osklen,Osklen
+Ellus,moda,brand,@ellus,Ellus jeans
+Forum,moda,brand,@forum,Forum moda
+John John,moda,brand,@johnjohn,John John denim
+Le Lis,moda,brand,@lelis,Le Lis moda
+Polo Wear,moda,brand,@polowear,Polo Wear
+Aramis,moda,brand,@aramis,Aramis moda masculina
+Richards,moda,brand,@richards,Richards moda
+Taco,moda,brand,@taco,Taco moda
+Lojas Besni,moda,brand,@besni,Lojas Besni
+Constance,moda,brand,@constance,Constance calcados
+Anacapri,moda,brand,@anacapri,Anacapri
+Ipanema,moda,brand,@ipanema,Ipanema sandalias
+Kanui,moda,brand,@kanui,Kanui
+Lala Rudge,moda,creator,@lalarudge,Lala Rudge
+Silvia Braz,moda,creator,@silviabraz,Silvia Braz
+Helena Lunardelli,moda,creator,@helenalunardelli,Helena Lunardelli
+Camila Gaio,moda,creator,@camilagaio,Camila Gaio
+Porsche Brasil,automotivo,brand,@porschebrasil,Porsche Brasil
+Land Rover Brasil,automotivo,brand,@landroverbrasil,Land Rover Brasil
+JAC Motors Brasil,automotivo,brand,@jacmotorsbrasil,JAC Motors Brasil
+Honda Motos Brasil,automotivo,brand,@hondamotosbr,Honda Motos Brasil
+Yamaha Motor Brasil,automotivo,brand,@yamahamotorbrasil,Yamaha Motor Brasil
+Vrum,automotivo,creator,@vrum,Vrum
+Car and Driver Brasil,automotivo,creator,@caranddriverbrasil,Car and Driver Brasil
+Jornal do Carro,automotivo,creator,@jornaldocarro,Jornal do Carro
+Carros na Web,automotivo,creator,@carrosnaweb,Carros na Web
+Primeira Marcha,automotivo,creator,@primeiramarcha,Primeira Marcha
+AutoMais,automotivo,creator,@automais,AutoMais
+Minuto Motor,automotivo,creator,@minutomotor,Minuto Motor
