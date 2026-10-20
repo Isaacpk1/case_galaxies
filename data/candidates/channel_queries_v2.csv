@@ -1,52 +1,86 @@
-channel_name,sector,channel_type,query
-Eudora,beleza,brand,Eudora oficial
-Quem disse Berenice,beleza,brand,Quem disse Berenice
-Avon Brasil,beleza,brand,Avon Brasil
-Vult,beleza,brand,Vult maquiagem
-Mari Maria Makeup,beleza,brand,Mari Maria Makeup
-Boca Rosa Beauty,beleza,brand,Boca Rosa Beauty
-Bruna Tavares,beleza,brand,Bruna Tavares maquiagem
-Ruby Rose,beleza,brand,Ruby Rose maquiagem
-Oceane,beleza,brand,Oceane Brasil
-Payot,beleza,brand,Payot Brasil
-Salon Line,beleza,brand,Salon Line
-Wepink,beleza,brand,Wepink
-Principia,beleza,brand,Principia skincare
-L'Oreal Paris Brasil,beleza,brand,L'Oreal Paris Brasil
-Maybelline Brasil,beleza,brand,Maybelline Brasil
-Nivea Brasil,beleza,brand,Nivea Brasil
-Mari Maria,beleza,creator,Mari Maria maquiadora
-Alice Salazar,beleza,creator,Alice Salazar
-Karen Bachini,beleza,creator,Karen Bachini
-Franciny Ehlke,beleza,creator,Franciny Ehlke
-Camila Nunes,beleza,creator,Camila Nunes maquiagem
-Rayza Nicacio,beleza,creator,Rayza Nicacio
-Mariana Saad,beleza,creator,Mariana Saad
-Pausa para Feminices,beleza,creator,Pausa para Feminices
-Juliana Goes,beleza,creator,Juliana Goes
-Shein Brasil,moda,brand,SHEIN Brasil
-Marisa,moda,brand,Lojas Marisa
-Dafiti,moda,brand,Dafiti
-Arezzo,moda,brand,Arezzo
-Reserva,moda,brand,Reserva moda masculina
-Malwee,moda,brand,Malwee
-Lupo,moda,brand,Lupo oficial
-Insider Store,moda,brand,Insider Store
-Pernambucanas,moda,brand,Pernambucanas
-Animale,moda,brand,Animale moda
-Peugeot Brasil,automotivo,brand,Peugeot Brasil
-Citroen Brasil,automotivo,brand,Citroen Brasil
-Mitsubishi Motors Brasil,automotivo,brand,Mitsubishi Motors Brasil
-CAOA Chery,automotivo,brand,CAOA Chery
-GWM Brasil,automotivo,brand,GWM Brasil
-Kia Brasil,automotivo,brand,Kia Brasil
-Ram Brasil,automotivo,brand,Ram Brasil picapes
-Mercedes-Benz Brasil,automotivo,brand,Mercedes-Benz Carros Brasil
-BMW Brasil,automotivo,brand,BMW Brasil
-Autoesporte,automotivo,creator,Autoesporte
-Quatro Rodas,automotivo,creator,Quatro Rodas
-Motor1 Brasil,automotivo,creator,Motor1 Brasil
-AutoPapo,automotivo,creator,AutoPapo
-Webmotors,automotivo,creator,Webmotors
-Mobiauto,automotivo,creator,Mobiauto
-Garagem do Bellote,automotivo,creator,Garagem do Bellote
+channel_name,sector,channel_type,handle,query
+Eudora,beleza,brand,@eudora,Eudora oficial
+Quem disse Berenice,beleza,brand,@quemdisseberenice,Quem disse Berenice
+Avon Brasil,beleza,brand,@avonbrasil,Avon Brasil
+Vult,beleza,brand,@vultcosmetica,Vult maquiagem
+Mari Maria Makeup,beleza,brand,@marimariamakeup,Mari Maria Makeup
+Boca Rosa Beauty,beleza,brand,@bocarosabeauty,Boca Rosa Beauty
+Bruna Tavares,beleza,brand,@brunatavares,Bruna Tavares maquiagem
+Ruby Rose,beleza,brand,@rubyrosemaquiagem,Ruby Rose maquiagem
+Oceane,beleza,brand,@oceanebrasil,Oceane Brasil
+Payot,beleza,brand,@payotbrasil,Payot Brasil
+Salon Line,beleza,brand,@salonline,Salon Line
+Wepink,beleza,brand,@wepink,Wepink
+Principia,beleza,brand,@principiaskin,Principia skincare
+L'Oreal Paris Brasil,beleza,brand,@lorealparisbrasil,L'Oreal Paris Brasil
+Maybelline Brasil,beleza,brand,@maybellinebrasil,Maybelline Brasil
+Nivea Brasil,beleza,brand,@niveabrasil,Nivea Brasil
+Dailus,beleza,brand,@dailus,Dailus maquiagem
+Sallve,beleza,brand,@sallve,Sallve skincare
+Creamy,beleza,brand,@creamyskincare,Creamy skincare
+Granado,beleza,brand,@granado,Granado Pharmacias
+Lola Cosmetics,beleza,brand,@lolacosmetics,Lola Cosmetics
+Garnier Brasil,beleza,brand,@garnierbrasil,Garnier Brasil
+Dove Brasil,beleza,brand,@dovebrasil,Dove Brasil
+Vizzela,beleza,brand,@vizzela,Vizzela cosmeticos
+Max Love,beleza,brand,@maxlove,Max Love maquiagem
+Mari Maria,beleza,creator,@marimaria,Mari Maria maquiadora
+Alice Salazar,beleza,creator,@alicesalazar,Alice Salazar
+Karen Bachini,beleza,creator,@karenbachini,Karen Bachini
+Franciny Ehlke,beleza,creator,@francinyehlke,Franciny Ehlke
+Camila Nunes,beleza,creator,@camilanunes,Camila Nunes maquiagem
+Rayza Nicacio,beleza,creator,@rayzanicacio,Rayza Nicacio
+Mariana Saad,beleza,creator,@marianasaad,Mariana Saad
+Pausa para Feminices,beleza,creator,@pausaparafeminices,Pausa para Feminices
+Juliana Goes,beleza,creator,@julianagoes,Juliana Goes
+Bianca Andrade,beleza,creator,@biancaandrade,Bianca Andrade Boca Rosa
+Bruna Malheiros,beleza,creator,@brunamalheiros,Bruna Malheiros
+Taciele Alcolea,beleza,creator,@tacielealcolea,Taciele Alcolea
+Nah Cardoso,beleza,creator,@nahcardoso,Nah Cardoso
+Shein Brasil,moda,brand,@sheinbrasil,SHEIN Brasil
+Marisa,moda,brand,@lojasmarisa,Lojas Marisa
+Dafiti,moda,brand,@dafiti,Dafiti
+Arezzo,moda,brand,@arezzo,Arezzo
+Reserva,moda,brand,@usereserva,Reserva moda masculina
+Malwee,moda,brand,@malwee,Malwee
+Lupo,moda,brand,@lupo,Lupo oficial
+Insider Store,moda,brand,@insiderstore,Insider Store
+Pernambucanas,moda,brand,@pernambucanas,Pernambucanas
+Animale,moda,brand,@animale,Animale moda
+Amaro,moda,brand,@amaro,Amaro moda
+Schutz,moda,brand,@schutz,Schutz sapatos
+Melissa,moda,brand,@melissa,Melissa calcados
+Havaianas,moda,brand,@havaianas,Havaianas Brasil
+Colcci,moda,brand,@colcci,Colcci
+Dzarm,moda,brand,@dzarm,Dzarm
+Puket,moda,brand,@puket,Puket
+Hope Lingerie,moda,brand,@hopelingerie,Hope lingerie
+Lojas Avenida,moda,brand,@lojasavenida,Lojas Avenida
+Lojas Torra,moda,brand,@lojastorra,Lojas Torra
+Track&Field,moda,brand,@trackfield,Track&Field
+Olympikus,moda,brand,@olympikus,Olympikus
+Peugeot Brasil,automotivo,brand,@peugeotbrasil,Peugeot Brasil
+Citroen Brasil,automotivo,brand,@citroenbrasil,Citroen Brasil
+Mitsubishi Motors Brasil,automotivo,brand,@mitsubishimotorsbrasil,Mitsubishi Motors Brasil
+CAOA Chery,automotivo,brand,@caoachery,CAOA Chery
+GWM Brasil,automotivo,brand,@gwmbrasil,GWM Brasil
+Kia Brasil,automotivo,brand,@kiabrasil,Kia Brasil
+Ram Brasil,automotivo,brand,@rambrasil,Ram Brasil picapes
+Mercedes-Benz Brasil,automotivo,brand,@mercedesbenzbrasil,Mercedes-Benz Carros Brasil
+BMW Brasil,automotivo,brand,@bmwbrasil,BMW Brasil
+Volvo Car Brasil,automotivo,brand,@volvocarbrasil,Volvo Car Brasil
+Audi Brasil,automotivo,brand,@audibrasil,Audi Brasil
+Ford Brasil,automotivo,brand,@fordbrasil,Ford Brasil
+Omoda Jaecoo Brasil,automotivo,brand,@omodajaecoobrasil,Omoda Jaecoo Brasil
+Autoesporte,automotivo,creator,@autoesporte,Autoesporte
+Quatro Rodas,automotivo,creator,@quatrorodas,Quatro Rodas
+Motor1 Brasil,automotivo,creator,@motor1brasil,Motor1 Brasil
+AutoPapo,automotivo,creator,@autopapo,AutoPapo
+Webmotors,automotivo,creator,@webmotors,Webmotors
+Mobiauto,automotivo,creator,@mobiauto,Mobiauto
+Garagem do Bellote,automotivo,creator,@garagemdobellote,Garagem do Bellote
+Carplace,automotivo,creator,@carplace,Carplace
+iCarros,automotivo,creator,@icarros,iCarros
+Revista Carro,automotivo,creator,@revistacarro,Revista Carro
+Autos Segredos,automotivo,creator,@autossegredos,Autos Segredos
+Noticias Automotivas,automotivo,creator,@noticiasautomotivas,Noticias Automotivas
