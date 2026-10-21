@@ -478,6 +478,8 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 - Secundario: CB_FINAL vs CB_FINAL_FR2 (+ so `frames_variacao` e `thumb_vs_frames`).
 - Correcao de Holm para as duas comparacoes.
 
+**Emenda (21/10/2026, antes de rodar o E-17; nenhum resultado visto).** O YouTube nao publica `oar1-3` para 534 dos 6.130 Shorts (8,7%; 404 em todas as 1.602 tentativas, com o video no ar). Para esses, o notebook usa `hq1-3` (os mesmos momentos em 480x360 com tarjas; o painel 9:16 do centro e recortado quando as laterais sao pretas, como nas thumbnails). Checagem em 60 Shorts com as duas versoes: cosseno mediano 0,84 entre `hq_k` e `oar_k` contra 0,72 entre `hq_k` e os outros quadros do mesmo video (n = 180). Cobertura final: 6.130 de 6.130 com os tres quadros (5.596 `oar`, 534 `hq`; campo `fonte` no npz, nao usado como feature). Sensibilidade (so descritiva, nao muda a decisao): metricas da validacao sem os Shorts de fonte `hq`. As demais regras ficam iguais.
+
 **Regra de decisao.** Um braco e `retido` se reduzir o MAE macro por canal com p de Holm < 0,05 e nao piorar a acuracia por pares em mais de 0,5 p.p.; se os dois passarem, fica o de menor MAE. Retido -> novo pacote da tool com os quadros buscados ao vivo pela mesma URL (sem teste intocado para confirmar; registrado como limitacao). Nao retido -> as features ficam como analise descritiva.
 
 ## Protocolo de experimento
