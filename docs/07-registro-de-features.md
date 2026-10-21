@@ -444,6 +444,24 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 - **Descritivo (treino inteiro; desvio medio sobre a mediana do canal dos Shorts que tem o cluster, sem controle de canal):** acima da media do canal ficam "ronco/som do motor" (1,12x), "detalhes do interior/motor" (1,06x), "corpo inteiro/espelho" (1,06x) e "try-on" (1,03x); abaixo ficam "fundo branco/neutro" (0,72x), "voz clara/fala clara" (0,75x), "ambiente interno/antes e depois" (0,77x) e "voz masculina" (0,82x).
 - Limite: a representacao e lexical (TF-IDF), entao junta descritores com negacao ("sem musica" com "musica animada"); clusters semanticos (sentence-transformers, como sugere o TAP) exigem o Hugging Face, que nao abre neste ambiente. Silhouette baixo (0,11 video; 0,21 audio).
 
+## E-17: quadros de dentro do video (pre-registro, 21/10/2026, antes de rodar)
+
+**Motivacao.** A camada minima do TAP (secao 6.2/6.3) pede embeddings SigLIP 2 dos frames, nao so da thumbnail, e "variancia entre frames". O download do video segue fora (D-011, D-023), mas o YouTube publica, no mesmo servidor de imagens das thumbnails (`i.ytimg.com/vi/<id>/oar1|oar2|oar3.jpg`), tres quadros verticais 1080x1920 tirados de dentro de cada Short (testado em 21/10 em 4 Shorts da base: quadros diferentes da capa). Nao e embedding de video completo (X-CLIP/VideoMAE exigem o video); e o que da para fazer sem baixar.
+
+**Dados.** Shorts do Gold v2.1 (6.121) + criativos da demo. Notebook no Colab baixa `oar1-3` e calcula SigLIP 2 (`google/siglip2-base-patch16-224`, `get_image_features`, L2), mesmo modelo da thumbnail. Cobertura minima: 95% das linhas de treino com os tres quadros; abaixo disso o experimento nao roda.
+
+**Features novas (por Short).**
+- `frames_pc01..16`: PCA 16 da media normalizada dos tres quadros (PCA ajustado so na janela de treino).
+- `frames_variacao`: 1 - cosseno medio entre os pares de quadros (troca de cena / variedade visual).
+- `thumb_vs_frames`: cosseno entre a thumbnail e a media dos quadros (a capa representa o conteudo?).
+
+**Bracos e validacao.** Mesmo protocolo do E-16: rolling-origin (50/65/80% de cada canal) so dentro de `split = train` do Gold v2.1, hiperparametros do E-08, comparacao pareada por canal com as tres origens juntas.
+- Principal: CB_FINAL vs CB_FINAL_FR (+ as 18 features).
+- Secundario: CB_FINAL vs CB_FINAL_FR2 (+ so `frames_variacao` e `thumb_vs_frames`).
+- Correcao de Holm para as duas comparacoes.
+
+**Regra de decisao.** Um braco e `retido` se reduzir o MAE macro por canal com p de Holm < 0,05 e nao piorar a acuracia por pares em mais de 0,5 p.p.; se os dois passarem, fica o de menor MAE. Retido -> novo pacote da tool com os quadros buscados ao vivo pela mesma URL (sem teste intocado para confirmar; registrado como limitacao). Nao retido -> as features ficam como analise descritiva.
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
