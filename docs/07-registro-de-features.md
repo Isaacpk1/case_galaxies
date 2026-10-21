@@ -417,6 +417,19 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 - **Canais:** melhor que o B0 em 50 de 68. Os piores sao marcas com poucos Shorts no teste (BYD 6, Toyota 7) ou com mudanca de patamar no periodo de teste (Lojas Torra: MAE 1,37, vies -1,37, todos os Shorts do teste acima da mediana historica).
 - **Tom de narracao:** "instrucional" e onde o modelo mais ganha do B0 (0,64 vs 1,04); "animado" e "calmo" ficam com vies negativo (subestima).
 
+## E-16: clusters dos descritores do VLM (pre-registro, 21/10/2026, antes de rodar)
+
+**Motivacao.** Camada 2 "recomendada" do TAP (secao 6.3): os descritores curtos do Gemini (`elementos_video_top5`, `elementos_audio_top5`) "podem ser embedados e clusterizados (K-Means) para virar features". No Gold v2.1 sao 7.146 descritores de video distintos (5.073 aparecem uma vez) e 2.932 de audio: sem agrupar, nao viram feature.
+
+**Metodo.**
+- Representacao de cada descritor distinto (minusculo, sem espacos extras): TF-IDF de palavras (1-2) + caracteres (3-5, dentro da palavra), SVD para 64 dimensoes, normalizacao L2. Sem modelo externo (o Hugging Face nao e acessivel no ambiente de treino).
+- K-Means separado para video e audio; k escolhido pelo maior silhouette entre {8, 12, 16, 20}, so com os descritores das linhas de treino de cada janela (nao usa o alvo).
+- Features por Short: contagem dos seus descritores em cada cluster (`kv_XX` video, `ka_XX` audio).
+- Bracos: CB_FINAL (features do pacote atual) vs CB_FINAL_KM (+ contagens), hiperparametros do E-08, PCA do embedding ajustado em cada janela.
+- Validacao: rolling-origin (50% / 65% / 80% de cada canal) **so dentro de `split = train` do Gold v2.1** (o teste ja foi aberto no E-15 e nao e usado). Comparacao pareada por canal (bootstrap + permutacao de sinais) sobre as previsoes das tres origens juntas.
+
+**Regra de decisao.** CB_FINAL_KM e `retida` se reduzir o MAE macro por canal com p < 0,05 e nao piorar a acuracia por pares em mais de 0,5 p.p. Se retida, a adocao no pacote da tool exige implementar o mapeamento descritor -> cluster na rubrica ao vivo e fica registrada como proximo passo (nao ha teste intocado para confirmar). Em qualquer caso, os clusters e o desvio medio por cluster sao reportados como analise descritiva.
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
