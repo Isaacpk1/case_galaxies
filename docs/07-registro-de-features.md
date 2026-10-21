@@ -345,6 +345,23 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 - **Canais:** o modelo ganha do B0 em 18 dos 26 canais. Os que pioram sao, em geral, canais com poucos Shorts no teste (6 a 14: BYD, Toyota, Fiat, NiinaSecrets, Maria Bardela) ou canais estaveis, onde a mediana ja acerta muito. Os maiores ganhos estao em canais volateis (Renault, Jeep, De Carona com Leandro, Vique, Edi Ribeiro).
 - **Idade do Short na coleta** (30 a 240+ dias) nao mostra padrao claro de erro, o que reduz a preocupacao com metricas medidas em idades diferentes.
 
+## E-14 e E-15: Gold v2 (pre-registro, 21/10/2026, antes de rodar)
+
+**Dados.** Gold v2 (`gold_v2_20261021T004252Z_4a159163`): 8.398 Shorts de 68 canais (automotivo 37, moda 31), equilibrados em pessoa, marca e midia (13/13/11 em automotivo; 13/13/5 em moda), ate 150 Shorts mais recentes por canal; historico do canal com todos os 23.092 Shorts elegiveis coletados. Coleta de 20-21/10/2026, janela de 21/04/2025 a 21/09/2026. Sete criadores de moda do v1 sairam por nao serem de moda (humor, vlog, jogo, costura, maquiagem; `data/candidates/exclusions_v2.csv`).
+
+**E-14: modelo servido congelado em dados que ele nunca viu.**
+- Modelo: pacote `tool_v2_20261014T000408Z` (CB_FINAL treinado em todo o Gold v1), sem retreino nem ajuste. Bracos: B0, CB_BASE, CB_EMB e CB_FINAL do pacote.
+- Linhas: `avaliacao_congelada = True` no Gold v2: `novo_periodo` (canais do v1, Shorts publicados depois do ultimo Short do canal no v1) e `novo_canal` (canais que nao existiam no v1).
+- Features recalculadas no Gold v2 (historico so com posts anteriores); comparaveis com Shorts anteriores do mesmo canal; PCA e calibracao do intervalo sao os do pacote.
+- Comparacao principal: CB_FINAL vs B0, MAE macro por canal e pares justos, pareado por canal (bootstrap + permutacao de sinais), nas linhas com embedding e rubrica. Estratos: origem, setor, grupo.
+- Expectativa registrada: em `novo_canal`, pelo E-11, o modelo deve ordenar acima do acaso, mas nao necessariamente bater o B0 em MAE.
+- Roda uma unica vez, quando embedding e rubrica cobrirem >= 95% das linhas.
+
+**E-15: mesma arquitetura retreinada no Gold v2.**
+- CB_FINAL com os hiperparametros do E-08 (sem nova busca), treinado em `split = train` do Gold v2, PCA ajustado so no treino; avaliado em `split = test` (20% mais recentes de cada canal).
+- Comparacoes: vs B0 e vs o modelo congelado do E-14 nas mesmas linhas de teste que ele nunca viu.
+- Regra: o pacote da tool passa a ser treinado no Gold v2 se o E-15 bater o B0 em MAE macro com p < 0,05 e nao piorar a acuracia por pares frente ao modelo congelado. Caso contrario, o pacote atual continua e o Gold v2 fica como avaliacao.
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
