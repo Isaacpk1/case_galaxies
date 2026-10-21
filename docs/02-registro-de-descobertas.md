@@ -248,3 +248,16 @@ Para cada item novo, anotar:
 - **Status**: decidida
 - **Contexto**: o credito pre-pago do Gemini acabou duas vezes (HTTP 402); na madrugada de 21/10 sairam 2.429 rubricas, deixando o Gold v2 (150 por canal) com 47,6% de cobertura e 43 canais abaixo de 50%.
 - **Decisao**: manter os 68 canais e reduzir para 100 Shorts por canal, priorizando os que ja tem rubrica (amostra aleatoria do canal, porque o coletor sorteia a ordem) e completando com os mais recentes. Faltam 2.547 rubricas (~50 h de video, estimativa ~US$ 4,50), rodadas em dois lotes: A = teste (619) e B = treino (1.929). Cortar canais foi descartado: economizaria pouco (os canais pequenos ja estavam cobertos) e reduziria o poder das comparacoes por canal.
+
+### D-026 - Tool passa a servir o modelo treinado no Gold v2.1
+
+- **Data**: 21/10/2026
+- **Tipo**: decisao de modelo
+- **Status**: implementada
+- **Contexto**: a coleta da rubrica fechou (Gold v2.1 com 99,97% de rubrica; 2 Shorts barrados pelo filtro de conteudo do Gemini) e o embedding v2 cobriu 100%. E-14 e E-15 rodaram uma vez cada (docs/07).
+- **Decisao**: pela regra pre-registrada do E-15, o pacote `tool_v3_20261021T175806Z` (todo o Gold v2.1, mesma arquitetura e hiperparametros) substitui o `tool_v2_20261014T000408Z` em `artifacts/tool_model/LATEST.json`. O pacote antigo continua no repositorio e e reproduzivel com `train_tool_model.py`.
+- **Intervalo**: o E-14 mostrou que a calibracao do v1 cobre 72,8% nos dados novos; o `tool_v3` recalibra com rolling-origin no Gold v2.1 (80,8% de cobertura na origem 3).
+- **Canais fora do v2**: os 12 canais da Silver v1 que nao estao no Gold v2 (os sete criadores de D-022 e cinco canais que nao entraram na selecao do v2: Orlivya, Riachuelo, Isa Moda Brasil, FARM Rio e FlatOut Brasil) continuam no historico da tool, com `in_training = False`: a tool preve pelo `channel_id` e marca confianca baixa.
+- **Embedding**: o cache da tool passa a ser `thumbnail_siglip2_v1_v2/20261021T172500Z/embeddings.npz` (v1 + v2, conjuntos disjuntos, mesmo modelo e preprocess).
+- **Testes**: os testes da tool leem o Gold e as Silvers do pacote servido (`metadata.json`), nao o LATEST dos experimentos; 24 testes passam com o pacote novo e com o antigo.
+

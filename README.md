@@ -4,6 +4,8 @@ Inteli Academy x Galaxies (TAPI). Agente que preve, **antes da publicacao**, as 
 
 **Resultado principal (teste final, aberto uma unica vez, 612 Shorts):** o modelo final (CatBoost sobre o desvio da mediana do canal, com embedding SigLIP 2 da thumbnail, Shorts comparaveis e rubrica de video + fala do Gemini) erra 13% menos que a mediana historica do canal (MAE 0,746 vs 0,858 em log), acerta a ordem de 58% dos pares de Shorts do mesmo canal (mediana do canal: 44%) e seu intervalo de 80% cobre 79,9% dos casos. Na validacao temporal, a rubrica Gemini + comparaveis melhoraram o modelo com p = 0,003 (21 de 26 canais). Em canais nunca vistos, o modelo ainda ordena acima do acaso (55%, p = 0,002).
 
+**Validacao no Gold v2 (68 canais, 21/10/2026):** sem retreino, o modelo do v1 tambem bate a mediana do canal em 4.884 Shorts que nunca viu (MAE 0,785 vs 0,863; pares 61% vs 51%; p < 0,001, E-14). Retreinado no Gold v2, erra 19% menos que a mediana no teste (MAE 0,740 vs 0,915; pares 62% vs 45%, E-15) e 9% menos que o modelo do v1 nas mesmas linhas (p = 0,003); pela regra pre-registrada, a tool passou a servir o pacote treinado no Gold v2 (`tool_v3`).
+
 ---
 
 ## 1. Problema e recorte
@@ -26,7 +28,8 @@ Detalhes e decisoes em [docs/01](docs/01-entendimento-do-problema.md).
 | --- | --- |
 | Origem | YouTube Data API v3 (metadados e metricas publicas); thumbnails publicas; rubrica de video e transcricao via Gemini a partir da URL publica |
 | Periodo | 01/04/2025 a 30/08/2026 (18 meses de historico, Shorts com pelo menos 30 dias na data da coleta, 28-29/09/2026) |
-| Volume | 3.004 Shorts, 26 canais (moda 1.589, automotivo 1.415; marcas e criadores) - Gold `gold_v1_20261002T013000Z_663f502d` |
+| Volume | 3.004 Shorts, 26 canais (moda 1.589, automotivo 1.415; marcas e criadores) - Gold `gold_v1_20261002T013000Z_663f502d` (experimentos E-00 a E-13) |
+| Volume v2 | 6.121 Shorts, 68 canais (automotivo 37, moda 31; pessoa, marca e midia), 100 por canal, historico com 23.092 Shorts - Gold `gold_v2_1_20261021T113931Z_e1fd77c6` (E-14, E-15 e pacote servido) |
 | Split | Treino 2.392 / teste 612 (os 20% mais recentes de cada canal); **teste aberto uma unica vez**, depois da decisao do E-13 |
 | Licenca e uso | Dados publicos coletados sob os Termos da YouTube API; nao redistribuidos (camadas `data/` fora do git). Gemini recebe apenas URLs publicas; nenhum video e baixado |
 
@@ -82,7 +85,8 @@ Copy-Item .env.example .env              # YOUTUBE_API_KEY e GEMINI_API_KEY (nun
 | 6. Embedding da thumbnail | `notebooks/04_modelo_colab/08_e08_catboost_residual_multimodal.ipynb` (Colab, GPU) |
 | 7. Experimentos | notebooks 05-10 e `scripts/experimentos/` (ver secao 7); E-13: `python scripts/experimentos/run_e13_final.py` e `--report` |
 | 7b. Teste final (uma vez) e erros | `python scripts/experimentos/run_e13_test_final.py` (recusa rodar de novo) e `python scripts/experimentos/analyze_e13_errors.py` |
-| 8. Pacote do modelo da tool | `python scripts/modelo/train_tool_model.py` (todo o Gold; `--train-only` reproduz o modelo do teste) |
+| 8. Pacote do modelo da tool | `python scripts/modelo/train_tool_model_v2.py` (pacote servido: todo o Gold v2.1, intervalo recalibrado no v2); `python scripts/modelo/train_tool_model.py` reproduz o pacote do Gold v1 (`--train-only`: modelo do teste do E-13) |
+| 8b. Gold v2 (E-14 / E-15, uma vez) | embedding: `notebooks/04_modelo_colab/12_embedding_thumbnails_v2.ipynb`; `python scripts/experimentos/run_e14_e15_gold_v2.py --cobertura` e `--exp e14` / `--exp e15 --emb-v2 <embeddings.npz>` |
 | 9. Testes | `PYTHONPATH=src python -m pytest -q tests/` |
 | 10. Servidor MCP | `PYTHONPATH=src python -m galaxies_agent.mcp_server` |
 | 11. Agente | `PYTHONPATH=src python -m galaxies_agent.agent "Qual destes Shorts priorizar?" --criativos '[...]'` |
@@ -132,8 +136,8 @@ print(out.model_variant, out.rubric_source, out.video_attributes)   # o que o Ge
 | Hiperparametros | depth 6, learning_rate 0,03, l2_leaf_reg 5, random_strength 2, bagging_temperature 2, 1.390 arvores (busca aleatoria em holdout cronologico, E-08) |
 | Reservas | sem rubrica (CB_EMB: criativo que nao e Short do YouTube, sem chave ou Gemini fora) e sem imagem (CB_BASE); a tool marca confianca baixa e diz o motivo |
 | Rubrica do video | `gemini-3.5-flash-lite`, URL publica do YouTube (o video nao e baixado), resolucao baixa, JSON com schema fixo (`rubrica_tap_v1`), temperatura 0; ~5,5 mil tokens por Short |
-| Treino do pacote | todo o Gold (3.004 Shorts, 26 canais), depois do teste final; `--train-only` reproduz o modelo avaliado |
-| Intervalo | 80%, conformal: quantis 10%/90% dos residuos fora da amostra do rolling-origin (E-13), por tipo de canal; cobriu 79,9% no teste final |
+| Treino do pacote | `tool_v3`: todo o Gold v2.1 (6.121 Shorts, 68 canais), depois do E-15; embedding SigLIP 2 v1 + v2. Os 12 canais da Silver v1 fora do v2 (D-022, D-026) continuam no historico da tool, fora do treino (confianca baixa) |
+| Intervalo | 80%, conformal: quantis 10%/90% dos residuos fora da amostra do rolling-origin, por tipo de canal. Recalibrado no Gold v2.1 (a calibracao do v1 cobriu so 72,8% nos dados novos, E-14): calibrado nas origens 1-2, cobriu 80,8% na origem 3 |
 | Explicacao | SHAP por previsao (embedding agrupado; rubrica e comparaveis com rotulos legiveis) + Shorts comparaveis por similaridade visual |
 | Pacote | `artifacts/tool_model/<versao>/` (modelos, PCA, calibracao, historico, comparaveis, `metadata.json` com hashes) |
 
@@ -160,6 +164,8 @@ print(out.model_variant, out.rubric_source, out.video_attributes)   # o que o Ge
 | E-11 | Canal nunca visto | Ordena acima do acaso (pares 0,553, p = 0,002); nao supera o B0 em MAE |
 | E-12 | LightGBM, XGBoost, ExtraTrees, ensemble, YetiRank, comparaveis, peso por canal, Optuna | Nenhum aprovado apos Holm; comparaveis promissor (p = 0,025 bruto) |
 | **E-13** | **Modelo final (CB_EMB + comparaveis + rubrica Gemini) vs CB_EMB** | **Aprovado: MAE 0,850 vs 0,882 (p = 0,003, 21/26 canais)** |
+| E-14 | Modelo do v1 congelado em 4.884 Shorts novos (Gold v2.1) | Bate o B0: MAE 0,785 vs 0,863, pares 61% vs 51% (p < 0,001, 51/66 canais); intervalo cobre so 72,8% |
+| **E-15** | **Mesma arquitetura retreinada no Gold v2.1** | **Aprovado: MAE 0,740 vs B0 0,915 (p < 0,001); vs modelo do v1 nas mesmas linhas 0,719 vs 0,788 (p = 0,003), pares 64,9% vs 61,9%** |
 
 Modelo anterior (CB_EMB, E-08) no rolling-origin, para referencia (o CB_FINAL tem MAE 0,850 e pares 61,7% no mesmo protocolo):
 
@@ -233,11 +239,11 @@ report = train_client_model("base_do_cliente.csv", nome="cliente_x")   # post_id
 
 ## 9. Limitacoes
 
-- **Valor absoluto e incerto:** o intervalo de 80% cobre um fator de ~5x entre o limite inferior e o superior para criadores e ~23x para marcas; a tool serve melhor para **ordenar** criativos do mesmo canal do que para cravar um numero.
+- **Valor absoluto e incerto:** o intervalo de 80% cobre um fator de ~8x entre o limite inferior e o superior para criadores e ~14x para marcas (pacote `tool_v3`); a tool serve melhor para **ordenar** criativos do mesmo canal do que para cravar um numero.
 - **Virais e midia paga:** o modelo subestima Shorts que estouram (cobertura do intervalo de 47% nos virais); impulsionamento pago e distribuicao do algoritmo nao sao observaveis antes da publicacao.
 - **Canal novo:** sem o canal no treino, o nivel absoluto nao supera a mediana do canal; a tool marca confianca baixa.
 - **Metricas como fotografia:** curtidas medidas na data da coleta, nao em horizonte fixo; videos antigos tiveram mais tempo para acumular.
-- **Recorte:** 2 setores, 26 canais, 3.004 Shorts (meta ampla do TAP: 5-15 mil e 60+ canais); beleza fora.
+- **Recorte:** 2 setores; o pacote servido usa 68 canais e 6.121 Shorts (Gold v2.1; meta ampla do TAP: 5-15 mil e 60+ canais); os experimentos E-00 a E-13 usaram 26 canais e 3.004 Shorts; beleza fora.
 - **Modalidades:** thumbnail estatica + rubrica/fala do Gemini; sem frames, cortes de cena ou audio bruto (o video nao e baixado).
 - **Split de teste por canal**, nao por data global.
 - **Embedding opaco:** o SHAP indica que o estilo visual pesou, nao qual aspecto; comparaveis e rubrica complementam.

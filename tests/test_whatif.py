@@ -5,8 +5,6 @@
 
 from __future__ import annotations
 
-import json
-
 import pandas as pd
 import pytest
 
@@ -20,9 +18,9 @@ def predictor() -> Predictor:
 
 
 @pytest.fixture(scope="module")
-def item() -> CreativeInput:
-    latest = json.loads((ROOT / "data" / "gold" / "snapshots" / "LATEST.json").read_text(encoding="utf-8"))
-    gold = pd.read_csv(ROOT / latest["path"], parse_dates=["published_at"])
+def item(predictor) -> CreativeInput:
+    gold = pd.read_csv(ROOT / predictor.meta["inputs"]["gold"]["path"], parse_dates=["published_at"],
+                       dtype={"video_id": str})  # Gold do pacote servido
     row = next(gold[gold["split"] == "train"].sample(1, random_state=11).itertuples())
     return CreativeInput(creative=row.video_id, caption="Titulo de teste", planned_datetime=row.published_at.to_pydatetime(),
                          channel_id=row.channel_id, sector=row.sector, duration_seconds=float(row.duration_seconds))

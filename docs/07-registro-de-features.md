@@ -364,6 +364,35 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 
 **Emenda (21/10/2026, antes de rodar E-14 e E-15): Gold v2.1.** O credito do Gemini acabou com 47,6% do Gold v2 com rubrica. Para chegar a 100% de rubrica com custo menor, E-14 e E-15 passam a usar o Gold v2.1 (`gold_v2_1_20261021T113931Z_e1fd77c6`): os mesmos 68 canais, 100 Shorts por canal (6.121 linhas), escolhidos primeiro entre os que ja tem rubrica e depois pelos mais recentes; o historico do canal continua completo e o split temporal (20% mais recentes de cada canal) e refeito sobre essas 100 linhas. Como o coletor processou os Shorts de cada canal em ordem sorteada, os que ja tinham rubrica sao uma amostra aleatoria do canal. Nenhum resultado dos experimentos foi visto antes desta emenda; as demais regras ficam iguais (inclusive a cobertura minima de 95%).
 
+### Resultado E-14 e E-15 (21/10/2026, uma execucao cada)
+
+**Insumos.** Rubrica Gemini em 6.119 de 6.121 linhas (99,97%; 2 Shorts barrados pelo filtro de conteudo do Gemini); embedding SigLIP 2 v2 de 6.760 thumbnails (`thumbnail_siglip2_v2/20261021T172500Z`, notebook 12 no Colab T4), cobertura de 100%. Rodado com CatBoost 1.2.10, commit `dda5601`. O smoke do E-14 (linhas `v1`, sem valor de avaliacao) rodou antes para testar o codigo. A primeira chamada do E-15 parou ao ler os hiperparametros do E-08 (arquivo ausente no ambiente), antes de treinar e de calcular qualquer metrica; a execucao valida e a segunda. Saidas: `artifacts/feature_experiments/e14_e15_gold_v2/`.
+
+**E-14 (modelo do v1 congelado; 4.884 linhas, 66 canais, `novo_canal` + `novo_periodo`).**
+
+| Braco | MAE macro | Pares | Dentro de 2x | vs B0 (MAE / pares) |
+| --- | ---: | ---: | ---: | --- |
+| B0 | 0,863 | 50,8% | 57,6% | - |
+| CB_BASE | 0,856 | 52,7% | 54,4% | p = 0,71 / p = 0,42 |
+| CB_EMB | 0,848 | 55,3% | 57,1% | p = 0,19 / p = 0,018 |
+| **CB_FINAL** | **0,785** | **61,1%** | **60,8%** | **-0,078, p < 0,001 (51/66 canais) / +10,3 p.p., p < 0,001 (54/64)** |
+
+- Contra a expectativa registrada, o modelo do v1 bate o B0 em MAE tambem em `novo_canal` (0,742 vs 0,797; pares 60% vs 51%) e em `novo_periodo` (0,908 vs 1,052). O ganho vem quase todo da rubrica do Gemini: o CB_EMB sozinho fica perto do B0 em MAE.
+- Todos os estratos melhoram (automotivo 0,758 vs 0,852; moda 0,815 vs 0,875; pessoa 0,717 vs 0,824; marca 0,867 vs 0,915; midia 0,771 vs 0,847).
+- **Intervalo de 80% cobre 72,8%** (`novo_periodo` 65,8%): a calibracao do v1 e estreita para os dados novos.
+
+**E-15 (retreino no Gold v2.1; treino 4.885, teste 1.236 linhas, 68 canais).**
+
+| Comparacao | Linhas | MAE macro | Pares | Resultado |
+| --- | ---: | --- | --- | --- |
+| CB_FINAL_v2 vs B0 | 1.236 | 0,740 vs 0,915 | 62,4% vs 44,9% | MAE -0,175 (IC95% [-0,256; -0,106], p < 0,001, 50/68 canais); pares +17,6 p.p. (p < 0,001, 63/68) |
+| CB_FINAL_v2 vs CB_FINAL congelado | 1.117 | 0,719 vs 0,788 | 64,9% vs 61,9% | MAE -0,070 (IC95% [-0,118; -0,027], p = 0,003, 41/66); pares +3,0 p.p. (p = 0,10) |
+
+- Melhora em todos os estratos: automotivo 0,716 vs 0,903; moda 0,769 vs 0,929; pessoa 0,648 vs 0,876; marca 0,801 vs 0,962; midia 0,791 vs 0,901.
+- **Decisao pela regra pre-registrada: aprovado** (bate o B0 em MAE com p < 0,05 e nao piora os pares frente ao modelo congelado). O pacote da tool passa a ser treinado no Gold v2.1 (`tool_v3`, D-026).
+
+**Pacote `tool_v3_20261021T175806Z`** (`scripts/modelo/train_tool_model_v2.py`): mesma arquitetura e hiperparametros, treinado em todo o Gold v2.1. Intervalo recalibrado por rolling-origin no Gold v2.1 (50/65/80%): calibrado nas origens 1-2, cobre 80,8% na origem 3 (CB_FINAL; reservas 79,0% e 80,0%). No rolling-origin, MAE CB_FINAL 0,736 vs B0 0,875.
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
@@ -391,3 +420,5 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 | E-10b | Embedding de texto (mpnet multilingue) sobre o CB_EMB | Titulo: MAE -0,004 (p=0,73); titulo+descricao: -0,006 (p=0,58) | Nao executado | `sem_ganho` | Texto semantico nao acrescenta ao embedding da thumbnail. |
 | E-12 | LGBM, XGB, ET, ensemble, YetiRank, comparaveis, peso por canal; Optuna; PyCaret | Nenhum aprovado apos Holm; CB_KNN MAE -0,020 (p bruto 0,025, Holm 0,148); Optuna pior na origem 3 (p=0,76); PyCaret nao instalou | Nao executado | `sem_ganho` (algoritmos, Optuna) / candidato (comparaveis) | Mantem CB_EMB com parametros do E-08; comparaveis vao ao E-13. |
 | E-13 | CB_EMB + comparaveis (KNN visual) + rubrica Gemini + fala | CB_FINAL MAE 0,850 vs 0,882 (-0,033, p=0,003, 21/26 canais); aprovado pela regra pre-registrada | **Aberto uma vez:** MAE 0,746 vs B0 0,858 e CB_EMB 0,780; pares 0,580 vs B0 0,440; intervalo 80% cobre 79,9% | `retida` | **CB_FINAL e o modelo final.** |
+| E-14 | Modelo do v1 congelado no Gold v2.1 (`novo_canal` + `novo_periodo`) | - | **Uma vez:** CB_FINAL MAE 0,785 vs B0 0,863 (p < 0,001, 51/66 canais); pares 61,1% vs 50,8%; intervalo 80% cobre 72,8% | diagnostico | Modelo generaliza para canais e periodos novos; intervalo precisa recalibrar. |
+| E-15 | Mesma arquitetura retreinada no Gold v2.1 | - | **Uma vez:** MAE 0,740 vs B0 0,915 (p < 0,001); vs congelado 0,719 vs 0,788 (p = 0,003), pares 64,9% vs 61,9% | `retida` | **Pacote da tool treinado no Gold v2.1 (`tool_v3`).** |

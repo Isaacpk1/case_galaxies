@@ -23,15 +23,24 @@ def predictor() -> Predictor:
 
 
 @pytest.fixture(scope="module")
-def gold() -> pd.DataFrame:
-    latest = json.loads((ROOT / "data" / "gold" / "snapshots" / "LATEST.json").read_text(encoding="utf-8"))
-    frame = pd.read_csv(ROOT / latest["path"], parse_dates=["published_at"])
+def gold(predictor) -> pd.DataFrame:
+    """Gold em que o pacote servido foi treinado (metadata do pacote), nao o LATEST dos experimentos."""
+    frame = pd.read_csv(ROOT / predictor.meta["inputs"]["gold"]["path"], parse_dates=["published_at"], dtype={"video_id": str})
     return frame[frame["split"] == "train"]
 
 
 @pytest.fixture(scope="module")
-def silver() -> pd.DataFrame:
-    return pd.read_csv(ROOT / "data" / "silver" / "eligible_shorts" / "20261002T013000Z" / "eligible_shorts.csv")
+def silver(predictor) -> pd.DataFrame:
+    """Titulo, descricao e tags dos Shorts: mesmas Silvers que montaram o historico do pacote servido."""
+    inputs = predictor.meta["inputs"]
+    base = ROOT / "data" / "silver" / "eligible_shorts"
+    if "silver_history" not in inputs:  # pacote do Gold v1
+        return pd.read_csv(base / "20261002T013000Z" / "eligible_shorts.csv", dtype={"video_id": str})
+    parts = [pd.read_csv(base / sid / "history_all_eligible.csv", dtype={"video_id": str}) for sid in inputs["silver_history"]]
+    extra = inputs.get("silver_history_v1_only_channels")
+    if extra:
+        parts.append(pd.read_csv(base / extra["silver_id"] / "eligible_shorts.csv", dtype={"video_id": str}))
+    return pd.concat(parts, ignore_index=True).drop_duplicates("video_id")
 
 
 def as_input(row, silver_row, creative: str | None = None) -> CreativeInput:
@@ -121,6 +130,20 @@ def test_external_channel_stats(predictor):
                                                     last_post_at="2026-10-15T12:00"))
     out = predictor.predict(item)
     assert out.channel_baseline_likes == 150
+    assert any("fora da base" in r for r in out.confidence_reasons)
+
+
+def test_channel_outside_training_keeps_history(predictor):
+    """Canal com historico na tool mas fora do treino do pacote: preve pelo channel_id, com confianca baixa."""
+    outside = predictor.channels[~predictor.channels["in_training"].astype(bool)]
+    if outside.empty:
+        pytest.skip("todos os canais do historico estao no treino deste pacote")
+    channel_id = outside.index[0]
+    last = predictor.history.loc[predictor.history["channel_id"] == channel_id, "published_at"].max()
+    item = CreativeInput(caption="Teste", planned_datetime=(last + pd.Timedelta(days=1)).to_pydatetime(),
+                         channel_id=channel_id, sector=outside.iloc[0]["sector"])
+    out = predictor.predict(item)
+    assert out.confidence_flag == "baixa"
     assert any("fora da base" in r for r in out.confidence_reasons)
 
 
