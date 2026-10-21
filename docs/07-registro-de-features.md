@@ -417,6 +417,24 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 - **Canais:** melhor que o B0 em 50 de 68. Os piores sao marcas com poucos Shorts no teste (BYD 6, Toyota 7) ou com mudanca de patamar no periodo de teste (Lojas Torra: MAE 1,37, vies -1,37, todos os Shorts do teste acima da mediana historica).
 - **Tom de narracao:** "instrucional" e onde o modelo mais ganha do B0 (0,64 vs 1,04); "animado" e "calmo" ficam com vies negativo (subestima).
 
+### Calibracao do intervalo de 80%: alternativas (analise, 21/10/2026)
+
+`python scripts/experimentos/analyze_interval_calibration.py` -> `artifacts/feature_experiments/interval_calibration/`. So dentro de `split = train` do Gold v2.1 (o teste ja foi aberto): calibra nas origens 1-2 (1.462 Shorts), mede na origem 3 (983 Shorts). Motivo: no teste do E-15 o intervalo cobriu 87% em marcas e 74% em midias.
+
+| Metodo | Cobertura | Largura mediana | Pessoa / marca / midia | Pior distancia de 80% (grupos e setores) |
+| --- | ---: | ---: | --- | ---: |
+| Conformal global | 78,7% | 8,4x | 84,8 / 70,1 / 80,3% | 9,9 p.p. |
+| **Conformal por tipo de canal (atual)** | 77,2% | **6,6x** | 80,5 / 74,9 / 74,8% | 5,2 p.p. |
+| Conformal por grupo | 76,6% | 8,4x | 76,6 / 74,9 / 79,1% | 5,1 p.p. |
+| Conformal por grupo x setor | 77,4% | 7,6x | 76,4 / 75,4 / 82,0% | 4,5 p.p. |
+| Quantis do GBM (CatBoost Quantile 10%/90%) | 58,9% | 4,2x | 59,8 / 59,3 / 56,8% | 23,2 p.p. |
+| CQR global (quantis do GBM + conformal) | 81,4% | 9,8x | 84,8 / 79,0 / 78,6% | 4,8 p.p. |
+| CQR por grupo | 80,7% | 9,9x | 83,1 / 80,8 / 76,1% | 3,9 p.p. |
+
+- **Quantis do GBM sozinhos (sugestao do TAP) cobrem so 59%**: o modelo treinado com perda quantilica fica confiante demais em dados futuros. E o motivo de o projeto usar conformal.
+- Entre os conformais, as diferencas por grupo (3 a 5 p.p.) estao dentro do ruido: com 234 a 415 Shorts por grupo, o erro padrao da cobertura e de 2,0 a 2,6 p.p. O CQR chega mais perto de 80% em todos os grupos, mas com faixa ~50% mais larga (9,8x vs 6,6x).
+- **Decisao: manter o metodo atual** (mais estreito, 77-80% no geral; os 87% / 74% do teste do E-15 sao compativeis com esse ruido). Recalibrar por grupo ou usar CQR fica como opcao se a Galaxies preferir cobertura mais uniforme a uma faixa mais estreita.
+
 ## E-16: clusters dos descritores do VLM (pre-registro, 21/10/2026, antes de rodar)
 
 **Motivacao.** Camada 2 "recomendada" do TAP (secao 6.3): os descritores curtos do Gemini (`elementos_video_top5`, `elementos_audio_top5`) "podem ser embedados e clusterizados (K-Means) para virar features". No Gold v2.1 sao 7.146 descritores de video distintos (5.073 aparecem uma vez) e 2.932 de audio: sem agrupar, nao viram feature.

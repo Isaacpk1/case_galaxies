@@ -228,7 +228,7 @@ Diario completo e analises: [docs/07](docs/07-registro-de-features.md); decisoes
 
 | Extensao | Onde | Resultado |
 | --- | --- | --- |
-| Intervalos conformais | pacote da tool (secao 5) | intervalo de 80% cobriu 79,9% no teste final |
+| Intervalos conformais | pacote da tool (secao 5); `scripts/experimentos/analyze_interval_calibration.py` | intervalo de 80% cobriu 79,9% no teste do E-13 e 80% no teste do E-15. Quantis do GBM sozinhos cobrem so 59% em dados futuros; calibrar por grupo ou CQR nao muda a cobertura alem do ruido e alarga a faixa |
 | Comparaveis (retrieval) | `features.knn_features`, tool | Shorts anteriores do canal com thumbnail parecida; parte do modelo final |
 | LLM zero-shot vs modelo treinado | `scripts/experimentos/run_llm_zero_shot.py` | no teste do E-15 (1.236 Shorts, 68 canais), a nota `potencial_viral_0a10` do Gemini sozinha acerta 56,2% dos pares do mesmo canal (acima do acaso, p < 0,001, 49/68 canais); o modelo treinado acerta 62,4% (+6,2 p.p., IC95% [3,8; 8,5], p < 0,001, 48/68 canais). No v1 (26 canais) a diferenca era +4,0 p.p. sem significancia (p = 0,15). O LLM tem sinal, mas o modelo ordena melhor e ainda da numero e intervalo |
 | What-if | `Predictor.what_if`, tool `simular_variacoes` | re-pontua horario, dia, duracao, titulo ou criativo alternativo, um fator por vez; o titulo entra so pelo tamanho |
