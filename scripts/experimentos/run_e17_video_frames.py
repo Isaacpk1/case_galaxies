@@ -9,6 +9,8 @@ Bracos: CB_FINAL vs CB_FINAL_FR (+18) e CB_FINAL_FR2 (+2), rolling-origin (50/65
 Gold v2.1, hiperparametros do E-08, Holm nas duas comparacoes de MAE. Regra: retido se MAE cair com p de Holm < 0,05
 e pares nao piorarem mais de 0,5 p.p.; se os dois passarem, fica o de menor MAE.
 
+Emenda antes de rodar (commit 515d71e): 534 Shorts sem oar1-3 usam hq1-3 (campo `fonte` no npz); sensibilidade so com `oar`.
+
     python scripts/experimentos/run_e17_video_frames.py --frames data/silver/features/video_frames_oar_v1/<run>/frames_oar.npz
 """
 
@@ -36,6 +38,15 @@ TARGET, BASELINE = ttm.TARGET, ttm.BASELINE
 FR_PCA = [f"frames_pc{i + 1:02d}" for i in range(16)]
 FR_SCALARS = ["frames_variacao", "thumb_vs_frames"]
 MIN_COVERAGE = 0.95
+
+
+def frame_source(video_ids: pd.Series, path: Path) -> pd.Series:
+    """oar | hq | nenhum por Short (emenda do pre-registro); 'oar' quando o npz nao tem o campo."""
+    npz = np.load(path, allow_pickle=True)
+    if "fonte" not in npz:
+        return pd.Series("oar", index=video_ids.index)
+    src = dict(zip(npz["video_id"].astype(str), npz["fonte"].astype(str)))
+    return video_ids.map(src).fillna("nenhum")
 
 
 def frame_features(video_ids: pd.Series, thumbs: np.ndarray, path: Path) -> tuple[np.ndarray, pd.DataFrame, np.ndarray]:
@@ -90,6 +101,7 @@ def main() -> None:
     ttm.add_rubric(data)
     frames_mean, scalars, n_frames = frame_features(data["video_id"], thumbs, args.frames)
     data[FR_SCALARS] = scalars
+    data["fonte_quadros"] = frame_source(data["video_id"], args.frames)
     coverage = {"3_quadros": round(float((n_frames == 3).mean()), 4), "pelo_menos_1": round(float((n_frames >= 1).mean()), 4),
                 "distribuicao": {int(k): int(v) for k, v in pd.Series(n_frames).value_counts().sort_index().items()}}
     print(f"treino {len(data)} linhas | cobertura dos quadros {coverage}", flush=True)
@@ -111,7 +123,7 @@ def main() -> None:
         proj[has] = (frames_mean[has] - fpca["mean"]) @ fpca["components"].T
         frame[FR_PCA] = proj
         fit, val = frame.loc[fit_idx], frame.loc[val_idx]
-        out = val[["video_id", "channel_id", "channel_name", "channel_type", "sector", TARGET, BASELINE] + FR_SCALARS].copy()
+        out = val[["video_id", "channel_id", "channel_name", "channel_type", "sector", "fonte_quadros", TARGET, BASELINE] + FR_SCALARS].copy()
         out["origin"], out["pred_B0"] = origin, out[BASELINE]
         for arm, extra in arms.items():
             model = CatBoostRegressor(loss_function="MAE", random_seed=ttm.SEED, verbose=False, allow_writing_files=False,
@@ -131,6 +143,11 @@ def main() -> None:
     winners = [k.replace("_vs_CB_FINAL", "") for k, ok in passed.items() if ok]
     chosen = min(winners, key=lambda a: summary[a]["mae_macro_canal"]) if winners else None
 
+    only_oar = pred[pred["fonte_quadros"].eq("oar")]
+    sensitivity = {"linhas": int(len(only_oar)),
+                   "mae_macro": {arm: t13.metrics(only_oar, f"pred_{arm}")[1]["mae_macro_canal"] for arm in ["B0"] + list(arms)},
+                   "fonte_na_validacao": {k: int(v) for k, v in pred["fonte_quadros"].value_counts().items()}}
+
     resid = data[TARGET] - data[BASELINE]
     descriptive = {}
     for col in FR_SCALARS:
@@ -146,7 +163,7 @@ def main() -> None:
               "linhas_validacao": int(len(pred)), "canais": int(pred["channel_id"].nunique()),
               "metricas": summary, "comparacoes": comps, "p_mae_holm": p_holm, "passou_na_regra": passed,
               "decisao_pre_registrada": f"retido: {chosen}" if chosen else "sem_ganho",
-              "descritivo_treino": descriptive, "rodado_em": datetime.now(timezone.utc).isoformat()}
+              "sensibilidade_so_oar": sensitivity, "descritivo_treino": descriptive, "rodado_em": datetime.now(timezone.utc).isoformat()}
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
     pred.to_csv(args.out / "rolling_origin_predictions.csv", index=False)
@@ -154,6 +171,7 @@ def main() -> None:
                      indent=1, ensure_ascii=False))
     for k, v in comps.items():
         print(k, {m: (x["delta"], x["ic95"], x["p"], f"{x['canais_melhor']}/{x['n']}") for m, x in v.items()})
+    print("sensibilidade (so quadros oar):", json.dumps(sensitivity, ensure_ascii=False))
     print(json.dumps(descriptive, indent=1, ensure_ascii=False))
 
 
