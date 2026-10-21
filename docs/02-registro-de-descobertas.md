@@ -197,3 +197,46 @@ Para cada item novo, anotar:
 - **O que descobrimos**: com a rubrica Gemini coletada para 99,97% dos Shorts, o CB_FINAL (CB_EMB + comparaveis visuais + rubrica + fala) reduz o MAE do rolling-origin de 0,882 para 0,850 (p = 0,003, 21 de 26 canais). Sozinhos, comparaveis e rubrica nao sao significativos; juntos sao. No teste final, aberto uma unica vez, o CB_FINAL tem MAE 0,746 (B0 0,858; CB_EMB 0,780), acerta 58% dos pares do mesmo canal (B0 44%) e o intervalo de 80% cobre 79,9%.
 - **Decisao**: CB_FINAL e o modelo final da tool. O teste foi usado e nao deve orientar novas escolhas; melhorias futuras precisam de dados novos (mais canais, horizonte fixo) para nova avaliacao.
 
+
+### D-020 - O coletor antigo cortava canais pelo teto de 300 uploads
+
+- **Data**: 20/10/2026
+- **Tipo**: qualidade de dados
+- **Status**: resolvido
+- **O que descobrimos**: `collect_data_discovery.py` lia so os 300 uploads mais recentes de cada canal. Em canais que postam muito, a janela de 18 meses ficava truncada: no Gold v1, ComprecarTV tinha so 2 semanas de Shorts (75), Giuliana Mafra 2 meses, Acelerados e Edi Ribeiro 4 meses. Sem o teto, ComprecarTV tem 992 Shorts elegiveis e Acelerados 566.
+- **Decisao**: novo coletor so com biblioteca padrao (`scripts/coleta/collect_youtube_stdlib.py`, roda no Windows do Inteli), que pagina a playlist de uploads ate sair da janela, aceita `@handle` e retoma por canal. Resolvedor de canais por handle com busca de reserva e triagem de Shorts (`resolve_channels_stdlib.py`).
+
+### D-021 - Base v2: canais equilibrados entre pessoa, marca e midia, ate 150 Shorts por canal
+
+- **Data**: 20/10/2026
+- **Tipo**: decisao de dados
+- **Status**: decidida
+- **O que foi feito**: busca de candidatos nos rankings da HypeAuditor (YouTube Autos & Vehicles e Fashion, Brasil) e em listas de marcas e veiculos. Coleta de 233 canais (119 automotivo, 114 moda): 91 e 76 com >= 30 Shorts, 44 mil Shorts elegiveis. Revisao dos titulos e exclusao de canais fora do tema (`data/candidates/exclusions_v2.csv`).
+- **Decisao**: em vez de usar todos os canais, equilibrar por grupo: automotivo 13 marcas, 13 pessoas e 11 midias; moda 13 marcas, 13 pessoas e 5 midias (todas as midias de moda com Shorts suficientes). Ate 150 Shorts mais recentes por canal no treino; o historico do canal (B0) usa todos os Shorts coletados. Resultado: Gold v2 com 8.398 Shorts e 68 canais (antes 3.004 e 26).
+- **Por que**: sem teto, quatro canais (Mobiauto, Star Motors, AutoPapo, Doutor Multas) teriam 900-1.400 Shorts cada e dominariam o treino; o teto tambem limita o custo do Gemini (~6,9 mil Shorts novos).
+- **Beleza**: fora do recorte, por decisao do time (dois setores, como permitido pelo TAP).
+
+### D-022 - Sete criadores de moda do v1 nao eram de moda
+
+- **Data**: 20/10/2026
+- **Tipo**: qualidade de dados
+- **Status**: corrigido no v2
+- **O que descobrimos**: lendo os titulos, Giuliana Mafra, Edi Ribeiro e Matando Matheus a Grito sao humor; Mandy Candy e vlog; Vique e jogo (Dress to Impress); Ingryd Lourenco e costura; NiinaSecrets e maquiagem. No v1, "moda / criador" era na pratica humor e vlog. Marcas de moda do v1 (Renner, C&A, Hering, Maria Bardela) estao corretas.
+- **Decisao**: os sete ficam fora do Gold v2; os resultados do v1 continuam validos como estao, mas o recorte "moda criador" do v1 deve ser lido com esse aviso.
+
+### D-023 - Camada multimodal: Gemini pela URL publica em vez de baixar video
+
+- **Data**: 20/10/2026
+- **Tipo**: decisao de escopo
+- **Status**: decidida
+- **Contexto**: a camada minima do TAP sugere frames, Whisper, OCR, rosto, YOLO, OpenCV e PySceneDetect sobre o video baixado. Download de Shorts e bloqueado por IP na rede do Inteli e no celular (D-011) e esbarra nos Termos do YouTube.
+- **Decisao**: nao baixar video. O Gemini assiste ao Short pela URL publica e preenche a rubrica do TAP, que cobre os mesmos atributos (gancho, ritmo de cortes, musica, fala, rosto, texto na tela, produto, estetica); a thumbnail entra via SigLIP 2. O ganho foi medido no E-13 (p = 0,003). Candidatos sem download (embedding semantico da fala, snapshots de metricas para alvo D7/D30) estao em `docs/11` e na branch `feat/multimodal`, e so entram no modelo com ablacao temporal.
+
+### D-024 - Extensoes da secao 4.2 do TAP implementadas
+
+- **Data**: 20/10/2026
+- **Tipo**: entrega
+- **Status**: implementadas
+- **LLM zero-shot vs modelo treinado** (`scripts/experimentos/run_llm_zero_shot.py`): no teste final do E-13, a nota `potencial_viral_0a10` do Gemini sozinha acerta 53,9% dos pares do mesmo canal (p = 0,08 contra o acaso; 19 de 26 canais acima de 50%); o CB_FINAL acerta 58,0% (+4,0 p.p., p = 0,15, 17 de 26 canais). O LLM tem sinal de ordenacao, mas nao da numero nem intervalo; a nota concentra 82% dos Shorts entre 6 e 8.
+- **What-if** (`Predictor.what_if`, tool MCP `simular_variacoes`): re-pontua o criativo mudando um fator por vez (horario, dia, duracao, titulo, criativo alternativo). O modelo ve o titulo so pelo tamanho; a saida avisa que diferencas menores que o intervalo nao sao decisivas.
+- **Treino dinamico** (`galaxies_agent.trainer`, tool MCP `treinar_modelo_cliente`): base do cliente no esquema minimo do TAP -> features so com posts anteriores, CatBoost residual, avaliacao temporal contra a mediana do canal, intervalo calibrado e decisao (usar / usar com cautela / nao usar). Exemplo com as 16 marcas do v1, so metadados: pares +10 p.p. (p = 0,017), MAE sem diferenca significativa -> "usar com cautela, para ordenar".
