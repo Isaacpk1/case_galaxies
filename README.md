@@ -113,6 +113,8 @@ print(out.model_variant, out.rubric_source, out.video_attributes)   # o que o Ge
 | --- | --- | --- |
 | `prever_criativo` | criativo, legenda, data planejada, `channel_id` ou `channel_stats`, setor | `predicted_metric`, `interval_low/high` (80%), `confidence_flag` + motivos, `relative_to_channel`, faixa, `top_drivers` (SHAP), `comparables`, `explanation`, `video_attributes` (rubrica do Gemini), `model_variant`, features usadas |
 | `ranquear_criativos` | 2 a 5 criativos | mesma saida, ordenada pelo desempenho relativo ao canal |
+| `simular_variacoes` | criativo + horas, dias, duracoes, titulos ou criativos alternativos | previsao de cada variacao e o delta em % sobre o original (um fator por vez) |
+| `treinar_modelo_cliente` | caminho de um CSV no esquema minimo do TAP + nome | modelo especialista treinado, metricas contra a mediana do canal no teste temporal, intervalo calibrado e decisao de uso |
 | `historico_canal` | `channel_id` | resumo e ultimos Shorts do canal |
 | `info_modelo` | - | versao, dados de treino, resultado do teste final, modelos e features, alvo, metodo do intervalo |
 
@@ -200,6 +202,23 @@ Contra o B0: MAE -0,112 (IC95% [-0,238; -0,010], p = 0,065) e pares +14 p.p. (p 
 - Ganha do B0 em 18 de 26 canais; perde em canais com poucos Shorts no teste ou muito estaveis.
 
 Diario completo e analises: [docs/07](docs/07-registro-de-features.md); decisoes: [docs/02](docs/02-registro-de-descobertas.md).
+
+## 7b. Extensoes do TAP (secao 4.2)
+
+| Extensao | Onde | Resultado |
+| --- | --- | --- |
+| Intervalos conformais | pacote da tool (secao 5) | intervalo de 80% cobriu 79,9% no teste final |
+| Comparaveis (retrieval) | `features.knn_features`, tool | Shorts anteriores do canal com thumbnail parecida; parte do modelo final |
+| LLM zero-shot vs modelo treinado | `scripts/experimentos/run_llm_zero_shot.py` | no teste final, a nota `potencial_viral_0a10` do Gemini sozinha acerta 53,9% dos pares do mesmo canal (p = 0,08 vs acaso); o CB_FINAL acerta 58,0% (+4,0 p.p., p = 0,15). O LLM tem sinal, mas nao da numero nem intervalo |
+| What-if | `Predictor.what_if`, tool `simular_variacoes` | re-pontua horario, dia, duracao, titulo ou criativo alternativo, um fator por vez; o titulo entra so pelo tamanho |
+| Treino dinamico | `galaxies_agent.trainer`, tool `treinar_modelo_cliente` | base propria no esquema minimo do TAP -> modelo especialista com validacao temporal e decisao de uso. Exemplo (16 marcas, so metadados): pares +10 p.p. sobre a mediana do canal (p = 0,017); MAE sem diferenca significativa |
+
+```python
+from galaxies_agent import Predictor, CreativeInput
+from galaxies_agent.trainer import train_client_model
+out = Predictor().what_if(CreativeInput(...), hours=[9, 12, 18, 21], durations=[15, 30, 60])
+report = train_client_model("base_do_cliente.csv", nome="cliente_x")   # post_id, channel_id, published_at, caption, metric_target, sector
+```
 
 ## 8. O que testamos e o que entrou
 
