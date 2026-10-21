@@ -29,7 +29,7 @@ from galaxies_agent.features import KNN_COLS, knn_features, rubric_features  # n
 import run_e13_test_final as t13  # noqa: E402  (metricas e comparacao pareada do teste final)
 import train_tool_model as ttm  # noqa: E402  (hiperparametros do E-08 e PCA)
 
-GOLD = ROOT / "data" / "gold" / "snapshots" / "gold_v2_20261021T004252Z_4a159163" / "training_snapshot.csv"
+GOLD = ROOT / "data" / "gold" / "snapshots" / "gold_v2_1_20261021T113931Z_e1fd77c6" / "training_snapshot.csv"
 PACKAGE = ROOT / "artifacts" / "tool_model" / "tool_v2_20261014T000408Z"
 EMB_V1 = ROOT / "data" / "silver" / "features" / "thumbnail_siglip2_v1" / "20261013T010000Z" / "embeddings.npz"
 RUBRIC = ROOT / "data" / "silver" / "gemini_video" / "gemini_video_features.csv"

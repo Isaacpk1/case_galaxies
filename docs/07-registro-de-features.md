@@ -362,6 +362,8 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 - Comparacoes: vs B0 e vs o modelo congelado do E-14 nas mesmas linhas de teste que ele nunca viu.
 - Regra: o pacote da tool passa a ser treinado no Gold v2 se o E-15 bater o B0 em MAE macro com p < 0,05 e nao piorar a acuracia por pares frente ao modelo congelado. Caso contrario, o pacote atual continua e o Gold v2 fica como avaliacao.
 
+**Emenda (21/10/2026, antes de rodar E-14 e E-15): Gold v2.1.** O credito do Gemini acabou com 47,6% do Gold v2 com rubrica. Para chegar a 100% de rubrica com custo menor, E-14 e E-15 passam a usar o Gold v2.1 (`gold_v2_1_20261021T113931Z_e1fd77c6`): os mesmos 68 canais, 100 Shorts por canal (6.121 linhas), escolhidos primeiro entre os que ja tem rubrica e depois pelos mais recentes; o historico do canal continua completo e o split temporal (20% mais recentes de cada canal) e refeito sobre essas 100 linhas. Como o coletor processou os Shorts de cada canal em ordem sorteada, os que ja tinham rubrica sao uma amostra aleatoria do canal. Nenhum resultado dos experimentos foi visto antes desta emenda; as demais regras ficam iguais (inclusive a cobertura minima de 95%).
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.

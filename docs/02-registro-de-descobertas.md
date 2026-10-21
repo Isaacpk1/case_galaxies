@@ -240,3 +240,11 @@ Para cada item novo, anotar:
 - **LLM zero-shot vs modelo treinado** (`scripts/experimentos/run_llm_zero_shot.py`): no teste final do E-13, a nota `potencial_viral_0a10` do Gemini sozinha acerta 53,9% dos pares do mesmo canal (p = 0,08 contra o acaso; 19 de 26 canais acima de 50%); o CB_FINAL acerta 58,0% (+4,0 p.p., p = 0,15, 17 de 26 canais). O LLM tem sinal de ordenacao, mas nao da numero nem intervalo; a nota concentra 82% dos Shorts entre 6 e 8.
 - **What-if** (`Predictor.what_if`, tool MCP `simular_variacoes`): re-pontua o criativo mudando um fator por vez (horario, dia, duracao, titulo, criativo alternativo). O modelo ve o titulo so pelo tamanho; a saida avisa que diferencas menores que o intervalo nao sao decisivas.
 - **Treino dinamico** (`galaxies_agent.trainer`, tool MCP `treinar_modelo_cliente`): base do cliente no esquema minimo do TAP -> features so com posts anteriores, CatBoost residual, avaliacao temporal contra a mediana do canal, intervalo calibrado e decisao (usar / usar com cautela / nao usar). Exemplo com as 16 marcas do v1, so metadados: pares +10 p.p. (p = 0,017), MAE sem diferenca significativa -> "usar com cautela, para ordenar".
+
+### D-025 - Gold v2.1: 100 Shorts por canal para fechar a rubrica do Gemini
+
+- **Data**: 21/10/2026
+- **Tipo**: decisao de dados
+- **Status**: decidida
+- **Contexto**: o credito pre-pago do Gemini acabou duas vezes (HTTP 402); na madrugada de 21/10 sairam 2.429 rubricas, deixando o Gold v2 (150 por canal) com 47,6% de cobertura e 43 canais abaixo de 50%.
+- **Decisao**: manter os 68 canais e reduzir para 100 Shorts por canal, priorizando os que ja tem rubrica (amostra aleatoria do canal, porque o coletor sorteia a ordem) e completando com os mais recentes. Faltam 2.547 rubricas (~50 h de video, estimativa ~US$ 4,50), rodadas em dois lotes: A = teste (619) e B = treino (1.929). Cortar canais foi descartado: economizaria pouco (os canais pequenos ja estavam cobertos) e reduziria o poder das comparacoes por canal.

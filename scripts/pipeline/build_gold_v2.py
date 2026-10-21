@@ -67,6 +67,8 @@ def check_baseline(gold: pd.DataFrame, history: pd.DataFrame, sample: int = 500)
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--silver-ids", nargs="+", required=True)
+    parser.add_argument("--keep-ids", type=Path, help="CSV com video_id: so essas linhas entram no Gold (o historico continua completo)")
+    parser.add_argument("--tag", default="", help="sufixo da versao (ex.: v2_1)")
     args = parser.parse_args()
 
     parts = []
@@ -84,6 +86,9 @@ def main() -> None:
 
     data = add_time_aware_features(history)
     gold = data.loc[data["in_training_cap"] & data["channel_prior_posts"].ge(MIN_PRIOR_POSTS)].copy()
+    if args.keep_ids:
+        keep = set(pd.read_csv(args.keep_ids, dtype={"video_id": str})["video_id"])
+        gold = gold[gold["video_id"].isin(keep)].copy()
     gold["target_log_likes"] = np.log1p(gold["like_count"])
     gold["target_residual_log_likes"] = gold["target_log_likes"] - gold["baseline_log_likes"]
     gold["target_relative_to_prior_median"] = (gold["like_count"] + 1) / (gold["channel_prior_median_likes"] + 1)
@@ -108,8 +113,8 @@ def main() -> None:
     targets = ["target_log_likes", "target_residual_log_likes", "target_relative_to_prior_median"]
     gold = gold[spine + targets + FEATURES + ["title", "silver_id"]].sort_values(["channel_id", "published_at", "video_id"])
 
-    version_hash = hashlib.sha256(json.dumps(sorted(args.silver_ids)).encode()).hexdigest()[:8]
-    version = f"gold_v2_{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}_{version_hash}"
+    version_hash = hashlib.sha256(json.dumps(sorted(args.silver_ids) + [args.tag]).encode()).hexdigest()[:8]
+    version = f"gold_{args.tag or 'v2'}_{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}_{version_hash}"
     out = ROOT / "data" / "gold" / "snapshots" / version
     out.mkdir(parents=True, exist_ok=False)
     gold.to_csv(out / "training_snapshot.csv", index=False)
@@ -119,7 +124,7 @@ def main() -> None:
 
     manifest = {
         "dataset_version": version, "created_at": datetime.now(timezone.utc).isoformat(),
-        "silver_ids": args.silver_ids, "cap_per_channel": 150, "min_prior_posts": MIN_PRIOR_POSTS,
+        "silver_ids": args.silver_ids, "cap_per_channel": 150, "keep_ids": str(args.keep_ids) if args.keep_ids else None, "min_prior_posts": MIN_PRIOR_POSTS,
         "test_fraction": TEST_FRACTION, "history_rows": int(len(history)), **counts(gold),
         "periodo": [str(gold["published_at"].min()), str(gold["published_at"].max())],
         "por_setor": {k: counts(g) for k, g in gold.groupby("sector")},
