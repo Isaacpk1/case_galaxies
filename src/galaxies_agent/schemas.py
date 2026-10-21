@@ -94,3 +94,21 @@ class RankedCreative(PredictionOutput):
 class RankingOutput(BaseModel):
     ranking: list[RankedCreative]
     note: str
+
+
+class WhatIfVariant(BaseModel):
+    factor: Literal["horario", "dia_da_semana", "duracao", "titulo", "criativo"]
+    value: str
+    predicted_metric: int
+    interval_low: int
+    interval_high: int
+    relative_to_channel: float
+    delta_vs_base_pct: float = Field(..., description="Variacao do desempenho previsto em relacao ao criativo original, em %")
+    model_variant: str
+
+
+class WhatIfOutput(BaseModel):
+    base: PredictionOutput
+    variants: list[WhatIfVariant]
+    best_by_factor: dict[str, WhatIfVariant]
+    note: str

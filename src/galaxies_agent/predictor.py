@@ -28,7 +28,8 @@ from catboost import CatBoostRegressor, Pool
 
 from . import features as F
 from .embedder import ThumbnailEmbedder, youtube_id
-from .schemas import Comparable, CreativeInput, Driver, PredictionOutput, RankedCreative, RankingOutput
+from .schemas import (Comparable, CreativeInput, Driver, PredictionOutput, RankedCreative, RankingOutput,
+                      WhatIfOutput, WhatIfVariant)
 from .video_rubric import VideoRubric
 
 ROOT = Path(os.environ.get("GALAXIES_ROOT", Path(__file__).resolve().parents[2]))
@@ -284,6 +285,55 @@ class Predictor:
                 + (f"no teste final, o modelo acertou {_br(acc * 100)}% dos pares dentro do mesmo canal (moeda = 50%)."
                    if acc else "no rolling-origin, o modelo acerta ~60% dos pares dentro do mesmo canal (moeda = 50%)."))
         return RankingOutput(ranking=ranked, note=note)
+
+    def what_if(self, item: CreativeInput, hours: Optional[list[int]] = None, weekdays: Optional[list[int]] = None,
+                durations: Optional[list[float]] = None, captions: Optional[list[str]] = None,
+                creatives: Optional[list[str]] = None, attributes: Optional[tuple] = None) -> WhatIfOutput:
+        """Re-pontua variacoes do criativo, mudando UM fator por vez (extensao 'what-if' do TAP).
+
+        hours: horas locais (America/Sao_Paulo) no mesmo dia; weekdays: 0=segunda..6=domingo na mesma semana;
+        durations: segundos; captions: titulos alternativos; creatives: thumbnails/videos alternativos.
+        Sem listas, usa uma grade padrao de horario e dia da semana. A rubrica do video original e reutilizada
+        nas variacoes de horario, dia, duracao e titulo (o video nao muda).
+        """
+        attributes = attributes if attributes is not None else self.video_attributes(item)
+        base = self.predict(item, attributes)
+        local = item.planned_datetime if item.planned_datetime.tzinfo else item.planned_datetime.replace(tzinfo=LOCAL_TZ)
+        local = local.astimezone(LOCAL_TZ)
+        if not any([hours, weekdays, durations, captions, creatives]):
+            hours, weekdays = [8, 12, 15, 18, 21], list(range(7))
+        candidates: list[tuple[str, str, CreativeInput, Optional[tuple]]] = []
+        for h in hours or []:
+            when = local.replace(hour=int(h), minute=0)
+            candidates.append(("horario", f"{int(h):02d}h", item.model_copy(update={"planned_datetime": when}), attributes))
+        for d in weekdays or []:
+            when = local + pd.Timedelta(days=int(d) - local.weekday())
+            candidates.append(("dia_da_semana", WEEKDAYS[int(d)], item.model_copy(update={"planned_datetime": when.to_pydatetime() if hasattr(when, "to_pydatetime") else when}), attributes))
+        for sec in durations or []:
+            candidates.append(("duracao", f"{float(sec):.0f}s", item.model_copy(update={"duration_seconds": float(sec)}), attributes))
+        for text in captions or []:
+            candidates.append(("titulo", text[:80], item.model_copy(update={"caption": text}), attributes))
+        for creative in creatives or []:
+            own = youtube_id(creative)
+            candidates.append(("criativo", creative[:120], item.model_copy(update={"creative": creative}), None if own else attributes))
+        variants = []
+        for factor, value, variant_item, attrs in candidates:
+            out = self.predict(variant_item, attrs)
+            variants.append(WhatIfVariant(factor=factor, value=value, predicted_metric=out.predicted_metric,
+                                          interval_low=out.interval_low, interval_high=out.interval_high,
+                                          relative_to_channel=out.relative_to_channel,
+                                          delta_vs_base_pct=round((out.relative_to_channel / base.relative_to_channel - 1) * 100, 1),
+                                          model_variant=out.model_variant))
+        best = {}
+        for v in variants:
+            if v.factor not in best or v.relative_to_channel > best[v.factor].relative_to_channel:
+                best[v.factor] = v
+        width = (base.interval_high + 1) / (base.interval_low + 1)
+        note = (f"Cada variacao muda um fator e mantem o resto do criativo. O intervalo de 80% do original vai de "
+                f"{_br(base.interval_low)} a {_br(base.interval_high)} curtidas (fator ~{_br(width, 1)}x): diferencas de poucos "
+                f"por cento entre variacoes estao dentro do ruido e nao sao decisivas. O modelo ve o titulo so pelo "
+                f"tamanho (caracteres), nao pelo conteudo do texto; horario e dia sao lidos em UTC, como no treino.")
+        return WhatIfOutput(base=base, variants=variants, best_by_factor=best, note=note)
 
     def channel_summary(self, channel_id: str, last: int = 10) -> dict:
         rows = self.history[self.history["channel_id"] == channel_id].sort_values("published_at")
