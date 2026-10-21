@@ -207,6 +207,17 @@ Contra o B0: MAE -0,112 (IC95% [-0,238; -0,010], p = 0,065) e pares +14 p.p. (p 
 - Os 10 maiores erros sao lancamentos e campanhas de marcas com mediana baixa (ex.: "Novo Jeep Avenger", 1.058 curtidas reais vs 30 previstas), provavelmente impulsionados por midia paga, que nao aparece nos dados publicos.
 - Ganha do B0 em 18 de 26 canais; perde em canais com poucos Shorts no teste ou muito estaveis.
 
+**Onde o modelo retreinado erra** (teste do E-15, 1.236 Shorts de 68 canais; `scripts/experimentos/analyze_e15_errors.py`):
+
+| Grupo | n | MAE modelo | MAE B0 | Cobertura 80% |
+| --- | ---: | ---: | ---: | ---: |
+| Todos | 1.236 | 0,72 | 0,91 | 80% |
+| Pessoa / marca / midia | 522 / 421 / 293 | 0,65 / 0,76 / 0,79 | 0,88 / 0,93 / 0,92 | 78% / 87% / 74% |
+| Shorts que viralizaram | 170 | 1,79 | 2,03 | 29% |
+| Shorts na media do canal | 330 | 0,28 | 0,14 | 99% |
+
+- Os maiores erros passam a ser noticia e celebridade em canais de midia (ex.: Steal The Look, 16,5 mil curtidas reais vs 78 previstas) e campanhas de marca (Arezzo, Nissan). Melhor que o B0 em 50 de 68 canais.
+
 Diario completo e analises: [docs/07](docs/07-registro-de-features.md); decisoes: [docs/02](docs/02-registro-de-descobertas.md).
 
 ## 7b. Extensoes do TAP (secao 4.2)

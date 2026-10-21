@@ -393,6 +393,30 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 
 **Pacote `tool_v3_20261021T175806Z`** (`scripts/modelo/train_tool_model_v2.py`): mesma arquitetura e hiperparametros, treinado em todo o Gold v2.1. Intervalo recalibrado por rolling-origin no Gold v2.1 (50/65/80%): calibrado nas origens 1-2, cobre 80,8% na origem 3 (CB_FINAL; reservas 79,0% e 80,0%). No rolling-origin, MAE CB_FINAL 0,736 vs B0 0,875.
 
+### Onde o modelo erra no teste do E-15 (analise posterior; nao orienta escolha de modelo)
+
+`python scripts/experimentos/analyze_e15_errors.py` -> `e14_e15_gold_v2/e15/error_analysis.json`. MAE por Short (nao macro por canal). Intervalo: quantis das origens 1-2 do rolling-origin do `tool_v3` (janelas anteriores ao teste), aplicados a previsao do E-15.
+
+| Grupo | n | MAE | MAE B0 | Vies (prev - real) | Cobertura 80% |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Todos | 1.236 | 0,721 | 0,908 | -0,08 | 80% |
+| Automotivo | 665 | 0,710 | 0,911 | -0,04 | 80% |
+| Moda | 571 | 0,733 | 0,904 | -0,12 | 80% |
+| Pessoa | 522 | 0,649 | 0,883 | -0,05 | 78% |
+| Marca | 421 | 0,759 | 0,931 | -0,03 | 87% |
+| Midia | 293 | 0,793 | 0,919 | -0,20 | 74% |
+| Canal novo (fora do v1) | 928 | 0,691 | 0,827 | -0,09 | 79% |
+| Real abaixo da media do canal | 552 | 0,686 | 1,121 | +0,61 | 81% |
+| Real na media | 330 | 0,280 | 0,142 | -0,06 | 99% |
+| Real acima | 184 | 0,625 | 0,608 | -0,59 | 89% |
+| Real viral (> 2,7x a mediana) | 170 | 1,793 | 2,028 | -1,79 | 29% |
+
+- **O intervalo calibrado antes do teste cobre 80%** no geral e nos dois setores; fica largo em marcas (87%) e curto em midias (74%) e nos virais (29%).
+- **Continua encolhendo para a media do canal:** preve viral em 7 dos 170 virais; nos Shorts abaixo da media o erro cai muito frente ao B0 (0,69 vs 1,12), e e ai que esta a maior parte do ganho.
+- **Os maiores erros agora sao noticia e celebridade em canais de midia** (Steal The Look, GQ, Capricho, Doutor Multas, AutoPapo: 5 mil a 38 mil curtidas contra medianas de 26 a 530) e **campanhas de marca** (Arezzo, Track&Field, Nissan), como no v1. Assunto do momento e midia paga nao aparecem antes da publicacao.
+- **Canais:** melhor que o B0 em 50 de 68. Os piores sao marcas com poucos Shorts no teste (BYD 6, Toyota 7) ou com mudanca de patamar no periodo de teste (Lojas Torra: MAE 1,37, vies -1,37, todos os Shorts do teste acima da mediana historica).
+- **Tom de narracao:** "instrucional" e onde o modelo mais ganha do B0 (0,64 vs 1,04); "animado" e "calmo" ficam com vies negativo (subestima).
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
