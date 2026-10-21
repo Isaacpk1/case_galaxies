@@ -1,7 +1,8 @@
 """Funcao de previsao da tool: criativo + contexto -> previsao, intervalo, drivers e comparaveis.
 
-O numero vem SEMPRE do modelo treinado. Modelo final = CB_FINAL do E-13 (thumbnail SigLIP 2 +
-comparaveis visuais + rubrica e fala do video extraidas pelo Gemini). Quando falta uma entrada, a tool
+O numero vem SEMPRE do modelo treinado. Modelo final = CB_FINAL (arquitetura do E-13; o pacote servido e o do
+LATEST.json, hoje retreinado no Gold v2.1 pelo E-15): thumbnail SigLIP 2 + comparaveis visuais + rubrica e fala do
+video extraidas pelo Gemini. Quando falta uma entrada, a tool
 usa a reserva correspondente e marca confianca baixa:
 
 | entrada disponivel                     | modelo            |
@@ -91,6 +92,17 @@ class Predictor:
         self.embedder = ThumbnailEmbedder(self.meta["embedding"]["model"], cache)
         self.rubric = VideoRubric(ROOT, extra_rubric_csv, live=live_rubric)
         self.calibration = self.meta["interval"]["calibration"]
+        self.subscribers = self._load_subscribers()
+
+    @staticmethod
+    def _load_subscribers() -> dict[str, int]:
+        """Inscritos da ultima Silver channel_stats (informativo; ausente = vazio, a tool funciona igual)."""
+        base = ROOT / "data" / "silver" / "channel_stats"
+        runs = sorted(p for p in base.glob("*/channel_stats.csv")) if base.exists() else []
+        if not runs:
+            return {}
+        stats = pd.read_csv(runs[-1]).dropna(subset=["subscriber_count_at_collection"])
+        return {r.channel_id: int(r.subscriber_count_at_collection) for r in stats.itertuples()}
 
     # ------------------------------------------------------------ features
     def _planned_utc(self, when: datetime) -> datetime:
@@ -106,7 +118,8 @@ class Predictor:
             return {"channel_id": item.channel_id or f"externo:{stats.channel_name or 'sem_nome'}",
                     "channel_name": stats.channel_name or item.channel_id or "canal externo",
                     "channel_type": stats.channel_type, "prior_likes": likes, "last_post_at": last,
-                    "median_duration": stats.median_duration_seconds, "in_training": False, "source": "channel_stats"}
+                    "median_duration": stats.median_duration_seconds, "in_training": False, "source": "channel_stats",
+                    "subscribers": stats.subscribers}
         rows = self.history[(self.history["channel_id"] == item.channel_id)
                             & (self.history["published_at"] < pd.Timestamp(planned))].sort_values("published_at")
         if rows.empty:
@@ -116,7 +129,8 @@ class Predictor:
                 "channel_type": rows["channel_type"].iat[-1], "prior_likes": rows["like_count"].astype(int).tolist(),
                 "last_post_at": rows["published_at"].iat[-1].to_pydatetime(),
                 "median_duration": float(rows["duration_seconds"].median()),
-                "in_training": bool(info["in_training"]) if info is not None else False, "source": "base_silver"}
+                "in_training": bool(info["in_training"]) if info is not None else False, "source": "base_silver",
+                "subscribers": self.subscribers.get(item.channel_id)}
 
     def build_row(self, item: CreativeInput) -> tuple[dict, dict]:
         planned = self._planned_utc(item.planned_datetime)
@@ -267,7 +281,8 @@ class Predictor:
             creative_id=item.creative_id or own_id or item.creative, predicted_metric=likes,
             interval_low=low, interval_high=high, interval_level=self.meta["interval"]["nominal"],
             confidence_flag="baixa" if reasons else "alta", confidence_reasons=reasons,
-            channel_baseline_likes=baseline_likes, relative_to_channel=round(relative, 3), performance_band=band,
+            channel_baseline_likes=baseline_likes, channel_subscribers=ctx.get("subscribers"),
+            relative_to_channel=round(relative, 3), performance_band=band,
             top_drivers=drivers, explanation=explanation, comparables=comps, features_used=features_used,
             model_version=self.version, model_variant=variant, embedding_source=emb_source,
             rubric_source=rubric_source, video_attributes=video,
@@ -342,6 +357,7 @@ class Predictor:
         recent = rows.tail(last)
         return {"channel_id": channel_id, "channel_name": rows["channel_name"].iat[0], "sector": rows["sector"].iat[0],
                 "channel_type": rows["channel_type"].iat[0], "shorts_na_base": int(len(rows)),
+                "inscritos_na_coleta": self.subscribers.get(channel_id),
                 "mediana_curtidas": float(rows["like_count"].median()),
                 "periodo": [str(rows["published_at"].min())[:10], str(rows["published_at"].max())[:10]],
                 "ultimos": [{"video_id": r.video_id, "titulo": str(r.title)[:100], "publicado": str(r.published_at)[:10],

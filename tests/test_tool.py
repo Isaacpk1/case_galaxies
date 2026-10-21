@@ -133,6 +133,24 @@ def test_external_channel_stats(predictor):
     assert any("fora da base" in r for r in out.confidence_reasons)
 
 
+def test_subscribers_are_informative_only(predictor, gold, silver):
+    """Inscritos entram no contrato (TAP) e voltam na saida, mas nao mudam a previsao."""
+    stats = dict(channel_name="Marca X", channel_type="brand", prior_likes=[120, 300, 90, 210, 150] * 8,
+                 last_post_at="2026-10-15T12:00")
+    base = dict(caption="Novo look de verao", planned_datetime="2026-10-20T18:00", sector="moda")
+    without = predictor.predict(CreativeInput(**base, channel_stats=ChannelStats(**stats)))
+    with_subs = predictor.predict(CreativeInput(**base, channel_stats=ChannelStats(**stats, subscribers=250_000)))
+    assert with_subs.channel_subscribers == 250_000 and without.channel_subscribers is None
+    assert with_subs.predicted_metric == without.predicted_metric
+    with pytest.raises(ValidationError):
+        ChannelStats(**stats, subscribers=-1)
+    if predictor.subscribers:  # canal da base: inscritos da ultima Silver channel_stats
+        sil = silver.set_index("video_id")
+        row = next(gold.sample(1, random_state=9).itertuples())
+        out = predictor.predict(as_input(row, sil.loc[row.video_id]))
+        assert out.channel_subscribers == predictor.subscribers.get(row.channel_id)
+
+
 def test_channel_outside_training_keeps_history(predictor):
     """Canal com historico na tool mas fora do treino do pacote: preve pelo channel_id, com confianca baixa."""
     outside = predictor.channels[~predictor.channels["in_training"].astype(bool)]

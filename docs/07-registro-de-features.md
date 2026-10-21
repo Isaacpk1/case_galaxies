@@ -430,6 +430,20 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 
 **Regra de decisao.** CB_FINAL_KM e `retida` se reduzir o MAE macro por canal com p < 0,05 e nao piorar a acuracia por pares em mais de 0,5 p.p. Se retida, a adocao no pacote da tool exige implementar o mapeamento descritor -> cluster na rubrica ao vivo e fica registrada como proximo passo (nao ha teste intocado para confirmar). Em qualquer caso, os clusters e o desvio medio por cluster sao reportados como analise descritiva.
 
+### Resultado E-16 (21/10/2026, uma execucao)
+
+`python scripts/experimentos/run_e16_descriptor_clusters.py` -> `artifacts/feature_experiments/e16_descriptor_clusters/`. Rolling-origin dentro do treino do Gold v2.1: 2.734 linhas de validacao, 68 canais; o silhouette escolheu k = 20 para video e para audio em todas as janelas (o maior valor da grade).
+
+| Braco | MAE macro | Origem 1 / 2 / 3 |
+| --- | ---: | --- |
+| B0 | 0,858 | 0,854 / 0,814 / 0,906 |
+| CB_FINAL | 0,767 | 0,779 / 0,747 / 0,777 |
+| CB_FINAL_KM | 0,770 | 0,780 / 0,753 / 0,779 |
+
+- CB_FINAL_KM vs CB_FINAL: MAE +0,0025 (IC95% [-0,003; +0,008], p = 0,38, 27/68 canais melhoram); pares -0,1 p.p. (p = 0,84). **Decisao pre-registrada: `sem_ganho`.** A rubrica numerica (notas, sinais sim/nao, tom, fala) ja carrega o que os clusters dizem.
+- **Descritivo (treino inteiro; desvio medio sobre a mediana do canal dos Shorts que tem o cluster, sem controle de canal):** acima da media do canal ficam "ronco/som do motor" (1,12x), "detalhes do interior/motor" (1,06x), "corpo inteiro/espelho" (1,06x) e "try-on" (1,03x); abaixo ficam "fundo branco/neutro" (0,72x), "voz clara/fala clara" (0,75x), "ambiente interno/antes e depois" (0,77x) e "voz masculina" (0,82x).
+- Limite: a representacao e lexical (TF-IDF), entao junta descritores com negacao ("sem musica" com "musica animada"); clusters semanticos (sentence-transformers, como sugere o TAP) exigem o Hugging Face, que nao abre neste ambiente. Silhouette baixo (0,11 video; 0,21 audio).
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
@@ -459,3 +473,4 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 | E-13 | CB_EMB + comparaveis (KNN visual) + rubrica Gemini + fala | CB_FINAL MAE 0,850 vs 0,882 (-0,033, p=0,003, 21/26 canais); aprovado pela regra pre-registrada | **Aberto uma vez:** MAE 0,746 vs B0 0,858 e CB_EMB 0,780; pares 0,580 vs B0 0,440; intervalo 80% cobre 79,9% | `retida` | **CB_FINAL e o modelo final.** |
 | E-14 | Modelo do v1 congelado no Gold v2.1 (`novo_canal` + `novo_periodo`) | - | **Uma vez:** CB_FINAL MAE 0,785 vs B0 0,863 (p < 0,001, 51/66 canais); pares 61,1% vs 50,8%; intervalo 80% cobre 72,8% | diagnostico | Modelo generaliza para canais e periodos novos; intervalo precisa recalibrar. |
 | E-15 | Mesma arquitetura retreinada no Gold v2.1 | - | **Uma vez:** MAE 0,740 vs B0 0,915 (p < 0,001); vs congelado 0,719 vs 0,788 (p = 0,003), pares 64,9% vs 61,9% | `retida` | **Pacote da tool treinado no Gold v2.1 (`tool_v3`).** |
+| E-16 | Clusters K-Means dos descritores do VLM (`elementos_video_top5`, `elementos_audio_top5`) | MAE 0,770 vs CB_FINAL 0,767 (+0,0025, p = 0,38) | Nao usado (teste ja aberto no E-15) | `sem_ganho` | Rubrica numerica ja cobre; clusters ficam como analise descritiva. |

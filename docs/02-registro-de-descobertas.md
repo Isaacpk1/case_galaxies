@@ -261,3 +261,12 @@ Para cada item novo, anotar:
 - **Embedding**: o cache da tool passa a ser `thumbnail_siglip2_v1_v2/20261021T172500Z/embeddings.npz` (v1 + v2, conjuntos disjuntos, mesmo modelo e preprocess).
 - **Testes**: os testes da tool leem o Gold e as Silvers do pacote servido (`metadata.json`), nao o LATEST dos experimentos; 24 testes passam com o pacote novo e com o antigo.
 
+### D-027 - Inscritos: no contrato e no baseline do TAP, fora do modelo
+
+- **Data**: 21/10/2026
+- **Tipo**: decisao de modelo / contrato
+- **Status**: implementada
+- **Contexto**: o TAP cita inscritos na coleta, no baseline ("regressao linear sobre inscritos") e no contrato (`channel_stats`: "inscritos e historico do canal"). O coletor ja gravava `subscriber_count_at_collection` no Bronze, mas o dado nao chegava a Silver nem a tool.
+- **O que foi feito**: Silver `channel_stats` (`build_channel_stats.py`, 236 canais, sem chamar a API); baseline do TAP no teste do E-15 (`run_subscriber_baseline.py`): MAE macro 1,55 (so inscritos) e 1,26 (+ setor e tipo) contra 0,91 da mediana do canal e 0,74 do modelo final; campo opcional `ChannelStats.subscribers` e saida `channel_subscribers`.
+- **Decisao**: inscritos nao entram como feature. Sao uma fotografia da data da coleta (o canal cresceu depois de cada post, em parte por causa dele), sao constantes dentro do canal (nao ajudam a escolher entre criativos do mesmo canal) e, como baseline, erram bem mais que a mediana do canal. Ficam no contrato como informacao.
+

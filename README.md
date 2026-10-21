@@ -86,6 +86,8 @@ Copy-Item .env.example .env              # YOUTUBE_API_KEY e GEMINI_API_KEY (nun
 | 7. Experimentos | notebooks 05-10 e `scripts/experimentos/` (ver secao 7); E-13: `python scripts/experimentos/run_e13_final.py` e `--report` |
 | 7b. Teste final (uma vez) e erros | `python scripts/experimentos/run_e13_test_final.py` (recusa rodar de novo) e `python scripts/experimentos/analyze_e13_errors.py` |
 | 8. Pacote do modelo da tool | `python scripts/modelo/train_tool_model_v2.py` (pacote servido: todo o Gold v2.1, intervalo recalibrado no v2); `python scripts/modelo/train_tool_model.py` reproduz o pacote do Gold v1 (`--train-only`: modelo do teste do E-13) |
+| 8c. Inscritos dos canais e baseline do TAP | `python scripts/pipeline/build_channel_stats.py` (le o Bronze, sem API) e `python scripts/experimentos/run_subscriber_baseline.py` |
+| 8d. E-16 (clusters dos descritores) | `python scripts/experimentos/run_e16_descriptor_clusters.py` |
 | 8b. Gold v2 (E-14 / E-15, uma vez) | embedding: `notebooks/04_modelo_colab/12_embedding_thumbnails_v2.ipynb`; `python scripts/experimentos/run_e14_e15_gold_v2.py --cobertura` e `--exp e14` / `--exp e15 --emb-v2 <embeddings.npz>` |
 | 9. Testes | `PYTHONPATH=src python -m pytest -q tests/` |
 | 10. Servidor MCP | `PYTHONPATH=src python -m galaxies_agent.mcp_server` |
@@ -115,7 +117,7 @@ print(out.model_variant, out.rubric_source, out.video_attributes)   # o que o Ge
 
 | Tool | Entrada | Saida |
 | --- | --- | --- |
-| `prever_criativo` | criativo, legenda, data planejada, `channel_id` ou `channel_stats`, setor | `predicted_metric`, `interval_low/high` (80%), `confidence_flag` + motivos, `relative_to_channel`, faixa, `top_drivers` (SHAP), `comparables`, `explanation`, `video_attributes` (rubrica do Gemini), `model_variant`, features usadas |
+| `prever_criativo` | criativo, legenda, data planejada, `channel_id` ou `channel_stats` (historico de curtidas e, opcional, `subscribers`), setor | `predicted_metric`, `interval_low/high` (80%), `confidence_flag` + motivos, `relative_to_channel`, faixa, `top_drivers` (SHAP), `comparables`, `explanation`, `video_attributes` (rubrica do Gemini), `channel_subscribers` (informativo), `model_variant`, features usadas |
 | `ranquear_criativos` | 2 a 5 criativos | mesma saida, ordenada pelo desempenho relativo ao canal |
 | `simular_variacoes` | criativo + horas, dias, duracoes, titulos ou criativos alternativos | previsao de cada variacao e o delta em % sobre o original (um fator por vez) |
 | `treinar_modelo_cliente` | caminho de um CSV no esquema minimo do TAP + nome | modelo especialista treinado, metricas contra a mediana do canal no teste temporal, intervalo calibrado e decisao de uso |
@@ -166,6 +168,8 @@ print(out.model_variant, out.rubric_source, out.video_attributes)   # o que o Ge
 | **E-13** | **Modelo final (CB_EMB + comparaveis + rubrica Gemini) vs CB_EMB** | **Aprovado: MAE 0,850 vs 0,882 (p = 0,003, 21/26 canais)** |
 | E-14 | Modelo do v1 congelado em 4.884 Shorts novos (Gold v2.1) | Bate o B0: MAE 0,785 vs 0,863, pares 61% vs 51% (p < 0,001, 51/66 canais); intervalo cobre so 72,8% |
 | **E-15** | **Mesma arquitetura retreinada no Gold v2.1** | **Aprovado: MAE 0,740 vs B0 0,915 (p < 0,001); vs modelo do v1 nas mesmas linhas 0,719 vs 0,788 (p = 0,003), pares 64,9% vs 61,9%** |
+| E-16 | Clusters K-Means dos descritores do VLM (camada 2 do TAP) | Sem ganho: MAE +0,0025 (p = 0,38); clusters viram analise descritiva (ex.: "ronco do motor" 1,12x a mediana do canal; "fundo branco/neutro" 0,72x) |
+| Baseline do TAP | Regressao linear sobre inscritos (teste do E-15) | MAE 1,55 (so inscritos) e 1,26 (+ setor e tipo) vs 0,91 da mediana do canal e 0,74 do modelo final: a mediana do canal e o baseline mais forte |
 
 Modelo anterior (CB_EMB, E-08) no rolling-origin, para referencia (o CB_FINAL tem MAE 0,850 e pares 61,7% no mesmo protocolo):
 
@@ -247,6 +251,7 @@ report = train_client_model("base_do_cliente.csv", nome="cliente_x")   # post_id
 | CatBoost (E-08, E-12) | Cor, brilho, OCR da thumbnail (E-06, E-08) |
 | Intervalo conformal (tool) | PCA 8 e 32 (E-10); LightGBM, XGBoost, ExtraTrees, ensemble, YetiRank, peso por canal (E-12) |
 | Comparaveis visuais + rubrica e fala do Gemini (E-13) | Destilacao por canal (D-015); modelos por canal (D-004) |
+| | Clusters K-Means dos descritores do VLM (E-16); inscritos como feature (fotografia da coleta; como baseline erra mais que a mediana do canal) |
 
 ## 9. Limitacoes
 
