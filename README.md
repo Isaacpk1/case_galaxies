@@ -27,7 +27,7 @@ Detalhes e decisoes em [docs/01](docs/01-entendimento-do-problema.md).
 | Item | Valor |
 | --- | --- |
 | Origem | YouTube Data API v3 (metadados e metricas publicas); thumbnails publicas; rubrica de video e transcricao via Gemini a partir da URL publica |
-| Periodo | 01/04/2025 a 30/08/2026 (18 meses de historico, Shorts com pelo menos 30 dias na data da coleta, 28-29/09/2026) |
+| Periodo | v1: 01/04/2025 a 30/08/2026 (coleta 28-29/09/2026). v2: 21/04/2025 a 21/09/2026 (coleta 20-21/10/2026). Sempre Shorts com pelo menos 30 dias na data da coleta |
 | Volume | 3.004 Shorts, 26 canais (moda 1.589, automotivo 1.415; marcas e criadores) - Gold `gold_v1_20261002T013000Z_663f502d` (experimentos E-00 a E-13) |
 | Volume v2 | 6.121 Shorts, 68 canais (automotivo 37, moda 31; pessoa, marca e midia), 100 por canal, historico com 23.092 Shorts - Gold `gold_v2_1_20261021T113931Z_e1fd77c6` (E-14, E-15 e pacote servido) |
 | Split | Treino 2.392 / teste 612 (os 20% mais recentes de cada canal); **teste aberto uma unica vez**, depois da decisao do E-13 |
@@ -226,7 +226,7 @@ Diario completo e analises: [docs/07](docs/07-registro-de-features.md); decisoes
 | --- | --- | --- |
 | Intervalos conformais | pacote da tool (secao 5) | intervalo de 80% cobriu 79,9% no teste final |
 | Comparaveis (retrieval) | `features.knn_features`, tool | Shorts anteriores do canal com thumbnail parecida; parte do modelo final |
-| LLM zero-shot vs modelo treinado | `scripts/experimentos/run_llm_zero_shot.py` | no teste final, a nota `potencial_viral_0a10` do Gemini sozinha acerta 53,9% dos pares do mesmo canal (p = 0,08 vs acaso); o CB_FINAL acerta 58,0% (+4,0 p.p., p = 0,15). O LLM tem sinal, mas nao da numero nem intervalo |
+| LLM zero-shot vs modelo treinado | `scripts/experimentos/run_llm_zero_shot.py` | no teste do E-15 (1.236 Shorts, 68 canais), a nota `potencial_viral_0a10` do Gemini sozinha acerta 56,2% dos pares do mesmo canal (acima do acaso, p < 0,001, 49/68 canais); o modelo treinado acerta 62,4% (+6,2 p.p., IC95% [3,8; 8,5], p < 0,001, 48/68 canais). No v1 (26 canais) a diferenca era +4,0 p.p. sem significancia (p = 0,15). O LLM tem sinal, mas o modelo ordena melhor e ainda da numero e intervalo |
 | What-if | `Predictor.what_if`, tool `simular_variacoes` | re-pontua horario, dia, duracao, titulo ou criativo alternativo, um fator por vez; o titulo entra so pelo tamanho |
 | Treino dinamico | `galaxies_agent.trainer`, tool `treinar_modelo_cliente` | base propria no esquema minimo do TAP -> modelo especialista com validacao temporal e decisao de uso. Exemplo (16 marcas, so metadados): pares +10 p.p. sobre a mediana do canal (p = 0,017); MAE sem diferenca significativa |
 
@@ -263,13 +263,14 @@ report = train_client_model("base_do_cliente.csv", nome="cliente_x")   # post_id
 
 ## 10. Evolucao
 
-1. Avaliar o modelo final em dados novos (Shorts publicados depois da coleta), ja que o teste atual foi usado.
-2. Mais canais e o setor de beleza; recoleta periodica para manter o historico atual.
+Feito desde a primeira versao: avaliacao em dados novos e canais novos (E-14), retreino com 68 canais (E-15), treino especialista sob demanda e what-if (secao 7b).
+
+1. Teste prospectivo: registrar previsoes de Shorts ainda nao publicados e medir depois (o teste do E-15 ja foi aberto).
+2. Setor de beleza; recoleta periodica para manter o historico atual.
 3. Alvo em horizonte fixo (curtidas aos 7/30 dias) com coleta recorrente.
 4. Frames iniciais e audio (gancho, cortes, musica) quando houver coleta de video autorizada.
-5. Dados autorizados do parceiro (YouTube Analytics via MCP: impressoes, CTR, retencao) como historico do canal (D-001).
-6. Treino especialista sob demanda para um cliente com base propria (esquema minimo do TAP).
-7. What-if: variacoes de titulo, horario e thumbnail re-pontuadas pelo modelo.
+5. Sinal de assunto do momento (noticia, celebridade): hoje sao os maiores erros em canais de midia.
+6. Dados autorizados do parceiro (YouTube Analytics via MCP: impressoes, CTR, retencao) como historico do canal (D-001).
 
 ## 11. Documentacao
 

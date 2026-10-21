@@ -4,7 +4,8 @@ O "palpite" do LLM e a nota `potencial_viral_0a10` que o Gemini da ao assistir o
 sem ver curtidas nem historico. Como e uma nota 0-10, so faz sentido comparar ORDENACAO: dentro de cada
 canal, quem o LLM poe na frente teve mais curtidas? Comparado com o CB_FINAL e com o B0 nas mesmas linhas.
 
-Linhas: teste final do E-13 (612 Shorts, 26 canais) e, quando existir, o E-14 (dados novos do Gold v2).
+Linhas: teste final do E-13 (612 Shorts, 26 canais), E-14 (modelo do v1 congelado em dados novos do Gold v2.1)
+e teste do E-15 (modelo retreinado no Gold v2.1, 1.236 Shorts, 68 canais; o "CB_FINAL" desse bloco e o CB_FINAL_v2).
 Nao escolhe modelo nem ajusta nada: so reporta. Observacao: a nota do LLM tambem e uma das features do
 CB_FINAL; aqui ela e usada sozinha, como um LLM "chutando" sem o modelo.
 
@@ -26,8 +27,11 @@ import run_e13_final as e13  # noqa: E402
 import run_e13_test_final as t13  # noqa: E402
 
 RUBRIC = ROOT / "data" / "silver" / "gemini_video" / "gemini_video_features.csv"
-SOURCES = {"teste_final_E13": ROOT / "artifacts" / "feature_experiments" / "e13_final" / "test_final" / "test_predictions.csv",
-           "dados_novos_E14": ROOT / "artifacts" / "feature_experiments" / "e14_e15_gold_v2" / "e14" / "predictions.csv"}
+SOURCES = {  # nome: (previsoes, coluna do modelo treinado)
+    "teste_final_E13": (ROOT / "artifacts" / "feature_experiments" / "e13_final" / "test_final" / "test_predictions.csv", "pred_CB_FINAL"),
+    "dados_novos_E14": (ROOT / "artifacts" / "feature_experiments" / "e14_e15_gold_v2" / "e14" / "predictions.csv", "pred_CB_FINAL"),
+    "teste_E15_gold_v2": (ROOT / "artifacts" / "feature_experiments" / "e14_e15_gold_v2" / "e15" / "predictions.csv", "pred_CB_FINAL_v2"),
+}
 OUT = ROOT / "artifacts" / "feature_experiments" / "llm_zero_shot"
 
 
@@ -59,13 +63,13 @@ def main() -> None:
     rubric = pd.read_csv(RUBRIC, dtype={"video_id": str}).drop_duplicates("video_id", keep="last")
     rubric["llm_score"] = pd.to_numeric(rubric["potencial_viral_0a10"], errors="coerce")
     report = {"pergunta": "o LLM sozinho (nota potencial_viral_0a10) ordena Shorts do mesmo canal tao bem quanto o modelo treinado?"}
-    for name, path in SOURCES.items():
+    for name, (path, model_col) in SOURCES.items():
         if not path.exists():
             report[name] = "ainda nao disponivel"
             continue
         frame = pd.read_csv(path, dtype={"video_id": str}).merge(rubric[["video_id", "llm_score"]], on="video_id")
-        frame = frame.dropna(subset=["llm_score", "pred_CB_FINAL"])
-        cols = {"LLM_zero_shot": "llm_score", "CB_FINAL": "pred_CB_FINAL", "B0": "pred_B0"}
+        frame = frame.dropna(subset=["llm_score", model_col])
+        cols = {"LLM_zero_shot": "llm_score", "CB_FINAL": model_col, "B0": "pred_B0"}
         summary, per = ranking(frame, cols)
         scores = frame["llm_score"]
         report[name] = {
