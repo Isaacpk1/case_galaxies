@@ -5,7 +5,7 @@ thumbnail e pillarbox e redimensiona o lado menor para 256 px) e grava thumbs/<v
 O notebook 04_modelo_colab/12_embedding_thumbnails_v2.ipynb gera embeddings.npz no formato da v1
 (video_id, embeddings L2-normalizados, source), que vai para data/silver/features/thumbnail_siglip2_v2/<run>/.
 
-    python scripts/pipeline/make_embedding_bundle_v2.py --gold gold_v2_<...> --thumbnail-runs <RUN_AUTO> <RUN_MODA>
+    python scripts/pipeline/make_embedding_bundle_v2.py --gold gold_v2_<...> --thumbnail-runs <RUN_AUTO> <RUN_MODA> --part 1 --parts 5
 """
 
 from __future__ import annotations
@@ -32,7 +32,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--gold", required=True)
     parser.add_argument("--thumbnail-runs", nargs="+", required=True)
-    parser.add_argument("--out", default=str(ROOT / ".tmp_transfer" / "emb_v2_bundle.tar.gz"))
+    parser.add_argument("--part", type=int, default=1, help="parte a gerar (1..parts)")
+    parser.add_argument("--parts", type=int, default=1, help="dividir em N arquivos (o Colab le todos)")
     args = parser.parse_args()
 
     gold = pd.read_csv(ROOT / "data" / "gold" / "snapshots" / args.gold / "training_snapshot.csv", usecols=["video_id"])
@@ -45,11 +46,12 @@ def main() -> None:
     missing = [v for v in todo if v not in files]
     print(f"Gold: {len(gold)} | ja com embedding (v1): {len(gold) - len(todo)} | a calcular: {len(todo)} | sem thumbnail: {len(missing)}")
 
-    out = Path(args.out)
+    todo = [v for v in todo if v in files][args.part - 1::args.parts]
+    out = ROOT / ".tmp_transfer" / f"emb_v2_bundle_part{args.part}of{args.parts}.tar.gz"
     out.parent.mkdir(parents=True, exist_ok=True)
     rows, failed = [], []
     with tarfile.open(out, "w:gz") as tar:
-        for i, vid in enumerate(v for v in todo if v in files):
+        for i, vid in enumerate(todo):
             try:
                 image = preprocess(Image.open(files[vid]))
                 buffer = io.BytesIO()
@@ -68,7 +70,7 @@ def main() -> None:
         writer.writerow(["video_id"])
         writer.writerows([[v] for v in rows])
         data = ids.getvalue().encode()
-        info = tarfile.TarInfo("emb_v2/ids.csv")
+        info = tarfile.TarInfo(f"emb_v2/ids_part{args.part}.csv")
         info.size = len(data)
         tar.addfile(info, io.BytesIO(data))
     print(f"{len(rows)} imagens em {out} ({out.stat().st_size / 1e6:.0f} MB); falhas: {len(failed)}; sem thumbnail: {len(missing)}")
