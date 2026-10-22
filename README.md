@@ -169,6 +169,7 @@ print(out.model_variant, out.rubric_source, out.video_attributes)   # o que o Ge
 | E-14 | Modelo do v1 congelado em 4.884 Shorts novos (Gold v2.1) | Bate o B0: MAE 0,785 vs 0,863, pares 61% vs 51% (p < 0,001, 51/66 canais); intervalo cobre so 72,8% |
 | **E-15** | **Mesma arquitetura retreinada no Gold v2.1** | **Aprovado: MAE 0,740 vs B0 0,915 (p < 0,001); vs modelo do v1 nas mesmas linhas 0,719 vs 0,788 (p = 0,003), pares 64,9% vs 61,9%** |
 | E-16 | Clusters K-Means dos descritores do VLM (camada 2 do TAP) | Sem ganho: MAE +0,0025 (p = 0,38); clusters viram analise descritiva (ex.: "ronco do motor" 1,12x a mediana do canal; "fundo branco/neutro" 0,72x) |
+| E-17 | Quadros de dentro do video (3 por Short, servidor publico de imagens, sem baixar video) | Sem ganho pela regra (no limite): variacao entre quadros + capa vs video reduz o MAE em 0,0066 (p = 0,036, Holm 0,072). Shorts com pouca troca de cena ou capa igual ao video rendem ~0,75x a mediana do canal |
 | Baseline do TAP | Regressao linear sobre inscritos (teste do E-15) | MAE 1,55 (so inscritos) e 1,26 (+ setor e tipo) vs 0,91 da mediana do canal e 0,74 do modelo final: a mediana do canal e o baseline mais forte |
 
 Modelo anterior (CB_EMB, E-08) no rolling-origin, para referencia (o CB_FINAL tem MAE 0,850 e pares 61,7% no mesmo protocolo):
@@ -251,7 +252,7 @@ report = train_client_model("base_do_cliente.csv", nome="cliente_x")   # post_id
 | CatBoost (E-08, E-12) | Cor, brilho, OCR da thumbnail (E-06, E-08) |
 | Intervalo conformal (tool) | PCA 8 e 32 (E-10); LightGBM, XGBoost, ExtraTrees, ensemble, YetiRank, peso por canal (E-12) |
 | Comparaveis visuais + rubrica e fala do Gemini (E-13) | Destilacao por canal (D-015); modelos por canal (D-004) |
-| | Clusters K-Means dos descritores do VLM (E-16); inscritos como feature (fotografia da coleta; como baseline erra mais que a mediana do canal) |
+| | Quadros de dentro do video (E-17, no limite: Holm 0,072); clusters K-Means dos descritores do VLM (E-16); inscritos como feature (fotografia da coleta; como baseline erra mais que a mediana do canal) |
 
 ## 9. Limitacoes
 

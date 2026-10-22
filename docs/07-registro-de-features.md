@@ -482,6 +482,22 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 
 **Regra de decisao.** Um braco e `retido` se reduzir o MAE macro por canal com p de Holm < 0,05 e nao piorar a acuracia por pares em mais de 0,5 p.p.; se os dois passarem, fica o de menor MAE. Retido -> novo pacote da tool com os quadros buscados ao vivo pela mesma URL (sem teste intocado para confirmar; registrado como limitacao). Nao retido -> as features ficam como analise descritiva.
 
+### Resultado E-17 (21/10/2026, uma execucao)
+
+`python scripts/experimentos/run_e17_video_frames.py --frames data/silver/features/video_frames_oar_v1/20261022T012500Z/frames_oar.npz` -> `artifacts/feature_experiments/e17_video_frames/`. Quadros: 6.130 de 6.130 Shorts com os tres (5.596 `oar`, 534 `hq`; md5 7324408f...). Rolling-origin dentro do treino do Gold v2.1: 2.445 linhas de validacao, 68 canais, 100% com os tres quadros.
+
+| Braco | MAE macro | Pares | vs CB_FINAL (MAE) |
+| --- | ---: | ---: | --- |
+| B0 | 0,864 | 48,6% | |
+| CB_FINAL | 0,769 | 60,8% | |
+| CB_FINAL_FR (+18: PCA dos quadros + 2 escalares) | 0,768 | 61,3% | -0,0015 (p = 0,72; Holm 0,72) |
+| CB_FINAL_FR2 (+2: variacao entre quadros, thumbnail vs quadros) | 0,763 | 61,2% | -0,0066 (IC95% [-0,0127; -0,0006], p = 0,036; **Holm 0,072**), 43/68 canais |
+
+- **Decisao pre-registrada: `sem_ganho`.** O FR2 melhora na direcao certa e no limite: p bruto 0,036, mas 0,072 com a correcao de Holm, acima de 0,05. O PCA dos quadros (FR) nao acrescenta nada ao embedding da thumbnail.
+- Sensibilidade so com quadros `oar` (2.243 linhas): CB_FINAL 0,796, FR2 0,787, FR 0,798, mesma direcao.
+- **Descritivo (treino; desvio sobre a mediana do canal por quintil):** Shorts com pouca variacao visual entre os quadros rendem 0,75x a mediana do canal, contra 1,0x nos quintis mais variados; Shorts cuja thumbnail e quase igual ao conteudo (quintil mais alto de similaridade) rendem 0,77x, contra ~1,0x quando a capa difere do video (capa produzida).
+- Proximo passo registrado: as duas variaveis do FR2 sao candidatas fortes para um teste com dados novos (teste prospectivo), sem reabrir este teste.
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
@@ -512,3 +528,4 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 | E-14 | Modelo do v1 congelado no Gold v2.1 (`novo_canal` + `novo_periodo`) | - | **Uma vez:** CB_FINAL MAE 0,785 vs B0 0,863 (p < 0,001, 51/66 canais); pares 61,1% vs 50,8%; intervalo 80% cobre 72,8% | diagnostico | Modelo generaliza para canais e periodos novos; intervalo precisa recalibrar. |
 | E-15 | Mesma arquitetura retreinada no Gold v2.1 | - | **Uma vez:** MAE 0,740 vs B0 0,915 (p < 0,001); vs congelado 0,719 vs 0,788 (p = 0,003), pares 64,9% vs 61,9% | `retida` | **Pacote da tool treinado no Gold v2.1 (`tool_v3`).** |
 | E-16 | Clusters K-Means dos descritores do VLM (`elementos_video_top5`, `elementos_audio_top5`) | MAE 0,772 vs CB_FINAL 0,769 (+0,0025, p = 0,38) | Nao usado (teste ja aberto no E-15) | `sem_ganho` | Rubrica numerica ja cobre; clusters ficam como analise descritiva. |
+| E-17 | Quadros de dentro do video (oar/hq 1-3, SigLIP 2): PCA + variacao entre quadros + thumbnail vs quadros | FR2: MAE -0,0066 (p = 0,036; Holm 0,072); FR: -0,0015 (p = 0,72) | Nao usado (teste ja aberto no E-15) | `sem_ganho` (no limite) | Candidatas para teste prospectivo; pouca variacao visual e capa igual ao video associam-se a ~0,75x a mediana. |
