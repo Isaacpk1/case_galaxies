@@ -5,6 +5,8 @@
 Tools:
 - prever_criativo: analisa o video (Gemini), previsao, intervalo, confianca, drivers SHAP, comparaveis e explicacao.
 - ranquear_criativos: mesma saida para 2 a 5 criativos, ordenados pelo desempenho relativo ao canal.
+- simular_variacoes: what-if (horario, dia, duracao, titulo, criativo alternativo) com o delta de cada variacao.
+- treinar_modelo_cliente: treina e avalia um modelo especialista na base propria de um cliente (esquema minimo do TAP).
 - historico_canal: resumo do historico de um canal da base (para o agente contextualizar a resposta).
 - info_modelo: versao, dados de treino, alvo, metodo do intervalo (inspecao exigida pelo TAP).
 """
@@ -44,6 +46,25 @@ def ranquear_criativos(criativos: list[CreativeInput]) -> dict:
     if not 2 <= len(criativos) <= 5:
         raise ValueError("envie de 2 a 5 criativos")
     return predictor().rank(criativos).model_dump(mode="json")
+
+
+@mcp.tool()
+def simular_variacoes(criativo: CreativeInput, horas: list[int] | None = None, dias_da_semana: list[int] | None = None,
+                      duracoes: list[float] | None = None, titulos: list[str] | None = None,
+                      criativos_alternativos: list[str] | None = None) -> dict:
+    """What-if: re-pontua o criativo mudando UM fator por vez (hora local, dia da semana 0=segunda, duracao em
+    segundos, titulo ou thumbnail/video alternativo) e diz quanto cada variacao muda o desempenho previsto.
+    Sem listas, testa horarios 8h-21h e os 7 dias da semana. Diferencas menores que o intervalo nao sao decisivas."""
+    return predictor().what_if(criativo, horas, dias_da_semana, duracoes, titulos, criativos_alternativos).model_dump(mode="json")
+
+
+@mcp.tool()
+def treinar_modelo_cliente(caminho_csv: str, nome: str) -> dict:
+    """Treino dinamico: recebe uma base propria de um cliente (CSV no esquema minimo do TAP: post_id, channel_id,
+    published_at, caption, metric_target, sector; opcionais channel_type, duration_seconds, description, tags),
+    treina um modelo especialista com validacao temporal por canal, compara com a mediana do canal e diz se vale usar."""
+    from .trainer import train_client_model
+    return train_client_model(caminho_csv, nome).model_dump(mode="json")
 
 
 @mcp.tool()

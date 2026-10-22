@@ -345,6 +345,159 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 - **Canais:** o modelo ganha do B0 em 18 dos 26 canais. Os que pioram sao, em geral, canais com poucos Shorts no teste (6 a 14: BYD, Toyota, Fiat, NiinaSecrets, Maria Bardela) ou canais estaveis, onde a mediana ja acerta muito. Os maiores ganhos estao em canais volateis (Renault, Jeep, De Carona com Leandro, Vique, Edi Ribeiro).
 - **Idade do Short na coleta** (30 a 240+ dias) nao mostra padrao claro de erro, o que reduz a preocupacao com metricas medidas em idades diferentes.
 
+## E-14 e E-15: Gold v2 (pre-registro, 21/10/2026, antes de rodar)
+
+**Dados.** Gold v2 (`gold_v2_20261021T004252Z_4a159163`): 8.398 Shorts de 68 canais (automotivo 37, moda 31), equilibrados em pessoa, marca e midia (13/13/11 em automotivo; 13/13/5 em moda), ate 150 Shorts mais recentes por canal; historico do canal com todos os 23.092 Shorts elegiveis coletados. Coleta de 20-21/10/2026, janela de 21/04/2025 a 21/09/2026. Sete criadores de moda do v1 sairam por nao serem de moda (humor, vlog, jogo, costura, maquiagem; `data/candidates/exclusions_v2.csv`).
+
+**E-14: modelo servido congelado em dados que ele nunca viu.**
+- Modelo: pacote `tool_v2_20261014T000408Z` (CB_FINAL treinado em todo o Gold v1), sem retreino nem ajuste. Bracos: B0, CB_BASE, CB_EMB e CB_FINAL do pacote.
+- Linhas: `avaliacao_congelada = True` no Gold v2: `novo_periodo` (canais do v1, Shorts publicados depois do ultimo Short do canal no v1) e `novo_canal` (canais que nao existiam no v1).
+- Features recalculadas no Gold v2 (historico so com posts anteriores); comparaveis com Shorts anteriores do mesmo canal; PCA e calibracao do intervalo sao os do pacote.
+- Comparacao principal: CB_FINAL vs B0, MAE macro por canal e pares justos, pareado por canal (bootstrap + permutacao de sinais), nas linhas com embedding e rubrica. Estratos: origem, setor, grupo.
+- Expectativa registrada: em `novo_canal`, pelo E-11, o modelo deve ordenar acima do acaso, mas nao necessariamente bater o B0 em MAE.
+- Roda uma unica vez, quando embedding e rubrica cobrirem >= 95% das linhas.
+
+**E-15: mesma arquitetura retreinada no Gold v2.**
+- CB_FINAL com os hiperparametros do E-08 (sem nova busca), treinado em `split = train` do Gold v2, PCA ajustado so no treino; avaliado em `split = test` (20% mais recentes de cada canal).
+- Comparacoes: vs B0 e vs o modelo congelado do E-14 nas mesmas linhas de teste que ele nunca viu.
+- Regra: o pacote da tool passa a ser treinado no Gold v2 se o E-15 bater o B0 em MAE macro com p < 0,05 e nao piorar a acuracia por pares frente ao modelo congelado. Caso contrario, o pacote atual continua e o Gold v2 fica como avaliacao.
+
+**Emenda (21/10/2026, antes de rodar E-14 e E-15): Gold v2.1.** O credito do Gemini acabou com 47,6% do Gold v2 com rubrica. Para chegar a 100% de rubrica com custo menor, E-14 e E-15 passam a usar o Gold v2.1 (`gold_v2_1_20261021T113931Z_e1fd77c6`): os mesmos 68 canais, 100 Shorts por canal (6.121 linhas), escolhidos primeiro entre os que ja tem rubrica e depois pelos mais recentes; o historico do canal continua completo e o split temporal (20% mais recentes de cada canal) e refeito sobre essas 100 linhas. Como o coletor processou os Shorts de cada canal em ordem sorteada, os que ja tinham rubrica sao uma amostra aleatoria do canal. Nenhum resultado dos experimentos foi visto antes desta emenda; as demais regras ficam iguais (inclusive a cobertura minima de 95%).
+
+### Resultado E-14 e E-15 (21/10/2026, uma execucao cada)
+
+**Insumos.** Rubrica Gemini em 6.119 de 6.121 linhas (99,97%; 2 Shorts barrados pelo filtro de conteudo do Gemini); embedding SigLIP 2 v2 de 6.760 thumbnails (`thumbnail_siglip2_v2/20261021T172500Z`, notebook 12 no Colab T4), cobertura de 100%. Rodado com CatBoost 1.2.10, commit `dda5601`. O smoke do E-14 (linhas `v1`, sem valor de avaliacao) rodou antes para testar o codigo. A primeira chamada do E-15 parou ao ler os hiperparametros do E-08 (arquivo ausente no ambiente), antes de treinar e de calcular qualquer metrica; a execucao valida e a segunda. Saidas: `artifacts/feature_experiments/e14_e15_gold_v2/`.
+
+**E-14 (modelo do v1 congelado; 4.884 linhas, 66 canais, `novo_canal` + `novo_periodo`).**
+
+| Braco | MAE macro | Pares | Dentro de 2x | vs B0 (MAE / pares) |
+| --- | ---: | ---: | ---: | --- |
+| B0 | 0,863 | 50,8% | 57,6% | - |
+| CB_BASE | 0,856 | 52,7% | 54,4% | p = 0,71 / p = 0,42 |
+| CB_EMB | 0,848 | 55,3% | 57,1% | p = 0,19 / p = 0,018 |
+| **CB_FINAL** | **0,785** | **61,1%** | **60,8%** | **-0,078, p < 0,001 (51/66 canais) / +10,3 p.p., p < 0,001 (54/64)** |
+
+- Contra a expectativa registrada, o modelo do v1 bate o B0 em MAE tambem em `novo_canal` (0,742 vs 0,797; pares 60% vs 51%) e em `novo_periodo` (0,908 vs 1,052). O ganho vem quase todo da rubrica do Gemini: o CB_EMB sozinho fica perto do B0 em MAE.
+- Todos os estratos melhoram (automotivo 0,758 vs 0,852; moda 0,815 vs 0,875; pessoa 0,717 vs 0,824; marca 0,867 vs 0,915; midia 0,771 vs 0,847).
+- **Intervalo de 80% cobre 72,8%** (`novo_periodo` 65,8%): a calibracao do v1 e estreita para os dados novos.
+
+**E-15 (retreino no Gold v2.1; treino 4.885, teste 1.236 linhas, 68 canais).**
+
+| Comparacao | Linhas | MAE macro | Pares | Resultado |
+| --- | ---: | --- | --- | --- |
+| CB_FINAL_v2 vs B0 | 1.236 | 0,740 vs 0,915 | 62,4% vs 44,9% | MAE -0,175 (IC95% [-0,256; -0,106], p < 0,001, 50/68 canais); pares +17,6 p.p. (p < 0,001, 63/68) |
+| CB_FINAL_v2 vs CB_FINAL congelado | 1.117 | 0,719 vs 0,788 | 64,9% vs 61,9% | MAE -0,070 (IC95% [-0,118; -0,027], p = 0,003, 41/66); pares +3,0 p.p. (p = 0,10) |
+
+- Melhora em todos os estratos: automotivo 0,716 vs 0,903; moda 0,769 vs 0,929; pessoa 0,648 vs 0,876; marca 0,801 vs 0,962; midia 0,791 vs 0,901.
+- **Decisao pela regra pre-registrada: aprovado** (bate o B0 em MAE com p < 0,05 e nao piora os pares frente ao modelo congelado). O pacote da tool passa a ser treinado no Gold v2.1 (`tool_v3`, D-026).
+
+**Pacote `tool_v3_20261021T175806Z`** (`scripts/modelo/train_tool_model_v2.py`): mesma arquitetura e hiperparametros, treinado em todo o Gold v2.1. Intervalo recalibrado por rolling-origin no Gold v2.1 (50/65/80%): calibrado nas origens 1-2, cobre 80,8% na origem 3 (CB_FINAL; reservas 79,0% e 80,0%). No rolling-origin, MAE CB_FINAL 0,736 vs B0 0,875.
+
+### Onde o modelo erra no teste do E-15 (analise posterior; nao orienta escolha de modelo)
+
+`python scripts/experimentos/analyze_e15_errors.py` -> `e14_e15_gold_v2/e15/error_analysis.json`. MAE por Short (nao macro por canal). Intervalo: quantis das origens 1-2 do rolling-origin do `tool_v3` (janelas anteriores ao teste), aplicados a previsao do E-15.
+
+| Grupo | n | MAE | MAE B0 | Vies (prev - real) | Cobertura 80% |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Todos | 1.236 | 0,721 | 0,908 | -0,08 | 80% |
+| Automotivo | 665 | 0,710 | 0,911 | -0,04 | 80% |
+| Moda | 571 | 0,733 | 0,904 | -0,12 | 80% |
+| Pessoa | 522 | 0,649 | 0,883 | -0,05 | 78% |
+| Marca | 421 | 0,759 | 0,931 | -0,03 | 87% |
+| Midia | 293 | 0,793 | 0,919 | -0,20 | 74% |
+| Canal novo (fora do v1) | 928 | 0,691 | 0,827 | -0,09 | 79% |
+| Real abaixo da media do canal | 552 | 0,686 | 1,121 | +0,61 | 81% |
+| Real na media | 330 | 0,280 | 0,142 | -0,06 | 99% |
+| Real acima | 184 | 0,625 | 0,608 | -0,59 | 89% |
+| Real viral (> 2,7x a mediana) | 170 | 1,793 | 2,028 | -1,79 | 29% |
+
+- **O intervalo calibrado antes do teste cobre 80%** no geral e nos dois setores; fica largo em marcas (87%) e curto em midias (74%) e nos virais (29%).
+- **Continua encolhendo para a media do canal:** preve viral em 7 dos 170 virais; nos Shorts abaixo da media o erro cai muito frente ao B0 (0,69 vs 1,12), e e ai que esta a maior parte do ganho.
+- **Os maiores erros agora sao noticia e celebridade em canais de midia** (Steal The Look, GQ, Capricho, Doutor Multas, AutoPapo: 5 mil a 38 mil curtidas contra medianas de 26 a 530) e **campanhas de marca** (Arezzo, Track&Field, Nissan), como no v1. Assunto do momento e midia paga nao aparecem antes da publicacao.
+- **Canais:** melhor que o B0 em 50 de 68. Os piores sao marcas com poucos Shorts no teste (BYD 6, Toyota 7) ou com mudanca de patamar no periodo de teste (Lojas Torra: MAE 1,37, vies -1,37, todos os Shorts do teste acima da mediana historica).
+- **Tom de narracao:** "instrucional" e onde o modelo mais ganha do B0 (0,64 vs 1,04); "animado" e "calmo" ficam com vies negativo (subestima).
+
+### Calibracao do intervalo de 80%: alternativas (analise, 21/10/2026)
+
+`python scripts/experimentos/analyze_interval_calibration.py` -> `artifacts/feature_experiments/interval_calibration/`. So dentro de `split = train` do Gold v2.1 (o teste ja foi aberto): calibra nas origens 1-2 (1.462 Shorts), mede na origem 3 (983 Shorts). Motivo: no teste do E-15 o intervalo cobriu 87% em marcas e 74% em midias.
+
+| Metodo | Cobertura | Largura mediana | Pessoa / marca / midia | Pior distancia de 80% (grupos e setores) |
+| --- | ---: | ---: | --- | ---: |
+| Conformal global | 78,7% | 8,4x | 84,8 / 70,1 / 80,3% | 9,9 p.p. |
+| **Conformal por tipo de canal (atual)** | 77,2% | **6,6x** | 80,5 / 74,9 / 74,8% | 5,2 p.p. |
+| Conformal por grupo | 76,6% | 8,4x | 76,6 / 74,9 / 79,1% | 5,1 p.p. |
+| Conformal por grupo x setor | 77,4% | 7,6x | 76,4 / 75,4 / 82,0% | 4,5 p.p. |
+| Quantis do GBM (CatBoost Quantile 10%/90%) | 58,9% | 4,2x | 59,8 / 59,3 / 56,8% | 23,2 p.p. |
+| CQR global (quantis do GBM + conformal) | 81,4% | 9,8x | 84,8 / 79,0 / 78,6% | 4,8 p.p. |
+| CQR por grupo | 80,7% | 9,9x | 83,1 / 80,8 / 76,1% | 3,9 p.p. |
+
+- **Quantis do GBM sozinhos (sugestao do TAP) cobrem so 59%**: o modelo treinado com perda quantilica fica confiante demais em dados futuros. E o motivo de o projeto usar conformal.
+- Entre os conformais, as diferencas por grupo (3 a 5 p.p.) estao dentro do ruido: com 234 a 415 Shorts por grupo, o erro padrao da cobertura e de 2,0 a 2,6 p.p. O CQR chega mais perto de 80% em todos os grupos, mas com faixa ~50% mais larga (9,8x vs 6,6x).
+- **Decisao: manter o metodo atual** (mais estreito, 77-80% no geral; os 87% / 74% do teste do E-15 sao compativeis com esse ruido). Recalibrar por grupo ou usar CQR fica como opcao se a Galaxies preferir cobertura mais uniforme a uma faixa mais estreita.
+
+## E-16: clusters dos descritores do VLM (pre-registro, 21/10/2026, antes de rodar)
+
+**Motivacao.** Camada 2 "recomendada" do TAP (secao 6.3): os descritores curtos do Gemini (`elementos_video_top5`, `elementos_audio_top5`) "podem ser embedados e clusterizados (K-Means) para virar features". No Gold v2.1 sao 7.146 descritores de video distintos (5.073 aparecem uma vez) e 2.932 de audio: sem agrupar, nao viram feature.
+
+**Metodo.**
+- Representacao de cada descritor distinto (minusculo, sem espacos extras): TF-IDF de palavras (1-2) + caracteres (3-5, dentro da palavra), SVD para 64 dimensoes, normalizacao L2. Sem modelo externo (o Hugging Face nao e acessivel no ambiente de treino).
+- K-Means separado para video e audio; k escolhido pelo maior silhouette entre {8, 12, 16, 20}, so com os descritores das linhas de treino de cada janela (nao usa o alvo).
+- Features por Short: contagem dos seus descritores em cada cluster (`kv_XX` video, `ka_XX` audio).
+- Bracos: CB_FINAL (features do pacote atual) vs CB_FINAL_KM (+ contagens), hiperparametros do E-08, PCA do embedding ajustado em cada janela.
+- Validacao: rolling-origin (50% / 65% / 80% de cada canal) **so dentro de `split = train` do Gold v2.1** (o teste ja foi aberto no E-15 e nao e usado). Comparacao pareada por canal (bootstrap + permutacao de sinais) sobre as previsoes das tres origens juntas.
+
+**Regra de decisao.** CB_FINAL_KM e `retida` se reduzir o MAE macro por canal com p < 0,05 e nao piorar a acuracia por pares em mais de 0,5 p.p. Se retida, a adocao no pacote da tool exige implementar o mapeamento descritor -> cluster na rubrica ao vivo e fica registrada como proximo passo (nao ha teste intocado para confirmar). Em qualquer caso, os clusters e o desvio medio por cluster sao reportados como analise descritiva.
+
+### Resultado E-16 (21/10/2026, uma execucao)
+
+`python scripts/experimentos/run_e16_descriptor_clusters.py` -> `artifacts/feature_experiments/e16_descriptor_clusters/`. Rolling-origin dentro do treino do Gold v2.1: 2.445 linhas de validacao, 68 canais; o silhouette escolheu k = 20 para video e para audio em todas as janelas (o maior valor da grade).
+
+| Braco | MAE macro | Origem 1 / 2 / 3 |
+| --- | ---: | --- |
+| B0 | 0,864 | 0,854 / 0,814 / 0,906 |
+| CB_FINAL | 0,769 | 0,779 / 0,747 / 0,777 |
+| CB_FINAL_KM | 0,772 | 0,780 / 0,753 / 0,779 |
+
+- CB_FINAL_KM vs CB_FINAL: MAE +0,0025 (IC95% [-0,003; +0,008], p = 0,38, 27/68 canais melhoram); pares -0,1 p.p. (p = 0,84). **Decisao pre-registrada: `sem_ganho`.** A rubrica numerica (notas, sinais sim/nao, tom, fala) ja carrega o que os clusters dizem.
+- **Descritivo (treino inteiro; desvio medio sobre a mediana do canal dos Shorts que tem o cluster, sem controle de canal):** acima da media do canal ficam "ronco/som do motor" (1,12x), "detalhes do interior/motor" (1,06x), "corpo inteiro/espelho" (1,06x) e "try-on" (1,03x); abaixo ficam "fundo branco/neutro" (0,72x), "voz clara/fala clara" (0,75x), "ambiente interno/antes e depois" (0,77x) e "voz masculina" (0,82x).
+- Limite: a representacao e lexical (TF-IDF), entao junta descritores com negacao ("sem musica" com "musica animada"); clusters semanticos (sentence-transformers, como sugere o TAP) exigem o Hugging Face, que nao abre neste ambiente. Silhouette baixo (0,11 video; 0,21 audio).
+
+## E-17: quadros de dentro do video (pre-registro, 21/10/2026, antes de rodar)
+
+**Motivacao.** A camada minima do TAP (secao 6.2/6.3) pede embeddings SigLIP 2 dos frames, nao so da thumbnail, e "variancia entre frames". O download do video segue fora (D-011, D-023), mas o YouTube publica, no mesmo servidor de imagens das thumbnails (`i.ytimg.com/vi/<id>/oar1|oar2|oar3.jpg`), tres quadros verticais 1080x1920 tirados de dentro de cada Short (testado em 21/10 em 4 Shorts da base: quadros diferentes da capa). Nao e embedding de video completo (X-CLIP/VideoMAE exigem o video); e o que da para fazer sem baixar.
+
+**Dados.** Shorts do Gold v2.1 (6.121) + criativos da demo. Notebook no Colab baixa `oar1-3` e calcula SigLIP 2 (`google/siglip2-base-patch16-224`, `get_image_features`, L2), mesmo modelo da thumbnail. Cobertura minima: 95% das linhas de treino com os tres quadros; abaixo disso o experimento nao roda.
+
+**Features novas (por Short).**
+- `frames_pc01..16`: PCA 16 da media normalizada dos tres quadros (PCA ajustado so na janela de treino).
+- `frames_variacao`: 1 - cosseno medio entre os pares de quadros (troca de cena / variedade visual).
+- `thumb_vs_frames`: cosseno entre a thumbnail e a media dos quadros (a capa representa o conteudo?).
+
+**Bracos e validacao.** Mesmo protocolo do E-16: rolling-origin (50/65/80% de cada canal) so dentro de `split = train` do Gold v2.1, hiperparametros do E-08, comparacao pareada por canal com as tres origens juntas.
+- Principal: CB_FINAL vs CB_FINAL_FR (+ as 18 features).
+- Secundario: CB_FINAL vs CB_FINAL_FR2 (+ so `frames_variacao` e `thumb_vs_frames`).
+- Correcao de Holm para as duas comparacoes.
+
+**Emenda (21/10/2026, antes de rodar o E-17; nenhum resultado visto).** O YouTube nao publica `oar1-3` para 534 dos 6.130 Shorts (8,7%; 404 em todas as 1.602 tentativas, com o video no ar). Para esses, o notebook usa `hq1-3` (os mesmos momentos em 480x360 com tarjas; o painel 9:16 do centro e recortado quando as laterais sao pretas, como nas thumbnails). Checagem em 60 Shorts com as duas versoes: cosseno mediano 0,84 entre `hq_k` e `oar_k` contra 0,72 entre `hq_k` e os outros quadros do mesmo video (n = 180). Cobertura final: 6.130 de 6.130 com os tres quadros (5.596 `oar`, 534 `hq`; campo `fonte` no npz, nao usado como feature). Sensibilidade (so descritiva, nao muda a decisao): metricas da validacao sem os Shorts de fonte `hq`. As demais regras ficam iguais.
+
+**Regra de decisao.** Um braco e `retido` se reduzir o MAE macro por canal com p de Holm < 0,05 e nao piorar a acuracia por pares em mais de 0,5 p.p.; se os dois passarem, fica o de menor MAE. Retido -> novo pacote da tool com os quadros buscados ao vivo pela mesma URL (sem teste intocado para confirmar; registrado como limitacao). Nao retido -> as features ficam como analise descritiva.
+
+### Resultado E-17 (21/10/2026, uma execucao)
+
+`python scripts/experimentos/run_e17_video_frames.py --frames data/silver/features/video_frames_oar_v1/20261022T012500Z/frames_oar.npz` -> `artifacts/feature_experiments/e17_video_frames/`. Quadros: 6.130 de 6.130 Shorts com os tres (5.596 `oar`, 534 `hq`; md5 7324408f...). Rolling-origin dentro do treino do Gold v2.1: 2.445 linhas de validacao, 68 canais, 100% com os tres quadros.
+
+| Braco | MAE macro | Pares | vs CB_FINAL (MAE) |
+| --- | ---: | ---: | --- |
+| B0 | 0,864 | 48,6% | |
+| CB_FINAL | 0,769 | 60,8% | |
+| CB_FINAL_FR (+18: PCA dos quadros + 2 escalares) | 0,768 | 61,3% | -0,0015 (p = 0,72; Holm 0,72) |
+| CB_FINAL_FR2 (+2: variacao entre quadros, thumbnail vs quadros) | 0,763 | 61,2% | -0,0066 (IC95% [-0,0127; -0,0006], p = 0,036; **Holm 0,072**), 43/68 canais |
+
+- **Decisao pre-registrada: `sem_ganho`.** O FR2 melhora na direcao certa e no limite: p bruto 0,036, mas 0,072 com a correcao de Holm, acima de 0,05. O PCA dos quadros (FR) nao acrescenta nada ao embedding da thumbnail.
+- Sensibilidade so com quadros `oar` (2.243 linhas): CB_FINAL 0,796, FR2 0,787, FR 0,798, mesma direcao.
+- **Descritivo (treino; desvio sobre a mediana do canal por quintil):** Shorts com pouca variacao visual entre os quadros rendem 0,75x a mediana do canal, contra 1,0x nos quintis mais variados; Shorts cuja thumbnail e quase igual ao conteudo (quintil mais alto de similaridade) rendem 0,77x, contra ~1,0x quando a capa difere do video (capa produzida).
+- Proximo passo registrado: as duas variaveis do FR2 sao candidatas fortes para um teste com dados novos (teste prospectivo), sem reabrir este teste.
+
 ## Protocolo de experimento
 
 1. Criar um grupo pequeno e coerente de features, sem alterar o teste final.
@@ -372,3 +525,7 @@ Script `scripts/experimentos/analyze_e13_errors.py`; saida em `artifacts/feature
 | E-10b | Embedding de texto (mpnet multilingue) sobre o CB_EMB | Titulo: MAE -0,004 (p=0,73); titulo+descricao: -0,006 (p=0,58) | Nao executado | `sem_ganho` | Texto semantico nao acrescenta ao embedding da thumbnail. |
 | E-12 | LGBM, XGB, ET, ensemble, YetiRank, comparaveis, peso por canal; Optuna; PyCaret | Nenhum aprovado apos Holm; CB_KNN MAE -0,020 (p bruto 0,025, Holm 0,148); Optuna pior na origem 3 (p=0,76); PyCaret nao instalou | Nao executado | `sem_ganho` (algoritmos, Optuna) / candidato (comparaveis) | Mantem CB_EMB com parametros do E-08; comparaveis vao ao E-13. |
 | E-13 | CB_EMB + comparaveis (KNN visual) + rubrica Gemini + fala | CB_FINAL MAE 0,850 vs 0,882 (-0,033, p=0,003, 21/26 canais); aprovado pela regra pre-registrada | **Aberto uma vez:** MAE 0,746 vs B0 0,858 e CB_EMB 0,780; pares 0,580 vs B0 0,440; intervalo 80% cobre 79,9% | `retida` | **CB_FINAL e o modelo final.** |
+| E-14 | Modelo do v1 congelado no Gold v2.1 (`novo_canal` + `novo_periodo`) | - | **Uma vez:** CB_FINAL MAE 0,785 vs B0 0,863 (p < 0,001, 51/66 canais); pares 61,1% vs 50,8%; intervalo 80% cobre 72,8% | diagnostico | Modelo generaliza para canais e periodos novos; intervalo precisa recalibrar. |
+| E-15 | Mesma arquitetura retreinada no Gold v2.1 | - | **Uma vez:** MAE 0,740 vs B0 0,915 (p < 0,001); vs congelado 0,719 vs 0,788 (p = 0,003), pares 64,9% vs 61,9% | `retida` | **Pacote da tool treinado no Gold v2.1 (`tool_v3`).** |
+| E-16 | Clusters K-Means dos descritores do VLM (`elementos_video_top5`, `elementos_audio_top5`) | MAE 0,772 vs CB_FINAL 0,769 (+0,0025, p = 0,38) | Nao usado (teste ja aberto no E-15) | `sem_ganho` | Rubrica numerica ja cobre; clusters ficam como analise descritiva. |
+| E-17 | Quadros de dentro do video (oar/hq 1-3, SigLIP 2): PCA + variacao entre quadros + thumbnail vs quadros | FR2: MAE -0,0066 (p = 0,036; Holm 0,072); FR: -0,0015 (p = 0,72) | Nao usado (teste ja aberto no E-15) | `sem_ganho` (no limite) | Candidatas para teste prospectivo; pouca variacao visual e capa igual ao video associam-se a ~0,75x a mediana. |

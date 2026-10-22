@@ -22,6 +22,9 @@ class ChannelStats(BaseModel):
     prior_likes: list[int] = Field(..., min_length=1, description="Curtidas dos Shorts anteriores do canal")
     last_post_at: Optional[datetime] = Field(None, description="Data do ultimo Short publicado")
     median_duration_seconds: Optional[float] = None
+    subscribers: Optional[int] = Field(
+        None, ge=0, description="Inscritos do canal (informativo, devolvido na saida; o modelo nao usa: e uma fotografia "
+                                "e, como baseline, erra mais que a mediana do canal)")
 
 
 class CreativeInput(BaseModel):
@@ -73,6 +76,8 @@ class PredictionOutput(BaseModel):
     confidence_flag: Literal["alta", "baixa"]
     confidence_reasons: list[str]
     channel_baseline_likes: int
+    channel_subscribers: Optional[int] = Field(
+        None, description="Inscritos do canal: os informados em channel_stats ou, para canal da base, os da ultima coleta")
     relative_to_channel: float = Field(..., description="Previsao / mediana historica do canal")
     performance_band: Literal["abaixo", "na_media", "acima", "viral"]
     top_drivers: list[Driver]
@@ -93,4 +98,22 @@ class RankedCreative(PredictionOutput):
 
 class RankingOutput(BaseModel):
     ranking: list[RankedCreative]
+    note: str
+
+
+class WhatIfVariant(BaseModel):
+    factor: Literal["horario", "dia_da_semana", "duracao", "titulo", "criativo"]
+    value: str
+    predicted_metric: int
+    interval_low: int
+    interval_high: int
+    relative_to_channel: float
+    delta_vs_base_pct: float = Field(..., description="Variacao do desempenho previsto em relacao ao criativo original, em %")
+    model_variant: str
+
+
+class WhatIfOutput(BaseModel):
+    base: PredictionOutput
+    variants: list[WhatIfVariant]
+    best_by_factor: dict[str, WhatIfVariant]
     note: str

@@ -22,9 +22,8 @@ def predictor() -> Predictor:
 
 
 @pytest.fixture(scope="module")
-def creatives() -> list[dict]:
-    latest = json.loads((ROOT / "data" / "gold" / "snapshots" / "LATEST.json").read_text(encoding="utf-8"))
-    gold = pd.read_csv(ROOT / latest["path"])
+def creatives(predictor) -> list[dict]:
+    gold = pd.read_csv(ROOT / predictor.meta["inputs"]["gold"]["path"], dtype={"video_id": str})  # Gold do pacote servido
     rows = gold[(gold["split"] == "train") & (gold["channel_name"] == "Carros com Camanzi")].tail(2)
     return [{"creative": f"https://www.youtube.com/shorts/{v}", "caption": "teste", "planned_datetime": "2026-07-01T18:00",
              "channel_id": c, "sector": "automotivo"} for v, c in zip(rows["video_id"], rows["channel_id"])]

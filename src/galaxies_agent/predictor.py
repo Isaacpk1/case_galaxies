@@ -1,7 +1,8 @@
 """Funcao de previsao da tool: criativo + contexto -> previsao, intervalo, drivers e comparaveis.
 
-O numero vem SEMPRE do modelo treinado. Modelo final = CB_FINAL do E-13 (thumbnail SigLIP 2 +
-comparaveis visuais + rubrica e fala do video extraidas pelo Gemini). Quando falta uma entrada, a tool
+O numero vem SEMPRE do modelo treinado. Modelo final = CB_FINAL (arquitetura do E-13; o pacote servido e o do
+LATEST.json, hoje retreinado no Gold v2.1 pelo E-15): thumbnail SigLIP 2 + comparaveis visuais + rubrica e fala do
+video extraidas pelo Gemini. Quando falta uma entrada, a tool
 usa a reserva correspondente e marca confianca baixa:
 
 | entrada disponivel                     | modelo            |
@@ -28,7 +29,8 @@ from catboost import CatBoostRegressor, Pool
 
 from . import features as F
 from .embedder import ThumbnailEmbedder, youtube_id
-from .schemas import Comparable, CreativeInput, Driver, PredictionOutput, RankedCreative, RankingOutput
+from .schemas import (Comparable, CreativeInput, Driver, PredictionOutput, RankedCreative, RankingOutput,
+                      WhatIfOutput, WhatIfVariant)
 from .video_rubric import VideoRubric
 
 ROOT = Path(os.environ.get("GALAXIES_ROOT", Path(__file__).resolve().parents[2]))
@@ -90,6 +92,17 @@ class Predictor:
         self.embedder = ThumbnailEmbedder(self.meta["embedding"]["model"], cache)
         self.rubric = VideoRubric(ROOT, extra_rubric_csv, live=live_rubric)
         self.calibration = self.meta["interval"]["calibration"]
+        self.subscribers = self._load_subscribers()
+
+    @staticmethod
+    def _load_subscribers() -> dict[str, int]:
+        """Inscritos da ultima Silver channel_stats (informativo; ausente = vazio, a tool funciona igual)."""
+        base = ROOT / "data" / "silver" / "channel_stats"
+        runs = sorted(p for p in base.glob("*/channel_stats.csv")) if base.exists() else []
+        if not runs:
+            return {}
+        stats = pd.read_csv(runs[-1]).dropna(subset=["subscriber_count_at_collection"])
+        return {r.channel_id: int(r.subscriber_count_at_collection) for r in stats.itertuples()}
 
     # ------------------------------------------------------------ features
     def _planned_utc(self, when: datetime) -> datetime:
@@ -105,7 +118,8 @@ class Predictor:
             return {"channel_id": item.channel_id or f"externo:{stats.channel_name or 'sem_nome'}",
                     "channel_name": stats.channel_name or item.channel_id or "canal externo",
                     "channel_type": stats.channel_type, "prior_likes": likes, "last_post_at": last,
-                    "median_duration": stats.median_duration_seconds, "in_training": False, "source": "channel_stats"}
+                    "median_duration": stats.median_duration_seconds, "in_training": False, "source": "channel_stats",
+                    "subscribers": stats.subscribers}
         rows = self.history[(self.history["channel_id"] == item.channel_id)
                             & (self.history["published_at"] < pd.Timestamp(planned))].sort_values("published_at")
         if rows.empty:
@@ -115,7 +129,8 @@ class Predictor:
                 "channel_type": rows["channel_type"].iat[-1], "prior_likes": rows["like_count"].astype(int).tolist(),
                 "last_post_at": rows["published_at"].iat[-1].to_pydatetime(),
                 "median_duration": float(rows["duration_seconds"].median()),
-                "in_training": bool(info["in_training"]) if info is not None else False, "source": "base_silver"}
+                "in_training": bool(info["in_training"]) if info is not None else False, "source": "base_silver",
+                "subscribers": self.subscribers.get(item.channel_id)}
 
     def build_row(self, item: CreativeInput) -> tuple[dict, dict]:
         planned = self._planned_utc(item.planned_datetime)
@@ -266,7 +281,8 @@ class Predictor:
             creative_id=item.creative_id or own_id or item.creative, predicted_metric=likes,
             interval_low=low, interval_high=high, interval_level=self.meta["interval"]["nominal"],
             confidence_flag="baixa" if reasons else "alta", confidence_reasons=reasons,
-            channel_baseline_likes=baseline_likes, relative_to_channel=round(relative, 3), performance_band=band,
+            channel_baseline_likes=baseline_likes, channel_subscribers=ctx.get("subscribers"),
+            relative_to_channel=round(relative, 3), performance_band=band,
             top_drivers=drivers, explanation=explanation, comparables=comps, features_used=features_used,
             model_version=self.version, model_variant=variant, embedding_source=emb_source,
             rubric_source=rubric_source, video_attributes=video,
@@ -285,6 +301,55 @@ class Predictor:
                    if acc else "no rolling-origin, o modelo acerta ~60% dos pares dentro do mesmo canal (moeda = 50%)."))
         return RankingOutput(ranking=ranked, note=note)
 
+    def what_if(self, item: CreativeInput, hours: Optional[list[int]] = None, weekdays: Optional[list[int]] = None,
+                durations: Optional[list[float]] = None, captions: Optional[list[str]] = None,
+                creatives: Optional[list[str]] = None, attributes: Optional[tuple] = None) -> WhatIfOutput:
+        """Re-pontua variacoes do criativo, mudando UM fator por vez (extensao 'what-if' do TAP).
+
+        hours: horas locais (America/Sao_Paulo) no mesmo dia; weekdays: 0=segunda..6=domingo na mesma semana;
+        durations: segundos; captions: titulos alternativos; creatives: thumbnails/videos alternativos.
+        Sem listas, usa uma grade padrao de horario e dia da semana. A rubrica do video original e reutilizada
+        nas variacoes de horario, dia, duracao e titulo (o video nao muda).
+        """
+        attributes = attributes if attributes is not None else self.video_attributes(item)
+        base = self.predict(item, attributes)
+        local = item.planned_datetime if item.planned_datetime.tzinfo else item.planned_datetime.replace(tzinfo=LOCAL_TZ)
+        local = local.astimezone(LOCAL_TZ)
+        if not any([hours, weekdays, durations, captions, creatives]):
+            hours, weekdays = [8, 12, 15, 18, 21], list(range(7))
+        candidates: list[tuple[str, str, CreativeInput, Optional[tuple]]] = []
+        for h in hours or []:
+            when = local.replace(hour=int(h), minute=0)
+            candidates.append(("horario", f"{int(h):02d}h", item.model_copy(update={"planned_datetime": when}), attributes))
+        for d in weekdays or []:
+            when = local + pd.Timedelta(days=int(d) - local.weekday())
+            candidates.append(("dia_da_semana", WEEKDAYS[int(d)], item.model_copy(update={"planned_datetime": when.to_pydatetime() if hasattr(when, "to_pydatetime") else when}), attributes))
+        for sec in durations or []:
+            candidates.append(("duracao", f"{float(sec):.0f}s", item.model_copy(update={"duration_seconds": float(sec)}), attributes))
+        for text in captions or []:
+            candidates.append(("titulo", text[:80], item.model_copy(update={"caption": text}), attributes))
+        for creative in creatives or []:
+            own = youtube_id(creative)
+            candidates.append(("criativo", creative[:120], item.model_copy(update={"creative": creative}), None if own else attributes))
+        variants = []
+        for factor, value, variant_item, attrs in candidates:
+            out = self.predict(variant_item, attrs)
+            variants.append(WhatIfVariant(factor=factor, value=value, predicted_metric=out.predicted_metric,
+                                          interval_low=out.interval_low, interval_high=out.interval_high,
+                                          relative_to_channel=out.relative_to_channel,
+                                          delta_vs_base_pct=round((out.relative_to_channel / base.relative_to_channel - 1) * 100, 1),
+                                          model_variant=out.model_variant))
+        best = {}
+        for v in variants:
+            if v.factor not in best or v.relative_to_channel > best[v.factor].relative_to_channel:
+                best[v.factor] = v
+        width = (base.interval_high + 1) / (base.interval_low + 1)
+        note = (f"Cada variacao muda um fator e mantem o resto do criativo. O intervalo de 80% do original vai de "
+                f"{_br(base.interval_low)} a {_br(base.interval_high)} curtidas (fator ~{_br(width, 1)}x): diferencas de poucos "
+                f"por cento entre variacoes estao dentro do ruido e nao sao decisivas. O modelo ve o titulo so pelo "
+                f"tamanho (caracteres), nao pelo conteudo do texto; horario e dia sao lidos em UTC, como no treino.")
+        return WhatIfOutput(base=base, variants=variants, best_by_factor=best, note=note)
+
     def channel_summary(self, channel_id: str, last: int = 10) -> dict:
         rows = self.history[self.history["channel_id"] == channel_id].sort_values("published_at")
         if rows.empty:
@@ -292,6 +357,7 @@ class Predictor:
         recent = rows.tail(last)
         return {"channel_id": channel_id, "channel_name": rows["channel_name"].iat[0], "sector": rows["sector"].iat[0],
                 "channel_type": rows["channel_type"].iat[0], "shorts_na_base": int(len(rows)),
+                "inscritos_na_coleta": self.subscribers.get(channel_id),
                 "mediana_curtidas": float(rows["like_count"].median()),
                 "periodo": [str(rows["published_at"].min())[:10], str(rows["published_at"].max())[:10]],
                 "ultimos": [{"video_id": r.video_id, "titulo": str(r.title)[:100], "publicado": str(r.published_at)[:10],

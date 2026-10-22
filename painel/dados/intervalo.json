@@ -1,0 +1,58 @@
+[
+{
+"metodo": "Conformal global",
+"cobertura": 0.7874,
+"largura_fator": 8.43,
+"pessoa": 0.8482,
+"marca": 0.7006,
+"midia": 0.8034
+},
+{
+"metodo": "Conformal por tipo (atual)",
+"cobertura": 0.7721,
+"largura_fator": 6.64,
+"pessoa": 0.8048,
+"marca": 0.7485,
+"midia": 0.7479
+},
+{
+"metodo": "Conformal por grupo",
+"cobertura": 0.766,
+"largura_fator": 8.38,
+"pessoa": 0.7663,
+"marca": 0.7485,
+"midia": 0.7906
+},
+{
+"metodo": "Conformal grupo x setor",
+"cobertura": 0.7742,
+"largura_fator": 7.58,
+"pessoa": 0.7639,
+"marca": 0.7545,
+"midia": 0.8205
+},
+{
+"metodo": "Quantis do GBM",
+"cobertura": 0.589,
+"largura_fator": 4.23,
+"pessoa": 0.5976,
+"marca": 0.5928,
+"midia": 0.5684
+},
+{
+"metodo": "CQR global",
+"cobertura": 0.8138,
+"largura_fator": 9.83,
+"pessoa": 0.8482,
+"marca": 0.7904,
+"midia": 0.7863
+},
+{
+"metodo": "CQR por grupo",
+"cobertura": 0.8067,
+"largura_fator": 9.92,
+"pessoa": 0.8313,
+"marca": 0.8084,
+"midia": 0.7607
+}
+]

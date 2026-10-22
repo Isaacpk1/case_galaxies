@@ -4,6 +4,8 @@ Inteli Academy x Galaxies (TAPI). Agente que preve, **antes da publicacao**, as 
 
 **Resultado principal (teste final, aberto uma unica vez, 612 Shorts):** o modelo final (CatBoost sobre o desvio da mediana do canal, com embedding SigLIP 2 da thumbnail, Shorts comparaveis e rubrica de video + fala do Gemini) erra 13% menos que a mediana historica do canal (MAE 0,746 vs 0,858 em log), acerta a ordem de 58% dos pares de Shorts do mesmo canal (mediana do canal: 44%) e seu intervalo de 80% cobre 79,9% dos casos. Na validacao temporal, a rubrica Gemini + comparaveis melhoraram o modelo com p = 0,003 (21 de 26 canais). Em canais nunca vistos, o modelo ainda ordena acima do acaso (55%, p = 0,002).
 
+**Validacao no Gold v2 (68 canais, 21/10/2026):** sem retreino, o modelo do v1 tambem bate a mediana do canal em 4.884 Shorts que nunca viu (MAE 0,785 vs 0,863; pares 61% vs 51%; p < 0,001, E-14). Retreinado no Gold v2, erra 19% menos que a mediana no teste (MAE 0,740 vs 0,915; pares 62% vs 45%, E-15) e 9% menos que o modelo do v1 nas mesmas linhas (p = 0,003); pela regra pre-registrada, a tool passou a servir o pacote treinado no Gold v2 (`tool_v3`).
+
 ---
 
 ## 1. Problema e recorte
@@ -25,8 +27,9 @@ Detalhes e decisoes em [docs/01](docs/01-entendimento-do-problema.md).
 | Item | Valor |
 | --- | --- |
 | Origem | YouTube Data API v3 (metadados e metricas publicas); thumbnails publicas; rubrica de video e transcricao via Gemini a partir da URL publica |
-| Periodo | 01/04/2025 a 30/08/2026 (18 meses de historico, Shorts com pelo menos 30 dias na data da coleta, 28-29/09/2026) |
-| Volume | 3.004 Shorts, 26 canais (moda 1.589, automotivo 1.415; marcas e criadores) - Gold `gold_v1_20261002T013000Z_663f502d` |
+| Periodo | v1: 01/04/2025 a 30/08/2026 (coleta 28-29/09/2026). v2: 21/04/2025 a 21/09/2026 (coleta 20-21/10/2026). Sempre Shorts com pelo menos 30 dias na data da coleta |
+| Volume | 3.004 Shorts, 26 canais (moda 1.589, automotivo 1.415; marcas e criadores) - Gold `gold_v1_20261002T013000Z_663f502d` (experimentos E-00 a E-13) |
+| Volume v2 | 6.121 Shorts, 68 canais (automotivo 37, moda 31; pessoa, marca e midia), 100 por canal, historico com 23.092 Shorts - Gold `gold_v2_1_20261021T113931Z_e1fd77c6` (E-14, E-15 e pacote servido) |
 | Split | Treino 2.392 / teste 612 (os 20% mais recentes de cada canal); **teste aberto uma unica vez**, depois da decisao do E-13 |
 | Licenca e uso | Dados publicos coletados sob os Termos da YouTube API; nao redistribuidos (camadas `data/` fora do git). Gemini recebe apenas URLs publicas; nenhum video e baixado |
 
@@ -62,7 +65,7 @@ Camadas e contratos: [docs/09](docs/09-arquitetura-elt-mvp.md). Decisao de stack
 
 ## 4. Instalacao e execucao
 
-Python 3.11+. No Windows do Inteli a politica de aplicativos bloqueia DLLs nativas (pandas, CatBoost, Pydantic): **os coletores rodam no Windows** (so biblioteca padrao); **modelo, tool e agente rodam em Linux, macOS ou Colab**.
+Python 3.11+. No Windows do Inteli a politica de aplicativos bloqueou DLLs nativas (pandas, CatBoost, Pydantic) no Python do sistema: por isso **os coletores usam so a biblioteca padrao**. Em 21/10/2026, um `.venv` com Python 3.14 nessa mesma maquina carregou o modelo (`catboost` 1.2.10) e serve o MCP no Claude Desktop; modelo, tool e agente tambem rodam em Linux, macOS ou Colab.
 
 ```powershell
 python -m venv .venv
@@ -82,10 +85,14 @@ Copy-Item .env.example .env              # YOUTUBE_API_KEY e GEMINI_API_KEY (nun
 | 6. Embedding da thumbnail | `notebooks/04_modelo_colab/08_e08_catboost_residual_multimodal.ipynb` (Colab, GPU) |
 | 7. Experimentos | notebooks 05-10 e `scripts/experimentos/` (ver secao 7); E-13: `python scripts/experimentos/run_e13_final.py` e `--report` |
 | 7b. Teste final (uma vez) e erros | `python scripts/experimentos/run_e13_test_final.py` (recusa rodar de novo) e `python scripts/experimentos/analyze_e13_errors.py` |
-| 8. Pacote do modelo da tool | `python scripts/modelo/train_tool_model.py` (todo o Gold; `--train-only` reproduz o modelo do teste) |
+| 8. Pacote do modelo da tool | `python scripts/modelo/train_tool_model_v2.py` (pacote servido: todo o Gold v2.1, intervalo recalibrado no v2); `python scripts/modelo/train_tool_model.py` reproduz o pacote do Gold v1 (`--train-only`: modelo do teste do E-13) |
+| 8c. Inscritos dos canais e baseline do TAP | `python scripts/pipeline/build_channel_stats.py` (le o Bronze, sem API) e `python scripts/experimentos/run_subscriber_baseline.py` |
+| 8d. E-16 (clusters dos descritores) | `python scripts/experimentos/run_e16_descriptor_clusters.py` |
+| 8b. Gold v2 (E-14 / E-15, uma vez) | embedding: `notebooks/04_modelo_colab/12_embedding_thumbnails_v2.ipynb`; `python scripts/experimentos/run_e14_e15_gold_v2.py --cobertura` e `--exp e14` / `--exp e15 --emb-v2 <embeddings.npz>` |
 | 9. Testes | `PYTHONPATH=src python -m pytest -q tests/` |
-| 10. Servidor MCP | `PYTHONPATH=src python -m galaxies_agent.mcp_server` |
+| 10. Servidor MCP | `PYTHONPATH=src python -m galaxies_agent.mcp_server`; no Claude Desktop: `python scripts/setup/configure_claude_desktop.py` (secao 4) |
 | 11. Agente | `PYTHONPATH=src python -m galaxies_agent.agent "Qual destes Shorts priorizar?" --criativos '[...]'` |
+| 11b. Painel de resultados | `painel/` (artifact Dashboard: <https://claude.ai/artifact/DeDmDXainSZacMnHzJehxZ>); fontes de cada dataset em `painel/README.md` |
 | 12. Demo | `notebooks/05_demo/11_demo_agente.ipynb` (Colab; arraste `demo_bundle.tar.gz` e cadastre `GEMINI_API_KEY` nos Secrets) |
 
 A coleta de legendas antiga (transcript-api/yt-dlp/apify) foi substituida pelo Gemini por bloqueio de IP (D-011); os scripts sem uso foram removidos em 14/10/2026 e continuam no historico do git.
@@ -102,17 +109,40 @@ print(out.predicted_metric, out.interval_low, out.interval_high, out.confidence_
 print(out.model_variant, out.rubric_source, out.video_attributes)   # o que o Gemini viu no video
 ```
 
-### Uso via MCP (ex.: Claude Desktop; `cwd` na raiz do repo)
+### Uso via MCP (Claude Desktop)
 
-```json
-{"mcpServers": {"galaxies-preditivo": {"command": "python", "args": ["-m", "galaxies_agent.mcp_server"],
-  "env": {"PYTHONPATH": "src"}}}}
-```
+Precisa de um Python onde `catboost` e `pandas` carreguem. No Windows do Inteli funcionou em 21/10/2026 com um `.venv` (Python 3.14, `catboost` 1.2.10) criado pelo instalador abaixo; o Python do sistema dessa maquina ja teve DLLs bloqueadas, e o instalador testa o carregamento antes de gravar qualquer coisa. Nao ha `pyproject.toml`: o pacote roda pelo `PYTHONPATH=src`.
+
+No Windows, os passos 1 e 2 estao em `instalar_mcp_claude_desktop.bat` (dois cliques; log em `setup_mcp.log`).
+
+1. Na raiz do repo, crie o ambiente e instale as dependencias:
+   ```bash
+   python -m venv .venv
+   .venv/bin/pip install -r requirements-tool.txt            # Windows: .venv\Scripts\pip install -r requirements-tool.txt
+   ```
+   O pacote do modelo (`artifacts/tool_model/tool_v3_...`, apontado por `LATEST.json`) e a Silver/Gold que ele cita em `metadata.json` precisam estar na pasta.
+2. Registre o servidor (testa se o modelo carrega e grava caminhos absolutos, preservando outros servidores do arquivo, com copia `.bak`):
+   ```bash
+   .venv/bin/python scripts/setup/configure_claude_desktop.py               # opcional: --gemini-key <chave>
+   ```
+   Arquivo gravado: Windows `%APPDATA%\Claude\claude_desktop_config.json`, macOS `~/Library/Application Support/Claude/claude_desktop_config.json`. Se o Claude Desktop foi instalado como pacote (pasta `%LOCALAPPDATA%\Packages\Claude_*`), ele le `...\LocalCache\Roaming\Claude\claude_desktop_config.json` ou, nas versoes recentes, `%LOCALAPPDATA%\Claude-Data\claude_<id>\claude_desktop_config.json` (em Configuracoes > Desenvolvedor > Editar configuracao o app mostra qual). O script grava em todos os que existirem; feche o app antes de rodar, porque ele regrava o arquivo ao sair. O Claude Desktop nao usa `cwd`, por isso a entrada fica com caminhos absolutos:
+   ```json
+   {"mcpServers": {"galaxies-preditivo": {
+     "command": "/caminho/case_galaxies/.venv/bin/python",
+     "args": ["-m", "galaxies_agent.mcp_server"],
+     "env": {"PYTHONPATH": "/caminho/case_galaxies/src", "GALAXIES_ROOT": "/caminho/case_galaxies",
+             "PYTHONIOENCODING": "utf-8", "GEMINI_API_KEY": "<opcional>"}}}}
+   ```
+3. Feche o Claude Desktop por completo (inclusive da bandeja do sistema) e abra de novo; as 6 tools abaixo aparecem no menu de ferramentas.
+
+Sem `GEMINI_API_KEY`, Shorts da base usam a rubrica em cache e Shorts novos caem no modelo reserva sem rubrica (confianca baixa). Teste do servidor fora do Claude: `PYTHONPATH=src python -m galaxies_agent.mcp_server` fica esperando entrada no stdio (Ctrl+C para sair); validado em 21/10/2026 com um cliente MCP real (6 tools listadas, `info_modelo` devolve `tool_v3_20261021T175806Z`).
 
 | Tool | Entrada | Saida |
 | --- | --- | --- |
-| `prever_criativo` | criativo, legenda, data planejada, `channel_id` ou `channel_stats`, setor | `predicted_metric`, `interval_low/high` (80%), `confidence_flag` + motivos, `relative_to_channel`, faixa, `top_drivers` (SHAP), `comparables`, `explanation`, `video_attributes` (rubrica do Gemini), `model_variant`, features usadas |
+| `prever_criativo` | criativo, legenda, data planejada, `channel_id` ou `channel_stats` (historico de curtidas e, opcional, `subscribers`), setor | `predicted_metric`, `interval_low/high` (80%), `confidence_flag` + motivos, `relative_to_channel`, faixa, `top_drivers` (SHAP), `comparables`, `explanation`, `video_attributes` (rubrica do Gemini), `channel_subscribers` (informativo), `model_variant`, features usadas |
 | `ranquear_criativos` | 2 a 5 criativos | mesma saida, ordenada pelo desempenho relativo ao canal |
+| `simular_variacoes` | criativo + horas, dias, duracoes, titulos ou criativos alternativos | previsao de cada variacao e o delta em % sobre o original (um fator por vez) |
+| `treinar_modelo_cliente` | caminho de um CSV no esquema minimo do TAP + nome | modelo especialista treinado, metricas contra a mediana do canal no teste temporal, intervalo calibrado e decisao de uso |
 | `historico_canal` | `channel_id` | resumo e ultimos Shorts do canal |
 | `info_modelo` | - | versao, dados de treino, resultado do teste final, modelos e features, alvo, metodo do intervalo |
 
@@ -130,8 +160,8 @@ print(out.model_variant, out.rubric_source, out.video_attributes)   # o que o Ge
 | Hiperparametros | depth 6, learning_rate 0,03, l2_leaf_reg 5, random_strength 2, bagging_temperature 2, 1.390 arvores (busca aleatoria em holdout cronologico, E-08) |
 | Reservas | sem rubrica (CB_EMB: criativo que nao e Short do YouTube, sem chave ou Gemini fora) e sem imagem (CB_BASE); a tool marca confianca baixa e diz o motivo |
 | Rubrica do video | `gemini-3.5-flash-lite`, URL publica do YouTube (o video nao e baixado), resolucao baixa, JSON com schema fixo (`rubrica_tap_v1`), temperatura 0; ~5,5 mil tokens por Short |
-| Treino do pacote | todo o Gold (3.004 Shorts, 26 canais), depois do teste final; `--train-only` reproduz o modelo avaliado |
-| Intervalo | 80%, conformal: quantis 10%/90% dos residuos fora da amostra do rolling-origin (E-13), por tipo de canal; cobriu 79,9% no teste final |
+| Treino do pacote | `tool_v3`: todo o Gold v2.1 (6.121 Shorts, 68 canais), depois do E-15; embedding SigLIP 2 v1 + v2. Os 12 canais da Silver v1 fora do v2 (D-022, D-026) continuam no historico da tool, fora do treino (confianca baixa) |
+| Intervalo | 80%, conformal: quantis 10%/90% dos residuos fora da amostra do rolling-origin, por tipo de canal. Recalibrado no Gold v2.1 (a calibracao do v1 cobriu so 72,8% nos dados novos, E-14): calibrado nas origens 1-2, cobriu 80,8% na origem 3 |
 | Explicacao | SHAP por previsao (embedding agrupado; rubrica e comparaveis com rotulos legiveis) + Shorts comparaveis por similaridade visual |
 | Pacote | `artifacts/tool_model/<versao>/` (modelos, PCA, calibracao, historico, comparaveis, `metadata.json` com hashes) |
 
@@ -158,6 +188,11 @@ print(out.model_variant, out.rubric_source, out.video_attributes)   # o que o Ge
 | E-11 | Canal nunca visto | Ordena acima do acaso (pares 0,553, p = 0,002); nao supera o B0 em MAE |
 | E-12 | LightGBM, XGBoost, ExtraTrees, ensemble, YetiRank, comparaveis, peso por canal, Optuna | Nenhum aprovado apos Holm; comparaveis promissor (p = 0,025 bruto) |
 | **E-13** | **Modelo final (CB_EMB + comparaveis + rubrica Gemini) vs CB_EMB** | **Aprovado: MAE 0,850 vs 0,882 (p = 0,003, 21/26 canais)** |
+| E-14 | Modelo do v1 congelado em 4.884 Shorts novos (Gold v2.1) | Bate o B0: MAE 0,785 vs 0,863, pares 61% vs 51% (p < 0,001, 51/66 canais); intervalo cobre so 72,8% |
+| **E-15** | **Mesma arquitetura retreinada no Gold v2.1** | **Aprovado: MAE 0,740 vs B0 0,915 (p < 0,001); vs modelo do v1 nas mesmas linhas 0,719 vs 0,788 (p = 0,003), pares 64,9% vs 61,9%** |
+| E-16 | Clusters K-Means dos descritores do VLM (camada 2 do TAP) | Sem ganho: MAE +0,0025 (p = 0,38); clusters viram analise descritiva (ex.: "ronco do motor" 1,12x a mediana do canal; "fundo branco/neutro" 0,72x) |
+| E-17 | Quadros de dentro do video (3 por Short, servidor publico de imagens, sem baixar video) | Sem ganho pela regra (no limite): variacao entre quadros + capa vs video reduz o MAE em 0,0066 (p = 0,036, Holm 0,072). Shorts com pouca troca de cena ou capa igual ao video rendem ~0,75x a mediana do canal |
+| Baseline do TAP | Regressao linear sobre inscritos (teste do E-15) | MAE 1,55 (so inscritos) e 1,26 (+ setor e tipo) vs 0,91 da mediana do canal e 0,74 do modelo final: a mediana do canal e o baseline mais forte |
 
 Modelo anterior (CB_EMB, E-08) no rolling-origin, para referencia (o CB_FINAL tem MAE 0,850 e pares 61,7% no mesmo protocolo):
 
@@ -199,7 +234,35 @@ Contra o B0: MAE -0,112 (IC95% [-0,238; -0,010], p = 0,065) e pares +14 p.p. (p 
 - Os 10 maiores erros sao lancamentos e campanhas de marcas com mediana baixa (ex.: "Novo Jeep Avenger", 1.058 curtidas reais vs 30 previstas), provavelmente impulsionados por midia paga, que nao aparece nos dados publicos.
 - Ganha do B0 em 18 de 26 canais; perde em canais com poucos Shorts no teste ou muito estaveis.
 
+**Onde o modelo retreinado erra** (teste do E-15, 1.236 Shorts de 68 canais; `scripts/experimentos/analyze_e15_errors.py`):
+
+| Grupo | n | MAE modelo | MAE B0 | Cobertura 80% |
+| --- | ---: | ---: | ---: | ---: |
+| Todos | 1.236 | 0,72 | 0,91 | 80% |
+| Pessoa / marca / midia | 522 / 421 / 293 | 0,65 / 0,76 / 0,79 | 0,88 / 0,93 / 0,92 | 78% / 87% / 74% |
+| Shorts que viralizaram | 170 | 1,79 | 2,03 | 29% |
+| Shorts na media do canal | 330 | 0,28 | 0,14 | 99% |
+
+- Os maiores erros passam a ser noticia e celebridade em canais de midia (ex.: Steal The Look, 16,5 mil curtidas reais vs 78 previstas) e campanhas de marca (Arezzo, Nissan). Melhor que o B0 em 50 de 68 canais.
+
 Diario completo e analises: [docs/07](docs/07-registro-de-features.md); decisoes: [docs/02](docs/02-registro-de-descobertas.md).
+
+## 7b. Extensoes do TAP (secao 4.2)
+
+| Extensao | Onde | Resultado |
+| --- | --- | --- |
+| Intervalos conformais | pacote da tool (secao 5); `scripts/experimentos/analyze_interval_calibration.py` | intervalo de 80% cobriu 79,9% no teste do E-13 e 80% no teste do E-15. Quantis do GBM sozinhos cobrem so 59% em dados futuros; calibrar por grupo ou CQR nao muda a cobertura alem do ruido e alarga a faixa |
+| Comparaveis (retrieval) | `features.knn_features`, tool | Shorts anteriores do canal com thumbnail parecida; parte do modelo final |
+| LLM zero-shot vs modelo treinado | `scripts/experimentos/run_llm_zero_shot.py` | no teste do E-15 (1.236 Shorts, 68 canais), a nota `potencial_viral_0a10` do Gemini sozinha acerta 56,2% dos pares do mesmo canal (acima do acaso, p < 0,001, 49/68 canais); o modelo treinado acerta 62,4% (+6,2 p.p., IC95% [3,8; 8,5], p < 0,001, 48/68 canais). No v1 (26 canais) a diferenca era +4,0 p.p. sem significancia (p = 0,15). O LLM tem sinal, mas o modelo ordena melhor e ainda da numero e intervalo |
+| What-if | `Predictor.what_if`, tool `simular_variacoes` | re-pontua horario, dia, duracao, titulo ou criativo alternativo, um fator por vez; o titulo entra so pelo tamanho |
+| Treino dinamico | `galaxies_agent.trainer`, tool `treinar_modelo_cliente` | base propria no esquema minimo do TAP -> modelo especialista com validacao temporal e decisao de uso. Exemplo (16 marcas, so metadados): pares +10 p.p. sobre a mediana do canal (p = 0,017); MAE sem diferenca significativa |
+
+```python
+from galaxies_agent import Predictor, CreativeInput
+from galaxies_agent.trainer import train_client_model
+out = Predictor().what_if(CreativeInput(...), hours=[9, 12, 18, 21], durations=[15, 30, 60])
+report = train_client_model("base_do_cliente.csv", nome="cliente_x")   # post_id, channel_id, published_at, caption, metric_target, sector
+```
 
 ## 8. O que testamos e o que entrou
 
@@ -211,29 +274,31 @@ Diario completo e analises: [docs/07](docs/07-registro-de-features.md); decisoes
 | CatBoost (E-08, E-12) | Cor, brilho, OCR da thumbnail (E-06, E-08) |
 | Intervalo conformal (tool) | PCA 8 e 32 (E-10); LightGBM, XGBoost, ExtraTrees, ensemble, YetiRank, peso por canal (E-12) |
 | Comparaveis visuais + rubrica e fala do Gemini (E-13) | Destilacao por canal (D-015); modelos por canal (D-004) |
+| | Quadros de dentro do video (E-17, no limite: Holm 0,072); clusters K-Means dos descritores do VLM (E-16); inscritos como feature (fotografia da coleta; como baseline erra mais que a mediana do canal) |
 
 ## 9. Limitacoes
 
-- **Valor absoluto e incerto:** o intervalo de 80% cobre um fator de ~5x entre o limite inferior e o superior para criadores e ~23x para marcas; a tool serve melhor para **ordenar** criativos do mesmo canal do que para cravar um numero.
+- **Valor absoluto e incerto:** o intervalo de 80% cobre um fator de ~8x entre o limite inferior e o superior para criadores e ~14x para marcas (pacote `tool_v3`); a tool serve melhor para **ordenar** criativos do mesmo canal do que para cravar um numero.
 - **Virais e midia paga:** o modelo subestima Shorts que estouram (cobertura do intervalo de 47% nos virais); impulsionamento pago e distribuicao do algoritmo nao sao observaveis antes da publicacao.
 - **Canal novo:** sem o canal no treino, o nivel absoluto nao supera a mediana do canal; a tool marca confianca baixa.
 - **Metricas como fotografia:** curtidas medidas na data da coleta, nao em horizonte fixo; videos antigos tiveram mais tempo para acumular.
-- **Recorte:** 2 setores, 26 canais, 3.004 Shorts (meta ampla do TAP: 5-15 mil e 60+ canais); beleza fora.
+- **Recorte:** 2 setores; o pacote servido usa 68 canais e 6.121 Shorts (Gold v2.1; meta ampla do TAP: 5-15 mil e 60+ canais); os experimentos E-00 a E-13 usaram 26 canais e 3.004 Shorts; beleza fora.
 - **Modalidades:** thumbnail estatica + rubrica/fala do Gemini; sem frames, cortes de cena ou audio bruto (o video nao e baixado).
 - **Split de teste por canal**, nao por data global.
 - **Embedding opaco:** o SHAP indica que o estilo visual pesou, nao qual aspecto; comparaveis e rubrica complementam.
-- **Ambiente:** modelo e agente nao rodam no Windows do Inteli (DLLs bloqueadas); o embedding ao vivo exige `torch` e acesso ao Hugging Face, e a rubrica ao vivo exige `GEMINI_API_KEY` (cada Short novo custa uma chamada, ~5 s).
+- **Ambiente:** no Windows do Inteli, o Python do sistema tem DLLs bloqueadas; o modelo e o MCP rodam pelo `.venv` do instalador (testado em 21/10/2026). O embedding ao vivo exige `torch` e acesso ao Hugging Face, e a rubrica ao vivo exige `GEMINI_API_KEY` (cada Short novo custa uma chamada, ~5 s).
 - **Rubrica gerada por LLM:** as notas do Gemini sao subjetivas e podem mudar com a versao do modelo; a versao do prompt e do modelo ficam registradas no pacote.
 
 ## 10. Evolucao
 
-1. Avaliar o modelo final em dados novos (Shorts publicados depois da coleta), ja que o teste atual foi usado.
-2. Mais canais e o setor de beleza; recoleta periodica para manter o historico atual.
+Feito desde a primeira versao: avaliacao em dados novos e canais novos (E-14), retreino com 68 canais (E-15), treino especialista sob demanda e what-if (secao 7b).
+
+1. Teste prospectivo: registrar previsoes de Shorts ainda nao publicados e medir depois (o teste do E-15 ja foi aberto).
+2. Setor de beleza; recoleta periodica para manter o historico atual.
 3. Alvo em horizonte fixo (curtidas aos 7/30 dias) com coleta recorrente.
 4. Frames iniciais e audio (gancho, cortes, musica) quando houver coleta de video autorizada.
-5. Dados autorizados do parceiro (YouTube Analytics via MCP: impressoes, CTR, retencao) como historico do canal (D-001).
-6. Treino especialista sob demanda para um cliente com base propria (esquema minimo do TAP).
-7. What-if: variacoes de titulo, horario e thumbnail re-pontuadas pelo modelo.
+5. Sinal de assunto do momento (noticia, celebridade): hoje sao os maiores erros em canais de midia.
+6. Dados autorizados do parceiro (YouTube Analytics via MCP: impressoes, CTR, retencao) como historico do canal (D-001).
 
 ## 11. Documentacao
 
@@ -243,8 +308,10 @@ Estrutura do repositorio:
 src/galaxies_agent/      tool: contrato Pydantic, preditor, rubrica Gemini ao vivo, embedding, agente LangGraph, servidor MCP
 scripts/coleta/          YouTube Data API, thumbnails (so biblioteca padrao) e rubrica de video + fala (Gemini)
 scripts/pipeline/        Bronze -> Silver -> Feature Store -> Gold, features de thumbnail e OCR
-scripts/experimentos/    E-00 a E-13, teste final (uma vez) e analise de erros
+scripts/experimentos/    E-00 a E-17, teste final (uma vez), analise de erros e descritivos do que funciona
 scripts/modelo/          treino e empacotamento do modelo servido pela tool
+scripts/setup/           registro do servidor MCP no Claude Desktop
+painel/                  front do painel de resultados (artifact Dashboard): index.html e dados/*.json
 notebooks/               01_dados, 02_baseline, 03_features, 04_modelo_colab (E-08/E-10/E-12), 05_demo
 tests/                   contrato, antivazamento, modelo, agente e rubrica (pytest)
 data/feature_store/      features versionadas por hash (versionadas no git); bronze/silver/gold ficam fora do git
@@ -279,3 +346,10 @@ docs/                    entendimento, decisoes (D-xxx), metricas, registro de e
 | `notebooks/05_demo/` | 11 | **Demo do agente e da tool MCP** (modelo final, Gemini ao vivo) | Colab |
 
 Os notebooks locais encontram a raiz do repo sozinhos (podem ser abertos de qualquer pasta). Os de Colab recebem um pacote `.tar.gz` arrastado para o painel Arquivos.
+
+
+## Demostração em video :
+### Front-end:
+- link: https://youtu.be/qFakB7bCiGQ
+### Arquitetura e mcp:
+- link: https://youtu.be/RmaKvxObIgU

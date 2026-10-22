@@ -1,6 +1,18 @@
+# Segredos e ambiente local
 .env
+.env.*
+!.env.example
 .venv/
+
+# Python, testes e empacotamento
 __pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Notebooks
 .ipynb_checkpoints/
 
 # Collected and generated data can be large and may be subject to source terms.
@@ -8,9 +20,24 @@ data/bronze/
 data/silver/
 data/gold/
 artifacts/
+# Copias soltas de dados na raiz (embeddings, quadros do Colab)
+/*.npz
+/*.csv
+/*.tar.gz
 
 # Pacotes temporarios para Colab (contem dados da Gold)
 .tmp_transfer/
 
 # Cache local das analises ao vivo do Gemini
 .cache/
+
+# Saidas de treino do CatBoost e logs de execucao
+catboost_info/
+*.log
+
+# Sistema e editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
