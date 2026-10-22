@@ -343,3 +343,7 @@ docs/                    entendimento, decisoes (D-xxx), metricas, registro de e
 | `notebooks/05_demo/` | 11 | **Demo do agente e da tool MCP** (modelo final, Gemini ao vivo) | Colab |
 
 Os notebooks locais encontram a raiz do repo sozinhos (podem ser abertos de qualquer pasta). Os de Colab recebem um pacote `.tar.gz` arrastado para o painel Arquivos.
+
+
+## Demostração em video do front-end:
+- link: https://youtu.be/qFakB7bCiGQ
