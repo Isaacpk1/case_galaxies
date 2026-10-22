@@ -28,13 +28,36 @@ CHECK = ("from galaxies_agent.predictor import Predictor; "
          "info = Predictor().model_info(); print(info.get('model_version') or info.get('versao') or 'ok')")
 
 
-def config_path() -> Path:
+def config_paths() -> list[Path]:
+    """Arquivos de configuracao que o Claude Desktop pode ler.
+
+    No Windows, a versao instalada como pacote le o AppData virtualizado (Packages\\Claude_*) ou, nas versoes recentes,
+    %LOCALAPPDATA%\\Claude-Data\\claude_<id>; grava em todos os que existirem. Feche o app antes: ele regrava o arquivo.
+    """
     system = platform.system()
     if system == "Windows":
-        return Path(os.environ["APPDATA"]) / "Claude" / "claude_desktop_config.json"
+        paths = [Path(os.environ["APPDATA"]) / "Claude" / "claude_desktop_config.json"]
+        local = Path(os.environ.get("LOCALAPPDATA", ""))
+        for pkg in sorted((local / "Packages").glob("Claude_*")) if (local / "Packages").exists() else []:
+            paths.append(pkg / "LocalCache" / "Roaming" / "Claude" / "claude_desktop_config.json")
+        # versoes recentes do app empacotado guardam os dados em %LOCALAPPDATA%\\Claude-Data\\claude_<id>
+        for data_dir in sorted((local / "Claude-Data").glob("claude_*")) if (local / "Claude-Data").exists() else []:
+            paths.append(data_dir / "claude_desktop_config.json")
+        return paths
     if system == "Darwin":
-        return Path.home() / "Library" / "Application Support" / "Claude" / "claude_desktop_config.json"
-    return Path.home() / ".config" / "Claude" / "claude_desktop_config.json"
+        return [Path.home() / "Library" / "Application Support" / "Claude" / "claude_desktop_config.json"]
+    return [Path.home() / ".config" / "Claude" / "claude_desktop_config.json"]
+
+
+def write_entry(path: Path, entry: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = {}
+    if path.exists() and path.read_text(encoding="utf-8-sig").strip():
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
+        shutil.copy2(path, path.with_suffix(".json.bak"))
+    data.setdefault("mcpServers", {})[NAME] = entry
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"gravado em {path}")
 
 
 def check(python: Path, env: dict) -> str:
@@ -74,16 +97,12 @@ def main() -> None:
     if args.dry_run:
         return
 
-    path = args.config or config_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    data = {}
-    if path.exists() and path.read_text(encoding="utf-8").strip():
-        data = json.loads(path.read_text(encoding="utf-8"))
-        shutil.copy2(path, path.with_suffix(".json.bak"))
-    data.setdefault("mcpServers", {})[NAME] = entry
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"gravado em {path}. Feche o Claude Desktop por completo e abra de novo.")
-
+    for path in ([args.config] if args.config else config_paths()):
+        try:
+            write_entry(path, entry)
+        except (OSError, ValueError) as exc:  # um arquivo ilegivel nao impede os outros
+            print(f"[aviso] nao gravei {path}: {exc}")
+    print("Feche o Claude Desktop por completo (inclusive da bandeja) e abra de novo.")
 
 if __name__ == "__main__":
     main()

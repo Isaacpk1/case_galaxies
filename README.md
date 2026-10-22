@@ -124,7 +124,7 @@ No Windows, os passos 1 e 2 estao em `instalar_mcp_claude_desktop.bat` (dois cli
    ```bash
    .venv/bin/python scripts/setup/configure_claude_desktop.py               # opcional: --gemini-key <chave>
    ```
-   Arquivo gravado: Windows `%APPDATA%\Claude\claude_desktop_config.json`, macOS `~/Library/Application Support/Claude/claude_desktop_config.json`. O Claude Desktop nao usa `cwd`, por isso a entrada fica com caminhos absolutos:
+   Arquivo gravado: Windows `%APPDATA%\Claude\claude_desktop_config.json`, macOS `~/Library/Application Support/Claude/claude_desktop_config.json`. Se o Claude Desktop foi instalado como pacote (pasta `%LOCALAPPDATA%\Packages\Claude_*`), ele le `...\LocalCache\Roaming\Claude\claude_desktop_config.json` ou, nas versoes recentes, `%LOCALAPPDATA%\Claude-Data\claude_<id>\claude_desktop_config.json` (em Configuracoes > Desenvolvedor > Editar configuracao o app mostra qual). O script grava em todos os que existirem; feche o app antes de rodar, porque ele regrava o arquivo ao sair. O Claude Desktop nao usa `cwd`, por isso a entrada fica com caminhos absolutos:
    ```json
    {"mcpServers": {"galaxies-preditivo": {
      "command": "/caminho/case_galaxies/.venv/bin/python",
