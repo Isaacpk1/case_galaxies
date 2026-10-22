@@ -1,0 +1,282 @@
+[
+{
+"tipo": "Video",
+"cluster": "kv_06",
+"exemplos": "corpo inteiro, espelho, tapete vermelho",
+"shorts": 416,
+"x_mediana": 1.06
+},
+{
+"tipo": "Video",
+"cluster": "kv_17",
+"exemplos": "detalhes do interior, detalhes do motor, detalhes do veiculo",
+"shorts": 730,
+"x_mediana": 1.06
+},
+{
+"tipo": "Video",
+"cluster": "kv_13",
+"exemplos": "try on de roupas, try on, try on de roupa",
+"shorts": 528,
+"x_mediana": 1.03
+},
+{
+"tipo": "Video",
+"cluster": "kv_05",
+"exemplos": "interior do carro, interior do veiculo, interior de carro",
+"shorts": 1001,
+"x_mediana": 1.01
+},
+{
+"tipo": "Video",
+"cluster": "kv_14",
+"exemplos": "transicoes rapidas, transicao rapida, cortes rapidos",
+"shorts": 817,
+"x_mediana": 0.99
+},
+{
+"tipo": "Video",
+"cluster": "kv_15",
+"exemplos": "close do carro, carro, close do rosto",
+"shorts": 1504,
+"x_mediana": 0.98
+},
+{
+"tipo": "Video",
+"cluster": "kv_01",
+"exemplos": "close do produto, close up produto, close up do produto",
+"shorts": 1754,
+"x_mediana": 0.95
+},
+{
+"tipo": "Video",
+"cluster": "kv_11",
+"exemplos": "pov de direcao, test drive, podcast",
+"shorts": 1298,
+"x_mediana": 0.93
+},
+{
+"tipo": "Video",
+"cluster": "kv_18",
+"exemplos": "carro em movimento, apresentacao de carro, evento automotivo",
+"shorts": 706,
+"x_mediana": 0.92
+},
+{
+"tipo": "Video",
+"cluster": "kv_03",
+"exemplos": "demonstracao de produto, demonstracao de recursos, demonstracao de uso",
+"shorts": 1106,
+"x_mediana": 0.92
+},
+{
+"tipo": "Video",
+"cluster": "kv_12",
+"exemplos": "oficina mecanica, loja de roupas, mudanca de look",
+"shorts": 3045,
+"x_mediana": 0.92
+},
+{
+"tipo": "Video",
+"cluster": "kv_19",
+"exemplos": "modelo, modelos, modelos na passarela",
+"shorts": 547,
+"x_mediana": 0.91
+},
+{
+"tipo": "Video",
+"cluster": "kv_02",
+"exemplos": "painel digital, paisagem natural, paisagem urbana",
+"shorts": 532,
+"x_mediana": 0.91
+},
+{
+"tipo": "Video",
+"cluster": "kv_10",
+"exemplos": "apresentador em pe, apresentador, apresentador em pe ao lado do carro",
+"shorts": 439,
+"x_mediana": 0.9
+},
+{
+"tipo": "Video",
+"cluster": "kv_09",
+"exemplos": "desfile de moda, legenda automatica, estetica minimalista",
+"shorts": 687,
+"x_mediana": 0.9
+},
+{
+"tipo": "Video",
+"cluster": "kv_04",
+"exemplos": "pessoa falando para a camera, apresentador falando para a camera, chamada para acao",
+"shorts": 2085,
+"x_mediana": 0.87
+},
+{
+"tipo": "Video",
+"cluster": "kv_00",
+"exemplos": "texto na tela, legenda na tela, legendas na tela",
+"shorts": 2675,
+"x_mediana": 0.87
+},
+{
+"tipo": "Video",
+"cluster": "kv_07",
+"exemplos": "logo da marca, entrevista, microfone",
+"shorts": 1107,
+"x_mediana": 0.86
+},
+{
+"tipo": "Video",
+"cluster": "kv_16",
+"exemplos": "ambiente interno, antes e depois, cenario interno",
+"shorts": 727,
+"x_mediana": 0.77
+},
+{
+"tipo": "Video",
+"cluster": "kv_08",
+"exemplos": "fundo branco, carro ao fundo, fundo neutro",
+"shorts": 371,
+"x_mediana": 0.72
+},
+{
+"tipo": "Audio",
+"cluster": "ka_12",
+"exemplos": "ronco do motor, som do motor, som de motor",
+"shorts": 444,
+"x_mediana": 1.12
+},
+{
+"tipo": "Audio",
+"cluster": "ka_07",
+"exemplos": "efeitos sonoros, efeitos sonoros de transicao, efeitos sonoros discretos",
+"shorts": 1057,
+"x_mediana": 1.03
+},
+{
+"tipo": "Audio",
+"cluster": "ka_02",
+"exemplos": "musica animada, musica eletronica, musica pop",
+"shorts": 984,
+"x_mediana": 1.0
+},
+{
+"tipo": "Audio",
+"cluster": "ka_03",
+"exemplos": "som ambiente, som ambiente de oficina, som ambiente de loja",
+"shorts": 1494,
+"x_mediana": 1.0
+},
+{
+"tipo": "Audio",
+"cluster": "ka_00",
+"exemplos": "batida eletronica, batida forte, batida envolvente",
+"shorts": 731,
+"x_mediana": 0.99
+},
+{
+"tipo": "Audio",
+"cluster": "ka_13",
+"exemplos": "trilha sonora instrumental, trilha sonora de fundo, trilha sonora comercial",
+"shorts": 470,
+"x_mediana": 0.98
+},
+{
+"tipo": "Audio",
+"cluster": "ka_15",
+"exemplos": "voz narrador, voz narrada, voz narradora",
+"shorts": 642,
+"x_mediana": 0.97
+},
+{
+"tipo": "Audio",
+"cluster": "ka_04",
+"exemplos": "voz falada, voz do apresentador, voz feminina",
+"shorts": 1156,
+"x_mediana": 0.95
+},
+{
+"tipo": "Audio",
+"cluster": "ka_18",
+"exemplos": "ritmo acelerado, risadas, ritmo animado",
+"shorts": 682,
+"x_mediana": 0.94
+},
+{
+"tipo": "Audio",
+"cluster": "ka_06",
+"exemplos": "musica instrumental, trilha instrumental, instrumental",
+"shorts": 668,
+"x_mediana": 0.94
+},
+{
+"tipo": "Audio",
+"cluster": "ka_09",
+"exemplos": "sem fala, ausencia de fala, fala do apresentador",
+"shorts": 583,
+"x_mediana": 0.93
+},
+{
+"tipo": "Audio",
+"cluster": "ka_19",
+"exemplos": "dialogo, tom animado, tom instrucional",
+"shorts": 1494,
+"x_mediana": 0.93
+},
+{
+"tipo": "Audio",
+"cluster": "ka_08",
+"exemplos": "audio limpo, transicao de audio, efeitos de transicao",
+"shorts": 787,
+"x_mediana": 0.92
+},
+{
+"tipo": "Audio",
+"cluster": "ka_05",
+"exemplos": "narracao animada, narracao dinamica, narracao instrucional",
+"shorts": 799,
+"x_mediana": 0.91
+},
+{
+"tipo": "Audio",
+"cluster": "ka_01",
+"exemplos": "musica de fundo, musica de fundo suave, musica de fundo animada",
+"shorts": 2173,
+"x_mediana": 0.88
+},
+{
+"tipo": "Audio",
+"cluster": "ka_10",
+"exemplos": "efeito sonoro, efeito sonoro de transicao, efeito sonoro discreto",
+"shorts": 709,
+"x_mediana": 0.88
+},
+{
+"tipo": "Audio",
+"cluster": "ka_17",
+"exemplos": "narracao explicativa, voz explicativa, fala explicativa",
+"shorts": 412,
+"x_mediana": 0.85
+},
+{
+"tipo": "Audio",
+"cluster": "ka_14",
+"exemplos": "microfone de lapela, microfone lapela, microfone",
+"shorts": 193,
+"x_mediana": 0.84
+},
+{
+"tipo": "Audio",
+"cluster": "ka_16",
+"exemplos": "voz masculina, voz masculina narrando, voz masculina explicativa",
+"shorts": 335,
+"x_mediana": 0.82
+},
+{
+"tipo": "Audio",
+"cluster": "ka_11",
+"exemplos": "voz clara, fala clara, voz principal clara",
+"shorts": 795,
+"x_mediana": 0.75
+}
+]

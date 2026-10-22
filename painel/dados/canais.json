@@ -1,0 +1,614 @@
+[
+{
+"canal": "Lojas Torra",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 15,
+"mae_modelo": 1.37,
+"mae_b0": 0.992,
+"ganho": -0.378
+},
+{
+"canal": "BYD Auto Brasil",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 6,
+"mae_modelo": 0.783,
+"mae_b0": 0.582,
+"ganho": -0.201
+},
+{
+"canal": "Ursula Angel",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.295,
+"mae_b0": 0.185,
+"ganho": -0.11
+},
+{
+"canal": "Nissan Brasil",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 19,
+"mae_modelo": 1.046,
+"mae_b0": 0.944,
+"ganho": -0.102
+},
+{
+"canal": "Carmen Steffens",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 13,
+"mae_modelo": 0.959,
+"mae_b0": 0.861,
+"ganho": -0.098
+},
+{
+"canal": "GQ Brasil",
+"setor": "moda",
+"grupo": "midia",
+"shorts": 10,
+"mae_modelo": 1.409,
+"mae_b0": 1.315,
+"ganho": -0.094
+},
+{
+"canal": "Revista Carro",
+"setor": "automotivo",
+"grupo": "midia",
+"shorts": 8,
+"mae_modelo": 0.378,
+"mae_b0": 0.288,
+"ganho": -0.09
+},
+{
+"canal": "Toyota do Brasil",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 7,
+"mae_modelo": 0.625,
+"mae_b0": 0.538,
+"ganho": -0.087
+},
+{
+"canal": "Autos Segredos",
+"setor": "automotivo",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 0.628,
+"mae_b0": 0.558,
+"ganho": -0.07
+},
+{
+"canal": "Dafiti",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 0.48,
+"mae_b0": 0.417,
+"ganho": -0.063
+},
+{
+"canal": "HYPNOTIQUE by Fabíola Kassin",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.455,
+"mae_b0": 0.394,
+"ganho": -0.061
+},
+{
+"canal": "EstiloRenner",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 0.295,
+"mae_b0": 0.259,
+"ganho": -0.036
+},
+{
+"canal": "Animale",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 0.457,
+"mae_b0": 0.423,
+"ganho": -0.034
+},
+{
+"canal": "Portal Rodovíario",
+"setor": "automotivo",
+"grupo": "midia",
+"shorts": 15,
+"mae_modelo": 0.47,
+"mae_b0": 0.447,
+"ganho": -0.023
+},
+{
+"canal": "Fiat Automoveis Brasil",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 14,
+"mae_modelo": 1.214,
+"mae_b0": 1.192,
+"ganho": -0.022
+},
+{
+"canal": "Opinião Sincera",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.702,
+"mae_b0": 0.687,
+"ganho": -0.015
+},
+{
+"canal": "Hering Oficial",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 10,
+"mae_modelo": 1.258,
+"mae_b0": 1.249,
+"ganho": -0.009
+},
+{
+"canal": "Edson Viana",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.388,
+"mae_b0": 0.386,
+"ganho": -0.002
+},
+{
+"canal": "Hyundai Motor Brasil",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 0.353,
+"mae_b0": 0.359,
+"ganho": 0.006
+},
+{
+"canal": "Autoesporte",
+"setor": "automotivo",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 0.527,
+"mae_b0": 0.533,
+"ganho": 0.006
+},
+{
+"canal": "Meu Carro LifeStyle",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.605,
+"mae_b0": 0.612,
+"ganho": 0.007
+},
+{
+"canal": "Moda Masculina ",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.339,
+"mae_b0": 0.35,
+"ganho": 0.011
+},
+{
+"canal": "Edumartins Car",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.832,
+"mae_b0": 0.843,
+"ganho": 0.011
+},
+{
+"canal": "Motor1 Brasil",
+"setor": "automotivo",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 0.807,
+"mae_b0": 0.824,
+"ganho": 0.017
+},
+{
+"canal": "Honda Automoveis",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 0.789,
+"mae_b0": 0.845,
+"ganho": 0.056
+},
+{
+"canal": "Pernambucanas",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 0.354,
+"mae_b0": 0.413,
+"ganho": 0.059
+},
+{
+"canal": "Lê Oliveira Cruz",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.3,
+"mae_b0": 0.365,
+"ganho": 0.065
+},
+{
+"canal": "Quatro Rodas",
+"setor": "automotivo",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 0.617,
+"mae_b0": 0.695,
+"ganho": 0.078
+},
+{
+"canal": "Citroën do Brasil",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 15,
+"mae_modelo": 0.56,
+"mae_b0": 0.64,
+"ganho": 0.08
+},
+{
+"canal": "Doutor Multas - Maior Especialista em Multas",
+"setor": "automotivo",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 1.55,
+"mae_b0": 1.631,
+"ganho": 0.081
+},
+{
+"canal": "AutoPapo",
+"setor": "automotivo",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 0.519,
+"mae_b0": 0.606,
+"ganho": 0.087
+},
+{
+"canal": "Dicas Brás SP",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.347,
+"mae_b0": 0.435,
+"ganho": 0.088
+},
+{
+"canal": "Falando de Carro",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.899,
+"mae_b0": 0.988,
+"ganho": 0.089
+},
+{
+"canal": "machomoda",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.598,
+"mae_b0": 0.688,
+"ganho": 0.09
+},
+{
+"canal": "C&A Brasil",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 0.429,
+"mae_b0": 0.525,
+"ganho": 0.096
+},
+{
+"canal": "DOUTOR CARRO",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.628,
+"mae_b0": 0.728,
+"ganho": 0.1
+},
+{
+"canal": "Arezzo Brasil",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 1.121,
+"mae_b0": 1.23,
+"ganho": 0.109
+},
+{
+"canal": "Debora Freitas",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.917,
+"mae_b0": 1.037,
+"ganho": 0.12
+},
+{
+"canal": "AUTO+",
+"setor": "automotivo",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 0.231,
+"mae_b0": 0.354,
+"ganho": 0.123
+},
+{
+"canal": "Glamour Brasil",
+"setor": "moda",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 1.279,
+"mae_b0": 1.402,
+"ganho": 0.123
+},
+{
+"canal": "Top Drive - @victorpicolli",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.556,
+"mae_b0": 0.689,
+"ganho": 0.133
+},
+{
+"canal": "Track&Field",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 13,
+"mae_modelo": 1.169,
+"mae_b0": 1.313,
+"ganho": 0.144
+},
+{
+"canal": "Veneto Studio",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.76,
+"mae_b0": 0.918,
+"ganho": 0.158
+},
+{
+"canal": "Femme Fatale by Jeh",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.417,
+"mae_b0": 0.581,
+"ganho": 0.164
+},
+{
+"canal": "Mitsubishi Motors BR",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 0.781,
+"mae_b0": 0.969,
+"ganho": 0.188
+},
+{
+"canal": "Chevrolet Brasil",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 12,
+"mae_modelo": 0.516,
+"mae_b0": 0.724,
+"ganho": 0.208
+},
+{
+"canal": "MARCELA CARRASCO",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.894,
+"mae_b0": 1.112,
+"ganho": 0.218
+},
+{
+"canal": "Marcelo Tonella",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 19,
+"mae_modelo": 0.768,
+"mae_b0": 0.996,
+"ganho": 0.228
+},
+{
+"canal": "ELLE Brasil",
+"setor": "moda",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 0.951,
+"mae_b0": 1.181,
+"ganho": 0.23
+},
+{
+"canal": "Cinderela de Mentira",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.658,
+"mae_b0": 0.897,
+"ganho": 0.239
+},
+{
+"canal": "Capricho",
+"setor": "moda",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 1.153,
+"mae_b0": 1.413,
+"ganho": 0.26
+},
+{
+"canal": "De Carona com Leandro",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 1.008,
+"mae_b0": 1.27,
+"ganho": 0.262
+},
+{
+"canal": "BMW Brasil",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 0.395,
+"mae_b0": 0.66,
+"ganho": 0.265
+},
+{
+"canal": "Bras Fernando Carriel",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.45,
+"mae_b0": 0.719,
+"ganho": 0.269
+},
+{
+"canal": "Vrum",
+"setor": "automotivo",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 0.3,
+"mae_b0": 0.579,
+"ganho": 0.279
+},
+{
+"canal": "Volkswagen do Brasil",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 0.868,
+"mae_b0": 1.193,
+"ganho": 0.325
+},
+{
+"canal": "Gloria Kalil",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.739,
+"mae_b0": 1.068,
+"ganho": 0.329
+},
+{
+"canal": "Planeta Caminhão",
+"setor": "automotivo",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 0.721,
+"mae_b0": 1.057,
+"ganho": 0.336
+},
+{
+"canal": "Lojas Avenida",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 1.086,
+"mae_b0": 1.451,
+"ganho": 0.365
+},
+{
+"canal": "Acelerados",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.758,
+"mae_b0": 1.159,
+"ganho": 0.401
+},
+{
+"canal": "Steal The Look",
+"setor": "moda",
+"grupo": "midia",
+"shorts": 20,
+"mae_modelo": 1.12,
+"mae_b0": 1.525,
+"ganho": 0.405
+},
+{
+"canal": "Maria Bardela",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 10,
+"mae_modelo": 0.971,
+"mae_b0": 1.388,
+"ganho": 0.417
+},
+{
+"canal": "ComprecarTV",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.811,
+"mae_b0": 1.331,
+"ganho": 0.52
+},
+{
+"canal": "Insider Store",
+"setor": "moda",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 0.715,
+"mae_b0": 1.362,
+"ganho": 0.647
+},
+{
+"canal": "Jeep Brasil",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 7,
+"mae_modelo": 1.41,
+"mae_b0": 2.258,
+"ganho": 0.848
+},
+{
+"canal": "Carros com Camanzi",
+"setor": "automotivo",
+"grupo": "pessoa",
+"shorts": 23,
+"mae_modelo": 0.885,
+"mae_b0": 2.087,
+"ganho": 1.202
+},
+{
+"canal": "Suelen Arrigo",
+"setor": "moda",
+"grupo": "pessoa",
+"shorts": 20,
+"mae_modelo": 0.844,
+"mae_b0": 2.253,
+"ganho": 1.409
+},
+{
+"canal": "Renault Brasil",
+"setor": "automotivo",
+"grupo": "marca",
+"shorts": 20,
+"mae_modelo": 0.809,
+"mae_b0": 2.224,
+"ganho": 1.415
+}
+]

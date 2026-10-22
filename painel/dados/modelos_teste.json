@@ -1,0 +1,42 @@
+[
+{
+"modelo": "Mediana do canal",
+"codigo": "B0",
+"mae_macro": 0.9146,
+"pares": 0.4486,
+"spearman": 0.828,
+"mape_log": 0.2815,
+"dentro_2x": 0.5291,
+"f1_faixas": 0.1054
+},
+{
+"modelo": "Regressao sobre inscritos",
+"codigo": "B_INS",
+"mae_macro": 1.5457,
+"pares": 0.5,
+"spearman": 0.4604,
+"mape_log": 0.5315,
+"dentro_2x": 0.2824,
+"f1_faixas": 0.2524
+},
+{
+"modelo": "Inscritos + setor + tipo",
+"codigo": "B_INS_SETOR",
+"mae_macro": 1.2583,
+"pares": 0.5,
+"spearman": 0.6738,
+"mape_log": 0.3921,
+"dentro_2x": 0.3528,
+"f1_faixas": 0.2541
+},
+{
+"modelo": "Modelo final (tool_v3)",
+"codigo": "CB_FINAL_v2",
+"mae_macro": 0.7401,
+"pares": 0.6241,
+"spearman": 0.892,
+"mape_log": 0.2071,
+"dentro_2x": 0.6084,
+"f1_faixas": 0.3596
+}
+]

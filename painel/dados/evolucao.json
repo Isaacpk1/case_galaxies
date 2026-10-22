@@ -1,0 +1,23 @@
+[
+{
+"modelo": "Modelo do v1 (tool_v2, 26 canais)",
+"codigo": "CB_FINAL",
+"mae_macro": 0.7882,
+"pares": 0.6191,
+"linhas": 1117
+},
+{
+"modelo": "Modelo retreinado (tool_v3, 68 canais)",
+"codigo": "CB_FINAL_v2",
+"mae_macro": 0.7185,
+"pares": 0.6485,
+"linhas": 1117
+},
+{
+"modelo": "Mediana do canal",
+"codigo": "B0",
+"mae_macro": 0.886,
+"pares": 0.4616,
+"linhas": 1117
+}
+]

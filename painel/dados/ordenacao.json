@@ -1,0 +1,20 @@
+[
+{
+"modelo": "Gemini sozinho (zero-shot)",
+"codigo": "LLM_zero_shot",
+"pares": 0.5621,
+"spearman_intra_canal": 0.177
+},
+{
+"modelo": "Modelo final (tool_v3)",
+"codigo": "CB_FINAL",
+"pares": 0.6241,
+"spearman_intra_canal": 0.3442
+},
+{
+"modelo": "Mediana do canal",
+"codigo": "B0",
+"pares": 0.4486,
+"spearman_intra_canal": -0.1679
+}
+]

@@ -1,0 +1,617 @@
+<style>
+  /* Galaxies: azul de marca #0065FF sobre neutros frios, cantos generosos, muito respiro.
+     Layout: hero com o resultado principal -> abas (Resultado, Onde erra, Como deve ser, Bastidores). */
+  #dash-root {
+    --gx-blue: #0065FF; --gx-blue-strong: #0052CC;
+    --gx-wash: color-mix(in srgb, #0065FF 9%, var(--color-panel));
+    --gx-soft: color-mix(in srgb, #0065FF 14%, transparent);
+    --gx-line: color-mix(in srgb, #0065FF 40%, var(--color-border-line));
+    --gx-red: var(--cds-chart-status-critical);
+    --gx-r: 18px;
+  }
+  .gx { font-family: var(--font-anthropic-sans); display: grid; gap: var(--cds-gap-lg); max-width: 1200px; margin-inline: auto; }
+  .gx * { box-sizing: border-box; }
+  .gx-num { font-variant-numeric: tabular-nums; }
+
+  /* hero */
+  .gx-hero { border-radius: var(--gx-r); background: var(--gx-wash); border: 1px solid var(--gx-line); padding: clamp(18px, 3vw, 32px);
+             display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(16px, 3vw, 40px); align-items: center; }
+  @media (max-width: 760px) { .gx-hero { grid-template-columns: 1fr; } }
+  .gx-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .gx-chip { background: var(--gx-blue); color: #fff; border-radius: 999px; padding: 3px 10px; font-weight: var(--cds-font-weight-medium); letter-spacing: .02em; }
+  .gx-h1 { margin: 12px 0 10px; font-size: clamp(26px, 3.4vw, 38px); line-height: 1.12; font-weight: var(--cds-font-weight-medium); letter-spacing: -.01em; text-wrap: balance; }
+  .gx-lead { margin: 0; color: var(--color-fg-muted); line-height: 1.55; max-width: 60ch; }
+  .gx-lead b { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+  .gx-big { background: var(--color-panel); border-radius: 14px; border: 1px solid var(--color-border-line); padding: 20px; display: grid; gap: 12px; }
+  .gx-big-num { font-size: clamp(44px, 6vw, 64px); line-height: 1; font-weight: var(--cds-font-weight-medium); color: var(--gx-blue); letter-spacing: -.02em; }
+  .gx-big-cap { font-size: var(--cds-font-size-body); color: var(--color-fg-muted); }
+  .gx-bullet { display: grid; gap: 8px; }
+  .gx-bullet-row { display: grid; grid-template-columns: 8.5em 1fr 3.4em; gap: 10px; align-items: center; font-size: var(--cds-font-size-caption); }
+  .gx-track { height: 10px; border-radius: 999px; background: color-mix(in srgb, var(--color-fg) 8%, transparent); overflow: hidden; }
+  .gx-fill { height: 100%; border-radius: 999px; }
+
+  /* abas */
+  .gx-tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 3; display: flex; gap: 4px; padding: 4px; border-radius: 999px;
+             background: var(--color-panel); border: 1px solid var(--color-border-line); width: max-content; max-width: 100%; overflow-x: auto; }
+  .gx-tabs button { font: inherit; font-size: var(--cds-font-size-body); border: 0; background: none; color: var(--color-fg-muted); padding: 8px 16px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+  .gx-tabs button[aria-selected="true"] { background: var(--gx-blue); color: #fff; }
+  .gx-tabs button:focus-visible { outline: 2px solid var(--gx-blue); outline-offset: 2px; }
+  .gx-page { display: grid; gap: var(--cds-gap-lg); }
+  .gx-page[hidden] { display: none; }
+  .gx-intro { margin: 0; color: var(--color-fg-muted); max-width: 72ch; line-height: 1.5; }
+
+  /* cartões */
+  .gx-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: var(--cds-gap-md); }
+  .gx-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--gx-r); padding: clamp(16px, 2vw, 22px); display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .gx-card h3 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+  .gx-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .gx-val { font-size: 34px; line-height: 1.05; font-weight: var(--cds-font-weight-medium); letter-spacing: -.01em; }
+  .gx-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .gx-up { color: var(--color-ok); font-weight: var(--cds-font-weight-medium); }
+  .gx-note { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.5; }
+  .gx-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: var(--cds-gap-md); }
+  .gx-grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: var(--cds-gap-md); }
+  .gx-meter { position: relative; height: 10px; border-radius: 999px; background: color-mix(in srgb, var(--color-fg) 8%, transparent); }
+  .gx-meter .fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: var(--gx-blue); }
+  .gx-meter .tick { position: absolute; top: -4px; bottom: -4px; width: 2px; border-radius: 2px; background: var(--color-fg-muted); }
+  .gx-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .gx-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+  /* gráficos */
+  .gx-chart { position: relative; min-height: 120px; }
+  .gx-chart svg { display: block; overflow: visible; }
+  .gx-chart text { fill: var(--color-fg-muted); font-size: 12px; font-family: var(--font-anthropic-sans); }
+  .gx-chart .strong { fill: var(--color-fg); font-weight: 500; }
+  .gx-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius);
+            box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; z-index: 4; }
+  .gx-tip .k { color: var(--cds-text-secondary); }
+
+  /* receita */
+  .gx-recipe { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: var(--cds-gap-md); }
+  .gx-tile { border-radius: var(--gx-r); padding: 18px; border: 1px solid var(--gx-line); background: var(--gx-wash); display: grid; gap: 6px; }
+  .gx-tile .what { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); text-transform: uppercase; letter-spacing: .06em; }
+  .gx-tile .x { font-size: 30px; font-weight: var(--cds-font-weight-medium); color: var(--gx-blue); line-height: 1.1; }
+  .gx-tile .vs { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .gx-tile .tip { font-size: var(--cds-font-size-body); line-height: 1.4; }
+
+  /* tabelas */
+  .gx-search { font: inherit; font-size: var(--cds-font-size-caption); padding: 8px 12px; border: 1px solid var(--color-border-line); border-radius: 999px; background: var(--color-bg); color: var(--color-fg); width: min(100%, 20rem); }
+  .gx-search:focus-visible { outline: 2px solid var(--gx-blue); outline-offset: 1px; }
+  .gx-tablebox { max-height: 28rem; overflow: auto; }
+  .gx-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .gx-table th { position: sticky; top: 0; background: var(--color-panel); text-align: left; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); padding: 10px 8px; border-bottom: 1px solid var(--color-border-line); z-index: 1; }
+  .gx-table th button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  .gx-table .num { text-align: right; }
+  .gx-table td { padding: 9px 8px; border-bottom: 1px solid var(--color-border-line); vertical-align: middle; }
+  .gx-table tbody tr:hover td { background: var(--gx-soft); }
+  .gx-pill { display: inline-block; border-radius: 999px; padding: 2px 9px; font-size: 11px; background: var(--gx-soft); color: var(--color-fg); }
+  .gx-div { position: relative; height: 8px; min-width: 80px; }
+  .gx-div span { position: absolute; top: 0; height: 8px; border-radius: 4px; }
+  .gx-div .zero { position: absolute; top: -3px; bottom: -3px; left: 50%; width: 1px; background: var(--cds-chart-axis); }
+  @media (max-width: 600px) { .gx-hide-narrow { display: none; } }
+
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+  [data-dash-source-state=empty] { color: transparent; }
+  .gx-fail { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 120px; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .gx-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+  @media (prefers-reduced-motion: no-preference) {
+    .gx-page:not([hidden]) { animation: gx-in var(--cds-dur-slow) var(--cds-ease-out); }
+    @keyframes gx-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  }
+</style>
+
+<div class="gx">
+  <header class="gx-hero" id="topo">
+    <div>
+      <span class="gx-eyebrow"><span class="gx-chip">Inteli Academy × Galaxies</span>Agente preditivo de performance</span>
+      <h1 class="gx-h1">Previsão de curtidas em YouTube Shorts, antes de publicar</h1>
+      <p class="gx-lead">Em <b class="dash-skeleton" data-source="base" data-field="shorts_teste" data-row="0">—</b> Shorts de teste que o modelo nunca viu, ele acerta qual de dois Shorts do mesmo canal vai render mais em <b class="dash-skeleton" data-source="modelos_teste" data-field="pares" data-where="codigo=CB_FINAL_v2">—</b> dos casos, contra <b class="dash-skeleton" data-source="modelos_teste" data-field="pares" data-where="codigo=B0">—</b> da mediana do canal.</p>
+    </div>
+    <div class="gx-big" id="hero-resultado">
+      <span class="gx-label">Erro do modelo em relação à mediana do canal</span>
+      <span class="gx-big-num gx-num dash-skeleton" data-source="resumo" data-field="reducao_mae_neg" data-row="0">—</span>
+      <span class="gx-big-cap">de erro médio por canal (MAE em log)</span>
+      <div class="gx-bullet" id="hero-bullet" data-source="modelos_teste"></div>
+    </div>
+  </header>
+
+  <nav class="gx-tabs" role="tablist" aria-label="Seções do painel">
+    <button type="button" role="tab" id="tab-resultado" data-tab="resultado" aria-selected="true">Resultado</button>
+    <button type="button" role="tab" id="tab-erros" data-tab="erros" aria-selected="false">Onde erra</button>
+    <button type="button" role="tab" id="tab-receita" data-tab="receita" aria-selected="false">Como deve ser um Short</button>
+    <button type="button" role="tab" id="tab-bastidores" data-tab="bastidores" aria-selected="false">Bastidores</button>
+  </nav>
+
+  <!-- RESULTADO -->
+  <section class="gx-page" id="resultado" role="tabpanel" aria-labelledby="tab-resultado">
+    <div class="gx-kpis">
+      <div class="gx-card" id="kpi-pares">
+        <span class="gx-label">Acerta quem rende mais</span>
+        <span class="gx-val gx-num dash-skeleton" data-source="modelos_teste" data-field="pares" data-where="codigo=CB_FINAL_v2">—</span>
+        <div class="gx-meter" data-meter="pares"><span class="fill"></span><span class="tick" title="acaso"></span></div>
+        <span class="gx-sub">pares do mesmo canal · traço = acaso (50%)</span>
+      </div>
+      <div class="gx-card" id="kpi-intervalo">
+        <span class="gx-label">Intervalo de 80% acertou</span>
+        <span class="gx-val gx-num dash-skeleton" data-source="base" data-field="cobertura_intervalo_teste" data-row="0">—</span>
+        <div class="gx-meter" data-meter="intervalo"><span class="fill"></span><span class="tick"></span></div>
+        <span class="gx-sub">traço = alvo de 80% · validação: <span class="dash-skeleton" data-source="base" data-field="cobertura_intervalo_validacao" data-row="0">—</span></span>
+      </div>
+      <div class="gx-card" id="kpi-canais">
+        <span class="gx-label">Canais em que bate a mediana</span>
+        <span class="gx-val gx-num"><span class="dash-skeleton" data-source="base" data-field="canais_melhores_que_b0" data-row="0">—</span><span class="gx-sub"> de <span data-source="base" data-field="canais" data-row="0">—</span></span></span>
+        <div class="gx-meter" data-meter="canais"><span class="fill"></span></div>
+        <span class="gx-sub">teste com os 20% mais recentes de cada canal</span>
+      </div>
+      <div class="gx-card" id="kpi-base">
+        <span class="gx-label">Base de treino</span>
+        <span class="gx-val gx-num dash-skeleton" data-source="base" data-field="shorts_gold" data-row="0">—</span>
+        <span class="gx-sub"><span data-source="base" data-field="canais" data-row="0">—</span> canais · automotivo e moda · rubrica do Gemini em <span class="dash-skeleton" data-source="base" data-field="cobertura_rubrica" data-row="0">—</span></span>
+      </div>
+    </div>
+    <div class="gx-grid2">
+      <div class="gx-card" id="card-modelos">
+        <h3>Erro no teste, por modelo</h3>
+        <p class="gx-note">MAE em log, macro por canal. Quanto menor, melhor. Os dois baselines do TAP contra o modelo final.</p>
+        <div class="gx-chart" id="ch-modelos" data-source="modelos_teste"></div>
+      </div>
+      <div class="gx-card" id="card-ordem">
+        <h3>Quem acerta a ordem dos Shorts</h3>
+        <p class="gx-note">Em pares do mesmo canal, quantas vezes o previsto mais alto foi o mais curtido. O Gemini sozinho tem sinal, mas o modelo treinado ordena melhor.</p>
+        <div class="gx-chart" id="ch-ordem" data-source="ordenacao"></div>
+      </div>
+    </div>
+    <div class="gx-card" id="card-evolucao">
+      <h3>Mais canais, modelo melhor</h3>
+      <p class="gx-note">Erro (MAE) do modelo treinado no Gold v1 contra o retreinado no Gold v2.1, nas mesmas <span data-source="evolucao" data-field="linhas" data-row="0">—</span> linhas de teste que nenhum dos dois viu. Passe o mouse para ver o acerto de pares.</p>
+      <div class="gx-chart" id="ch-evolucao" data-source="evolucao"></div>
+    </div>
+  </section>
+
+  <!-- ONDE ERRA -->
+  <section class="gx-page" id="erros" role="tabpanel" aria-labelledby="tab-erros" hidden>
+    <p class="gx-intro">O modelo puxa a previsão para a média do canal. Ganha muito nos Shorts fracos e erra os virais, que dependem de mídia paga e de assunto do momento, coisas que não existem antes da publicação.</p>
+    <div class="gx-grid2">
+      <div class="gx-card" id="card-faixas">
+        <h3>Erro pelo desempenho real</h3>
+        <div class="gx-legend"><span><i style="background: var(--gx-blue)"></i>Modelo</span><span><i style="background: var(--cds-chart-muted)"></i>Mediana do canal</span></div>
+        <div class="gx-chart" id="ch-faixas" data-source="recortes"></div>
+      </div>
+      <div class="gx-card" id="card-recortes">
+        <h3>Erro por grupo, setor e origem</h3>
+        <div class="gx-legend"><span><i style="background: var(--gx-blue)"></i>Modelo</span><span><i style="background: var(--cds-chart-muted)"></i>Mediana do canal</span></div>
+        <div class="gx-chart" id="ch-recortes" data-source="recortes"></div>
+      </div>
+    </div>
+    <div class="gx-card" id="card-canais">
+      <h3>Canal a canal</h3>
+      <p class="gx-note">Ganho = erro da mediana − erro do modelo. Positivo é melhor. Clique no cabeçalho para ordenar.</p>
+      <input class="gx-search" id="busca-canal" type="search" placeholder="Buscar canal, setor ou grupo" aria-label="Buscar canal">
+      <div class="gx-tablebox">
+        <table class="gx-table" id="tb-canais" data-source="canais" data-row-key="canal">
+          <thead><tr>
+            <th data-field="canal"><button type="button" data-sort="canal">Canal</button></th>
+            <th data-field="grupo" class="gx-hide-narrow"><button type="button" data-sort="grupo">Grupo</button></th>
+            <th data-field="shorts" class="num gx-hide-narrow"><button type="button" data-sort="shorts">Shorts</button></th>
+            <th data-field="mae_modelo" class="num"><button type="button" data-sort="mae_modelo">Modelo</button></th>
+            <th data-field="mae_b0" class="num"><button type="button" data-sort="mae_b0">Mediana</button></th>
+            <th data-field="ganho" class="num"><button type="button" data-sort="ganho" aria-sort="descending">Ganho</button></th>
+            <th class="gx-hide-narrow"><span class="gx-label">↔</span></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="gx-card" id="card-maiores">
+      <h3>Os maiores erros</h3>
+      <p class="gx-note">Notícia e celebridade em canais de mídia e campanhas de marca: nada disso aparece no criativo antes de publicar.</p>
+      <div class="gx-tablebox">
+        <table class="gx-table" id="tb-maiores" data-source="maiores_erros" data-row-key="titulo">
+          <thead><tr>
+            <th data-field="titulo">Short</th>
+            <th data-field="canal" class="gx-hide-narrow">Canal</th>
+            <th data-field="curtidas_reais" class="num">Reais</th>
+            <th data-field="previstas" class="num">Previstas</th>
+            <th data-field="mediana_canal" class="num gx-hide-narrow">Mediana</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO DEVE SER -->
+  <section class="gx-page" id="receita" role="tabpanel" aria-labelledby="tab-receita" hidden>
+    <p class="gx-intro">O que os Shorts que rendem acima da mediana do próprio canal têm em comum, em <span data-source="atributos" data-field="shorts" data-where="atributo=Todos%20os%20Shorts">—</span> Shorts de <span data-source="base" data-field="canais" data-row="0">—</span> canais. São associações, não causa: servem para orientar a criação, e o modelo é quem dá o número de cada criativo.</p>
+    <div class="gx-recipe" id="receita-tiles" data-source="atributos"></div>
+    <div class="gx-card" id="card-atributos">
+      <h3>Cada característica, nível a nível</h3>
+      <p class="gx-note">Curtidas em relação à mediana do próprio canal (1,00x = igual à mediana), com intervalo de 95%. A linha tracejada é a média de todos os Shorts. Azul = melhor nível, vermelho = pior.</p>
+      <div class="gx-grid3" id="ch-atributos" data-source="atributos"></div>
+    </div>
+    <div class="gx-card" id="card-importancia">
+      <h3>O que mais pesa na previsão do modelo</h3>
+      <p class="gx-note">Participação de cada bloco no SHAP médio do modelo final (quanto, em média, cada bloco move a previsão).</p>
+      <div class="gx-chart" id="ch-importancia" data-source="importancia"></div>
+    </div>
+  </section>
+
+  <!-- BASTIDORES -->
+  <section class="gx-page" id="bastidores" role="tabpanel" aria-labelledby="tab-bastidores" hidden>
+    <p class="gx-intro">Escolhas testadas na validação temporal, dentro do treino, com regra registrada antes de rodar.</p>
+    <div class="gx-grid2">
+      <div class="gx-card" id="card-e17">
+        <h3>Quadros de dentro do vídeo (E-17)</h3>
+        <p class="gx-note">Três quadros de cada Short, sem baixar o vídeo. Troca de cena + capa vs vídeo melhoraram no limite, mas não passaram na regra (p de Holm acima de 0,05).</p>
+        <div class="gx-chart" id="ch-e17" data-source="e17"></div>
+      </div>
+      <div class="gx-card" id="card-intervalo">
+        <h3>Como calibrar o intervalo de 80%</h3>
+        <p class="gx-note">Cobertura e largura em dados futuros. Os quantis do GBM sozinhos ficam muito abaixo do alvo; o método atual é o mais estreito perto de 80%.</p>
+        <div class="gx-chart" id="ch-intervalo" data-source="intervalo"></div>
+      </div>
+    </div>
+    <div class="gx-card" id="card-clusters">
+      <h3>Elementos descritos pelo Gemini (E-16)</h3>
+      <p class="gx-note">Clusters dos elementos de vídeo e áudio: curtidas dos Shorts com o cluster em relação à mediana do canal. Descritivo; não entrou no modelo.</p>
+      <div class="gx-legend"><span><i style="background: var(--gx-blue)"></i>Vídeo</span><span><i style="background: var(--cds-chart-muted)"></i>Áudio</span></div>
+      <div class="gx-chart" id="ch-clusters" data-source="clusters"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+  dash.calc('resumo', {
+    inputs: ['modelos_teste'],
+    title: 'Redução do erro sobre a mediana',
+    description: 'Variação do MAE do modelo final em relação ao MAE da mediana do canal, no teste do E-15 (negativo = erra menos).',
+    fn: (modelos_teste) => {
+      const m = (c) => modelos_teste.find((r) => r.codigo === c);
+      return [{ reducao_mae_neg: m('CB_FINAL_v2').mae_macro / m('B0').mae_macro - 1 }];
+    },
+  });
+</script>
+
+<script>
+  const F = {
+    dec: (x, d = 3) => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }).format(x),
+    pct: (x, d = 1) => new Intl.NumberFormat('pt-BR', { style: 'percent', minimumFractionDigits: d, maximumFractionDigits: d }).format(x),
+    sgn: (x) => (x > 0 ? '+' : x < 0 ? '−' : '') + new Intl.NumberFormat('pt-BR', { style: 'percent', maximumFractionDigits: 0 }).format(Math.abs(x)),
+    int: (x) => new Intl.NumberFormat('pt-BR').format(x),
+    x: (x) => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(x) + 'x',
+  };
+  const rowsOf = (id) => { const s = dash.data(id); return s.status === 'ok' && Array.isArray(s.data) ? s.data : null; };
+
+  /* abas */
+  let current = 'resultado';
+  const tabs = [...document.querySelectorAll('.gx-tabs [data-tab]')];
+  function show(id, link = true) {
+    if (!document.getElementById(id)) return;
+    current = id;
+    tabs.forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === id)));
+    document.querySelectorAll('.gx-page').forEach((p) => { p.hidden = p.id !== id; });
+    if (link) dash.setLink(id);
+    draw();
+  }
+  tabs.forEach((b) => b.addEventListener('click', () => show(b.dataset.tab)));
+
+  /* números marcados */
+  const fmtField = {
+    mae_macro: (v) => F.dec(v), pares: (v) => F.pct(v), reducao_mae_neg: F.sgn,
+    cobertura_intervalo_teste: (v) => F.pct(v), cobertura_intervalo_validacao: (v) => F.pct(v), cobertura_rubrica: (v) => F.pct(v, 2),
+    shorts_gold: F.int, shorts_teste: F.int, canais: F.int, canais_melhores_que_b0: F.int, linhas: F.int, shorts: F.int,
+  };
+  function fillMarks() {
+    document.querySelectorAll('#dash-root [data-field][data-source]:not(th)').forEach((el) => {
+      const s = dash.data(el.dataset.source);
+      if (s.status !== 'ok') { if (s.status !== 'loading') el.classList.remove('dash-skeleton'); return; }
+      const rows = Array.isArray(s.data) ? s.data : [];
+      let row;
+      if (el.dataset.row != null) row = rows[+el.dataset.row];
+      else if (el.dataset.where) { const [k, v] = el.dataset.where.split('=').map(decodeURIComponent); row = rows.find((r) => String(r[k]) === v); }
+      el.classList.remove('dash-skeleton');
+      const v = row ? row[el.dataset.field] : null;
+      el.textContent = v == null ? '—' : (fmtField[el.dataset.field] || String)(v);
+    });
+  }
+
+  /* utilitários de gráfico */
+  function tipFor(box) {
+    let tip = box.querySelector('.gx-tip');
+    if (!tip) { tip = document.createElement('div'); tip.className = 'gx-tip'; tip.hidden = true; box.appendChild(tip); }
+    return {
+      show(e, lines) {
+        tip.replaceChildren(...lines.map(([k, v], i) => { const d = document.createElement('div'); if (i === 0) { d.className = 'k'; d.textContent = k; } else d.textContent = `${k}: ${v}`; return d; }));
+        tip.hidden = false;
+        const r = box.getBoundingClientRect(); let x = e.clientX - r.left + 12; const y = e.clientY - r.top + 12;
+        if (x + tip.offsetWidth > r.width) x = Math.max(0, e.clientX - r.left - tip.offsetWidth - 12);
+        tip.style.left = x + 'px'; tip.style.top = y + 'px';
+      },
+      hide() { tip.hidden = true; },
+    };
+  }
+  function state(box, id) {
+    const s = dash.data(id);
+    if (s.status === 'ok') return true;
+    box.querySelectorAll('svg, .gx-fail').forEach((n) => n.remove());
+    if (s.status === 'error') { const d = document.createElement('div'); d.className = 'gx-fail'; d.textContent = 'Failed to load'; box.appendChild(d); }
+    return false;
+  }
+  function textWidth(svg, list, size = 12) {
+    const t = svg.append('text').attr('font-size', size).attr('visibility', 'hidden');
+    const w = d3.max(list, (s) => { t.text(s); return t.node().getComputedTextLength(); }) || 0;
+    t.remove(); return w;
+  }
+  function freshSvg(box, H) {
+    box.querySelectorAll('svg, .gx-fail').forEach((n) => n.remove());
+    const W = box.clientWidth || 320;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    box.style.minHeight = H + 'px';
+    return { svg, W };
+  }
+
+  /* barras horizontais arredondadas, rótulo de valor no fim */
+  function hbars(box, rows, o) {
+    const rowH = 38, H = rows.length * rowH + (o.ref != null ? 18 : 4);
+    const { svg, W } = freshSvg(box, H);
+    const left = Math.min(textWidth(svg, rows.map(o.label)) + 14, W * 0.46);
+    const valW = textWidth(svg, rows.map((r) => o.fmt(o.value(r)))) + 10;
+    const x = d3.scaleLinear([0, o.max || d3.max(rows, o.value) * 1.04], [left, W - valW]);
+    const tip = tipFor(box);
+    const g = svg.selectAll('g.r').data(rows).join('g').attr('class', 'r').attr('transform', (d, i) => `translate(0,${i * rowH})`);
+    g.append('rect').attr('x', left).attr('y', 8).attr('width', W - valW - left).attr('height', 18).attr('rx', 9).attr('fill', 'var(--gx-soft)').attr('opacity', .45);
+    g.append('rect').attr('x', left).attr('y', 8).attr('height', 18).attr('rx', 9).attr('width', (d) => Math.max(0, x(o.value(d)) - left))
+      .attr('fill', (d) => o.hi(d) ? 'var(--gx-blue)' : 'var(--cds-chart-muted)')
+      .on('mousemove', (e, d) => tip.show(e, [[o.label(d)], ...(o.tip ? o.tip(d) : [['Valor', o.fmt(o.value(d))]])])).on('mouseleave', () => tip.hide());
+    g.append('text').attr('x', left - 12).attr('y', 21).attr('text-anchor', 'end').attr('class', (d) => o.hi(d) ? 'strong' : null).text(o.label);
+    g.append('text').attr('x', (d) => x(o.value(d)) + 8).attr('y', 21).attr('class', (d) => o.hi(d) ? 'strong' : null).text((d) => o.fmt(o.value(d)));
+    if (o.ref != null) {
+      svg.append('line').attr('x1', x(o.ref)).attr('x2', x(o.ref)).attr('y1', 2).attr('y2', H - 14).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3');
+      svg.append('text').attr('x', x(o.ref)).attr('y', H - 2).attr('text-anchor', 'middle').attr('font-size', 11).text(o.refLabel);
+    }
+  }
+
+  /* duas barras por linha: modelo x mediana */
+  function pairs(box, rows, o) {
+    const rowH = 46, H = rows.length * rowH;
+    const { svg, W } = freshSvg(box, H);
+    const left = Math.min(textWidth(svg, rows.map(o.label)) + 14, W * 0.4);
+    const valW = textWidth(svg, rows.map((r) => o.fmt(Math.max(o.a(r), o.b(r))))) + 10;
+    const x = d3.scaleLinear([0, d3.max(rows, (r) => Math.max(o.a(r), o.b(r))) * 1.04], [left, W - valW]);
+    const tip = tipFor(box);
+    const g = svg.selectAll('g.r').data(rows).join('g').attr('class', 'r').attr('transform', (d, i) => `translate(0,${i * rowH})`);
+    g.append('text').attr('x', left - 12).attr('y', 22).attr('text-anchor', 'end').attr('class', 'strong').text(o.label);
+    g.append('rect').attr('x', left).attr('y', 8).attr('height', 12).attr('rx', 6).attr('width', (d) => x(o.a(d)) - left).attr('fill', 'var(--gx-blue)');
+    g.append('rect').attr('x', left).attr('y', 23).attr('height', 12).attr('rx', 6).attr('width', (d) => x(o.b(d)) - left).attr('fill', 'var(--cds-chart-muted)');
+    g.append('text').attr('x', (d) => x(o.a(d)) + 6).attr('y', 18).attr('class', 'strong').text((d) => o.fmt(o.a(d)));
+    g.append('text').attr('x', (d) => x(o.b(d)) + 6).attr('y', 33).text((d) => o.fmt(o.b(d)));
+    g.append('rect').attr('width', W).attr('height', rowH - 4).attr('fill', 'transparent')
+      .on('mousemove', (e, d) => tip.show(e, [[o.label(d)], ['Modelo', o.fmt(o.a(d))], ['Mediana do canal', o.fmt(o.b(d))], ...(o.extra ? o.extra(d) : [])])).on('mouseleave', () => tip.hide());
+  }
+
+  /* ---------- desenhos por aba ---------- */
+  function drawHero() {
+    const box = document.getElementById('hero-bullet');
+    const m = rowsOf('modelos_teste');
+    box.replaceChildren();
+    if (!m) return;
+    const pick = (c) => m.find((r) => r.codigo === c);
+    const items = [['Modelo final', pick('CB_FINAL_v2'), 'var(--gx-blue)'], ['Mediana do canal', pick('B0'), 'var(--cds-chart-muted)']];
+    const max = d3.max(items, (d) => d[1].mae_macro);
+    items.forEach(([name, r, color]) => {
+      const row = document.createElement('div'); row.className = 'gx-bullet-row';
+      const a = document.createElement('span'); a.textContent = name;
+      const t = document.createElement('div'); t.className = 'gx-track';
+      const f = document.createElement('div'); f.className = 'gx-fill'; f.style.width = (r.mae_macro / max * 100) + '%'; f.style.background = color; t.appendChild(f);
+      const v = document.createElement('span'); v.className = 'gx-num'; v.style.textAlign = 'right'; v.textContent = F.dec(r.mae_macro, 2);
+      row.append(a, t, v); box.appendChild(row);
+    });
+  }
+
+  function drawMeters() {
+    const m = rowsOf('modelos_teste'), b = rowsOf('base');
+    const set = (key, frac, tick) => {
+      const el = document.querySelector(`[data-meter="${key}"]`); if (!el) return;
+      el.querySelector('.fill').style.width = Math.max(0, Math.min(1, frac)) * 100 + '%';
+      const t = el.querySelector('.tick'); if (t && tick != null) t.style.left = `calc(${tick * 100}% - 1px)`;
+    };
+    if (m) set('pares', m.find((r) => r.codigo === 'CB_FINAL_v2').pares, 0.5);
+    if (b) { set('intervalo', b[0].cobertura_intervalo_teste, 0.8); set('canais', b[0].canais_melhores_que_b0 / b[0].canais); }
+  }
+
+  function drawResultado() {
+    const mb = document.getElementById('ch-modelos');
+    if (state(mb, 'modelos_teste')) {
+      const m = rowsOf('modelos_teste'), order = ['B_INS', 'B_INS_SETOR', 'B0', 'CB_FINAL_v2'];
+      hbars(mb, order.map((c) => m.find((r) => r.codigo === c)), { label: (r) => r.modelo, value: (r) => r.mae_macro, fmt: (v) => F.dec(v, 2), hi: (r) => r.codigo === 'CB_FINAL_v2',
+        tip: (r) => [['Erro (MAE)', F.dec(r.mae_macro)], ['Spearman', F.dec(r.spearman, 2)], ['Dentro de 2x do real', F.pct(r.dentro_2x)]] });
+    }
+    const ob = document.getElementById('ch-ordem');
+    if (state(ob, 'ordenacao')) {
+      const o = rowsOf('ordenacao'), order = ['B0', 'LLM_zero_shot', 'CB_FINAL'];
+      hbars(ob, order.map((c) => o.find((r) => r.codigo === c)), { label: (r) => r.modelo, value: (r) => r.pares, fmt: (v) => F.pct(v), hi: (r) => r.codigo === 'CB_FINAL', max: 0.7, ref: 0.5, refLabel: 'acaso (50%)' });
+    }
+    const eb = document.getElementById('ch-evolucao');
+    if (state(eb, 'evolucao')) {
+      const e = rowsOf('evolucao'), order = ['B0', 'CB_FINAL', 'CB_FINAL_v2'];
+      const rows = order.map((c) => e.find((r) => r.codigo === c));
+      hbars(eb, rows, { label: (r) => r.modelo, value: (r) => r.mae_macro, fmt: (v) => F.dec(v, 3), hi: (r) => r.codigo === 'CB_FINAL_v2',
+        tip: (r) => [['Erro (MAE)', F.dec(r.mae_macro)], ['Acerto de pares', F.pct(r.pares)]] });
+    }
+  }
+
+  let sortBy = { key: 'ganho', dir: -1 };
+  const busca = document.getElementById('busca-canal');
+  busca.addEventListener('input', () => drawCanais());
+  document.querySelectorAll('#tb-canais [data-sort]').forEach((btn) => btn.addEventListener('click', () => {
+    const k = btn.dataset.sort;
+    sortBy = { key: k, dir: sortBy.key === k ? -sortBy.dir : (k === 'canal' || k === 'grupo' ? 1 : -1) };
+    document.querySelectorAll('#tb-canais [data-sort]').forEach((b) => b.removeAttribute('aria-sort'));
+    btn.setAttribute('aria-sort', sortBy.dir > 0 ? 'ascending' : 'descending');
+    drawCanais();
+  }));
+  function drawCanais() {
+    const all = rowsOf('canais'), body = document.querySelector('#tb-canais tbody');
+    if (!all) { body.replaceChildren(); return; }
+    const q = busca.value.trim().toLowerCase();
+    const ext = d3.max(all, (r) => Math.abs(r.ganho)) || 1;
+    const rows = all.filter((r) => !q || `${r.canal} ${r.setor} ${r.grupo}`.toLowerCase().includes(q)).slice()
+      .sort((a, b) => { const x = a[sortBy.key], y = b[sortBy.key]; return (typeof x === 'number' ? x - y : String(x).localeCompare(String(y), 'pt-BR')) * sortBy.dir; });
+    body.replaceChildren(...rows.map((r) => {
+      const tr = document.createElement('tr');
+      const td = (t, c) => { const e = document.createElement('td'); if (c) e.className = c; e.textContent = t; tr.appendChild(e); return e; };
+      td(r.canal);
+      const gp = td('', 'gx-hide-narrow'); const p = document.createElement('span'); p.className = 'gx-pill'; p.textContent = `${r.setor} · ${r.grupo}`; gp.appendChild(p);
+      td(F.int(r.shorts), 'num gx-hide-narrow'); td(F.dec(r.mae_modelo), 'num'); td(F.dec(r.mae_b0), 'num');
+      const gc = td((r.ganho > 0 ? '+' : '') + F.dec(r.ganho), 'num'); gc.style.color = r.ganho >= 0 ? 'var(--color-ok)' : 'var(--color-bad)';
+      const bc = document.createElement('td'); bc.className = 'gx-hide-narrow';
+      const bar = document.createElement('div'); bar.className = 'gx-div';
+      const z = document.createElement('div'); z.className = 'zero';
+      const s = document.createElement('span'); const w = Math.abs(r.ganho) / ext * 50;
+      s.style.width = w + '%'; s.style.left = r.ganho >= 0 ? '50%' : (50 - w) + '%'; s.style.background = r.ganho >= 0 ? 'var(--gx-blue)' : 'var(--gx-red)';
+      bar.append(z, s); bc.appendChild(bar); tr.appendChild(bc);
+      return tr;
+    }));
+  }
+  function drawMaiores() {
+    const all = rowsOf('maiores_erros'), body = document.querySelector('#tb-maiores tbody');
+    if (!all) { body.replaceChildren(); return; }
+    body.replaceChildren(...all.map((r) => {
+      const tr = document.createElement('tr');
+      const td = (t, c) => { const e = document.createElement('td'); if (c) e.className = c; e.textContent = t; tr.appendChild(e); };
+      td(r.titulo); td(r.canal, 'gx-hide-narrow'); td(F.int(r.curtidas_reais), 'num'); td(F.int(r.previstas), 'num'); td(F.int(r.mediana_canal), 'num gx-hide-narrow');
+      return tr;
+    }));
+  }
+  function drawErros() {
+    const fb = document.getElementById('ch-faixas'), rb = document.getElementById('ch-recortes');
+    if (state(fb, 'recortes') && state(rb, 'recortes')) {
+      const rec = rowsOf('recortes');
+      const extra = (r) => [['Shorts', F.int(r.shorts)], ['Intervalo acertou', F.pct(r.cobertura_80, 0)]];
+      pairs(fb, rec.filter((r) => r.recorte === 'Desempenho real'), { label: (r) => r.grupo, a: (r) => r.mae_modelo, b: (r) => r.mae_b0, fmt: (v) => F.dec(v, 2), extra });
+      pairs(rb, rec.filter((r) => r.recorte !== 'Desempenho real'), { label: (r) => r.grupo, a: (r) => r.mae_modelo, b: (r) => r.mae_b0, fmt: (v) => F.dec(v, 2), extra: (r) => [['Recorte', r.recorte], ...extra(r)] });
+    }
+    drawCanais(); drawMaiores();
+  }
+
+  /* receita: cartões de destaque + um mini gráfico por característica */
+  const TIPS = {
+    'Força do gancho (0-10)': 'Abra com o que prende nos 3 primeiros segundos.',
+    'Ritmo de cortes (0-10)': 'Cortes rápidos rendem mais que plano parado.',
+    'Estética geral (0-10)': 'Produção caprichada compensa.',
+    'Troca de cena entre quadros': 'Evite vídeo de uma cena só, sem variação.',
+    'Capa parecida com o vídeo': 'Produza a capa; não use um quadro qualquer do vídeo.',
+    'Try-on ou demonstração': 'Mostre o produto em uso.',
+    'Tom da narração': 'Narração animada rende mais que tom de aula.',
+    'Close no produto': 'Mostre o produto de perto.',
+  };
+  function drawReceita() {
+    const at = rowsOf('atributos');
+    const tiles = document.getElementById('receita-tiles'), grid = document.getElementById('ch-atributos');
+    if (!at) { tiles.replaceChildren(); grid.replaceChildren(); return; }
+    const ref = at.find((r) => r.atributo === 'Todos os Shorts');
+    const byAttr = d3.groups(at.filter((r) => r.atributo !== 'Todos os Shorts'), (r) => r.atributo)
+      .map(([name, lv]) => { lv.sort((a, b) => a.ordem - b.ordem); const best = d3.greatest(lv, (r) => r.x_mediana), worst = d3.least(lv, (r) => r.x_mediana); return { name, lv, best, worst, spread: best.x_mediana / worst.x_mediana }; })
+      .sort((a, b) => b.spread - a.spread);
+
+    tiles.replaceChildren(...byAttr.slice(0, 4).map((a) => {
+      const t = document.createElement('div'); t.className = 'gx-tile';
+      const w = document.createElement('span'); w.className = 'what'; w.textContent = a.name;
+      const x = document.createElement('span'); x.className = 'x gx-num'; x.textContent = F.x(a.best.x_mediana);
+      const vs = document.createElement('span'); vs.className = 'vs gx-num'; vs.textContent = `com ${a.best.nivel} · contra ${F.x(a.worst.x_mediana)} com ${a.worst.nivel}`;
+      const tp = document.createElement('span'); tp.className = 'tip'; tp.textContent = TIPS[a.name] || '';
+      t.append(w, x, vs, tp); return t;
+    }));
+
+    const lo = Math.min(d3.min(at, (r) => r.ic_baixo), 0.6), hi = Math.max(d3.max(at, (r) => r.ic_alto), 1.4);
+    grid.replaceChildren();
+    byAttr.forEach((a) => {
+      const card = document.createElement('div'); card.className = 'gx-chart'; card.style.minHeight = '0';
+      const h = document.createElement('div'); h.className = 'gx-label'; h.style.color = 'var(--color-fg)'; h.style.fontWeight = '500'; h.style.marginBottom = '4px'; h.textContent = a.name;
+      card.appendChild(h); grid.appendChild(card);
+      const rowH = 24, H = a.lv.length * rowH + 22, W = card.clientWidth || 280;
+      const svg = d3.select(card).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+      const left = textWidth(svg, a.lv.map((r) => r.nivel)) + 10;
+      const x = d3.scaleLog([lo, hi], [left + 6, W - 44]);
+      [0.75, 1, 1.25].forEach((v) => {
+        svg.append('line').attr('x1', x(v)).attr('x2', x(v)).attr('y1', 0).attr('y2', H - 16).attr('stroke', v === 1 ? 'var(--cds-chart-axis)' : 'var(--cds-chart-grid)');
+        svg.append('text').attr('x', x(v)).attr('y', H - 3).attr('text-anchor', 'middle').attr('font-size', 10).text(F.x(v).replace(',00', ''));
+      });
+      svg.append('line').attr('x1', x(ref.x_mediana)).attr('x2', x(ref.x_mediana)).attr('y1', 0).attr('y2', H - 16).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '3 3');
+      const tip = tipFor(card);
+      const g = svg.selectAll('g.l').data(a.lv).join('g').attr('class', 'l').attr('transform', (d, i) => `translate(0,${i * rowH + 4})`);
+      const col = (d) => d === a.best ? 'var(--gx-blue)' : d === a.worst ? 'var(--gx-red)' : 'var(--cds-chart-muted)';
+      g.append('text').attr('x', left - 4).attr('y', 12).attr('text-anchor', 'end').text((d) => d.nivel);
+      g.append('line').attr('x1', (d) => x(d.ic_baixo)).attr('x2', (d) => x(d.ic_alto)).attr('y1', 8).attr('y2', 8).attr('stroke', col).attr('stroke-width', 3).attr('stroke-linecap', 'round').attr('opacity', .35);
+      g.append('circle').attr('cx', (d) => x(d.x_mediana)).attr('cy', 8).attr('r', 5.5).attr('fill', col)
+        .on('mousemove', (e, d) => tip.show(e, [[`${a.name}: ${d.nivel}`], ['Curtidas', F.x(d.x_mediana) + ' a mediana do canal'], ['IC 95%', `${F.x(d.ic_baixo)} a ${F.x(d.ic_alto)}`], ['Shorts', F.int(d.shorts)]]))
+        .on('mouseleave', () => tip.hide());
+      g.append('text').attr('x', W - 40).attr('y', 12).attr('class', (d) => d === a.best ? 'strong' : null).text((d) => F.x(d.x_mediana));
+    });
+
+    const ib = document.getElementById('ch-importancia');
+    if (state(ib, 'importancia')) {
+      hbars(ib, rowsOf('importancia'), { label: (r) => r.bloco, value: (r) => r.participacao, fmt: (v) => F.pct(v), hi: (r) => r.participacao >= 0.15,
+        tip: (r) => [['Participação', F.pct(r.participacao)], ['SHAP médio', F.dec(r.shap_medio)]] });
+    }
+  }
+
+  function drawBastidores() {
+    const eb = document.getElementById('ch-e17');
+    if (state(eb, 'e17')) {
+      const e = rowsOf('e17'), order = ['B0', 'CB_FINAL', 'CB_FINAL_FR', 'CB_FINAL_FR2'];
+      hbars(eb, order.map((c) => e.find((r) => r.codigo === c)), { label: (r) => r.braco, value: (r) => r.mae_macro, fmt: (v) => F.dec(v, 3), hi: (r) => r.codigo === 'CB_FINAL_FR2',
+        tip: (r) => [['Erro (MAE)', F.dec(r.mae_macro)], ['Pares', F.pct(r.pares)], ...(r.p_holm != null ? [['p (bruto / Holm)', `${F.dec(r.p_bruto)} / ${F.dec(r.p_holm)}`], ['Canais que melhoram', `${r.canais_melhor} de ${(rowsOf('base') || [{}])[0].canais ?? '—'}`]] : [])] });
+    }
+    const ib = document.getElementById('ch-intervalo');
+    if (state(ib, 'intervalo')) {
+      const rows = rowsOf('intervalo'), H = 240, m = { t: 12, r: 16, b: 40, l: 44 };
+      const { svg, W } = freshSvg(ib, H);
+      const x = d3.scaleLinear([3, d3.max(rows, (r) => r.largura_fator) * 1.1], [m.l, W - m.r]);
+      const y = d3.scaleLinear([0.55, 0.86], [H - m.b, m.t]);
+      svg.selectAll('line.g').data(y.ticks(4)).join('line').attr('class', 'g').attr('x1', m.l).attr('x2', W - m.r).attr('y1', (d) => y(d)).attr('y2', (d) => y(d)).attr('stroke', 'var(--cds-chart-grid)');
+      svg.selectAll('text.y').data(y.ticks(4)).join('text').attr('class', 'y').attr('x', m.l - 6).attr('y', (d) => y(d) + 4).attr('text-anchor', 'end').text((d) => F.pct(d, 0));
+      svg.selectAll('text.x').data(x.ticks(4)).join('text').attr('class', 'x').attr('x', (d) => x(d)).attr('y', H - m.b + 16).attr('text-anchor', 'middle').text((d) => F.int(d) + 'x');
+      svg.append('text').attr('x', (m.l + W - m.r) / 2).attr('y', H - 4).attr('text-anchor', 'middle').text('largura do intervalo (máximo ÷ mínimo)');
+      svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(0.8)).attr('y2', y(0.8)).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3');
+      svg.append('text').attr('x', m.l + 4).attr('y', y(0.8) - 5).attr('font-size', 11).text('alvo 80%');
+      const atual = (r) => r.metodo.includes('atual'); const tip = tipFor(ib);
+      svg.selectAll('circle').data(rows).join('circle').attr('cx', (r) => x(r.largura_fator)).attr('cy', (r) => y(r.cobertura)).attr('r', (r) => atual(r) ? 8 : 5.5)
+        .attr('fill', (r) => atual(r) ? 'var(--gx-blue)' : 'var(--cds-chart-muted)').attr('stroke', 'var(--color-panel)').attr('stroke-width', 2)
+        .on('mousemove', (e, r) => tip.show(e, [[r.metodo], ['Cobertura', F.pct(r.cobertura)], ['Largura', F.x(r.largura_fator)], ['Pessoa / marca / mídia', `${F.pct(r.pessoa, 0)} / ${F.pct(r.marca, 0)} / ${F.pct(r.midia, 0)}`]])).on('mouseleave', () => tip.hide());
+      svg.selectAll('text.lab').data(rows.filter((r) => atual(r) || r.metodo === 'Quantis do GBM')).join('text').attr('class', (r) => 'lab' + (atual(r) ? ' strong' : ''))
+        .attr('x', (r) => x(r.largura_fator) + 11).attr('y', (r) => y(r.cobertura) + 4).text((r) => r.metodo);
+    }
+    const cb = document.getElementById('ch-clusters');
+    if (state(cb, 'clusters')) {
+      const sorted = rowsOf('clusters').slice().sort((a, b) => b.x_mediana - a.x_mediana);
+      const rows = [...sorted.slice(0, 6), ...sorted.slice(-6)], rowH = 28, H = rows.length * rowH + 24;
+      const { svg, W } = freshSvg(cb, H);
+      const lab = (r) => r.exemplos.split(', ')[0];
+      const left = Math.min(textWidth(svg, rows.map(lab)) + 12, W * 0.45);
+      const ext = d3.max(rows, (r) => Math.abs(Math.log(r.x_mediana)));
+      const x = d3.scaleLinear([-ext, ext], [left + 8, W - 48]);
+      svg.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', 0).attr('y2', H - 20).attr('stroke', 'var(--cds-chart-axis)');
+      svg.append('text').attr('x', x(0)).attr('y', H - 4).attr('text-anchor', 'middle').attr('font-size', 11).text('mediana do canal');
+      const tip = tipFor(cb);
+      const g = svg.selectAll('g.r').data(rows).join('g').attr('class', 'r').attr('transform', (d, i) => `translate(0,${i * rowH})`);
+      g.append('text').attr('x', left - 4).attr('y', 17).attr('text-anchor', 'end').text(lab);
+      g.append('rect').attr('y', 6).attr('height', 15).attr('rx', 7).attr('x', (r) => Math.min(x(0), x(Math.log(r.x_mediana)))).attr('width', (r) => Math.abs(x(Math.log(r.x_mediana)) - x(0)))
+        .attr('fill', (r) => r.tipo === 'Video' ? 'var(--gx-blue)' : 'var(--cds-chart-muted)')
+        .on('mousemove', (e, r) => tip.show(e, [[`${r.tipo === 'Video' ? 'Vídeo' : 'Áudio'} · ${r.cluster}`], ['Exemplos', r.exemplos], ['Curtidas', F.x(r.x_mediana) + ' a mediana'], ['Shorts', F.int(r.shorts)]])).on('mouseleave', () => tip.hide());
+      g.append('text').attr('y', 18).attr('x', (r) => r.x_mediana >= 1 ? x(Math.log(r.x_mediana)) + 6 : x(0) + 6).text((r) => F.x(r.x_mediana));
+    }
+  }
+
+  function draw() {
+    fillMarks(); drawHero(); drawMeters();
+    if (current === 'resultado') drawResultado();
+    if (current === 'erros') drawErros();
+    if (current === 'receita') drawReceita();
+    if (current === 'bastidores') drawBastidores();
+  }
+  dash.onData(draw);
+
+  const named = location.hash.slice(1);
+  if (['resultado', 'erros', 'receita', 'bastidores'].includes(named)) show(named, false);
+</script>

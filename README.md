@@ -92,6 +92,7 @@ Copy-Item .env.example .env              # YOUTUBE_API_KEY e GEMINI_API_KEY (nun
 | 9. Testes | `PYTHONPATH=src python -m pytest -q tests/` |
 | 10. Servidor MCP | `PYTHONPATH=src python -m galaxies_agent.mcp_server`; no Claude Desktop: `python scripts/setup/configure_claude_desktop.py` (secao 4) |
 | 11. Agente | `PYTHONPATH=src python -m galaxies_agent.agent "Qual destes Shorts priorizar?" --criativos '[...]'` |
+| 11b. Painel de resultados | `painel/` (artifact Dashboard: <https://claude.ai/artifact/DeDmDXainSZacMnHzJehxZ>); fontes de cada dataset em `painel/README.md` |
 | 12. Demo | `notebooks/05_demo/11_demo_agente.ipynb` (Colab; arraste `demo_bundle.tar.gz` e cadastre `GEMINI_API_KEY` nos Secrets) |
 
 A coleta de legendas antiga (transcript-api/yt-dlp/apify) foi substituida pelo Gemini por bloqueio de IP (D-011); os scripts sem uso foram removidos em 14/10/2026 e continuam no historico do git.
@@ -307,8 +308,10 @@ Estrutura do repositorio:
 src/galaxies_agent/      tool: contrato Pydantic, preditor, rubrica Gemini ao vivo, embedding, agente LangGraph, servidor MCP
 scripts/coleta/          YouTube Data API, thumbnails (so biblioteca padrao) e rubrica de video + fala (Gemini)
 scripts/pipeline/        Bronze -> Silver -> Feature Store -> Gold, features de thumbnail e OCR
-scripts/experimentos/    E-00 a E-13, teste final (uma vez) e analise de erros
+scripts/experimentos/    E-00 a E-17, teste final (uma vez), analise de erros e descritivos do que funciona
 scripts/modelo/          treino e empacotamento do modelo servido pela tool
+scripts/setup/           registro do servidor MCP no Claude Desktop
+painel/                  front do painel de resultados (artifact Dashboard): index.html e dados/*.json
 notebooks/               01_dados, 02_baseline, 03_features, 04_modelo_colab (E-08/E-10/E-12), 05_demo
 tests/                   contrato, antivazamento, modelo, agente e rubrica (pytest)
 data/feature_store/      features versionadas por hash (versionadas no git); bronze/silver/gold ficam fora do git
@@ -345,5 +348,8 @@ docs/                    entendimento, decisoes (D-xxx), metricas, registro de e
 Os notebooks locais encontram a raiz do repo sozinhos (podem ser abertos de qualquer pasta). Os de Colab recebem um pacote `.tar.gz` arrastado para o painel Arquivos.
 
 
-## Demostração em video do front-end:
+## Demostração em video :
+### Front-end:
 - link: https://youtu.be/qFakB7bCiGQ
+### Arquitetura e mcp:
+- link: https://youtu.be/RmaKvxObIgU
