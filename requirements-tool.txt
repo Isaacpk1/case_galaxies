@@ -1,4 +1,4 @@
-# Tool / agente preditivo (Linux, macOS ou Colab; no Windows do Inteli as DLLs nativas sao bloqueadas).
+# Tool / agente preditivo (Linux, macOS, Colab ou Windows via .venv: instalar_mcp_claude_desktop.bat; testado no Windows do Inteli com Python 3.14).
 catboost>=1.2
 numpy>=1.24
 pandas>=2.0

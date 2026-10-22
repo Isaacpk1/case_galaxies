@@ -65,7 +65,7 @@ Camadas e contratos: [docs/09](docs/09-arquitetura-elt-mvp.md). Decisao de stack
 
 ## 4. Instalacao e execucao
 
-Python 3.11+. No Windows do Inteli a politica de aplicativos bloqueia DLLs nativas (pandas, CatBoost, Pydantic): **os coletores rodam no Windows** (so biblioteca padrao); **modelo, tool e agente rodam em Linux, macOS ou Colab**.
+Python 3.11+. No Windows do Inteli a politica de aplicativos bloqueou DLLs nativas (pandas, CatBoost, Pydantic) no Python do sistema: por isso **os coletores usam so a biblioteca padrao**. Em 21/10/2026, um `.venv` com Python 3.14 nessa mesma maquina carregou o modelo (`catboost` 1.2.10) e serve o MCP no Claude Desktop; modelo, tool e agente tambem rodam em Linux, macOS ou Colab.
 
 ```powershell
 python -m venv .venv
@@ -90,7 +90,7 @@ Copy-Item .env.example .env              # YOUTUBE_API_KEY e GEMINI_API_KEY (nun
 | 8d. E-16 (clusters dos descritores) | `python scripts/experimentos/run_e16_descriptor_clusters.py` |
 | 8b. Gold v2 (E-14 / E-15, uma vez) | embedding: `notebooks/04_modelo_colab/12_embedding_thumbnails_v2.ipynb`; `python scripts/experimentos/run_e14_e15_gold_v2.py --cobertura` e `--exp e14` / `--exp e15 --emb-v2 <embeddings.npz>` |
 | 9. Testes | `PYTHONPATH=src python -m pytest -q tests/` |
-| 10. Servidor MCP | `PYTHONPATH=src python -m galaxies_agent.mcp_server` |
+| 10. Servidor MCP | `PYTHONPATH=src python -m galaxies_agent.mcp_server`; no Claude Desktop: `python scripts/setup/configure_claude_desktop.py` (secao 4) |
 | 11. Agente | `PYTHONPATH=src python -m galaxies_agent.agent "Qual destes Shorts priorizar?" --criativos '[...]'` |
 | 12. Demo | `notebooks/05_demo/11_demo_agente.ipynb` (Colab; arraste `demo_bundle.tar.gz` e cadastre `GEMINI_API_KEY` nos Secrets) |
 
@@ -108,12 +108,33 @@ print(out.predicted_metric, out.interval_low, out.interval_high, out.confidence_
 print(out.model_variant, out.rubric_source, out.video_attributes)   # o que o Gemini viu no video
 ```
 
-### Uso via MCP (ex.: Claude Desktop; `cwd` na raiz do repo)
+### Uso via MCP (Claude Desktop)
 
-```json
-{"mcpServers": {"galaxies-preditivo": {"command": "python", "args": ["-m", "galaxies_agent.mcp_server"],
-  "env": {"PYTHONPATH": "src"}}}}
-```
+Precisa de um Python onde `catboost` e `pandas` carreguem. No Windows do Inteli funcionou em 21/10/2026 com um `.venv` (Python 3.14, `catboost` 1.2.10) criado pelo instalador abaixo; o Python do sistema dessa maquina ja teve DLLs bloqueadas, e o instalador testa o carregamento antes de gravar qualquer coisa. Nao ha `pyproject.toml`: o pacote roda pelo `PYTHONPATH=src`.
+
+No Windows, os passos 1 e 2 estao em `instalar_mcp_claude_desktop.bat` (dois cliques; log em `setup_mcp.log`).
+
+1. Na raiz do repo, crie o ambiente e instale as dependencias:
+   ```bash
+   python -m venv .venv
+   .venv/bin/pip install -r requirements-tool.txt            # Windows: .venv\Scripts\pip install -r requirements-tool.txt
+   ```
+   O pacote do modelo (`artifacts/tool_model/tool_v3_...`, apontado por `LATEST.json`) e a Silver/Gold que ele cita em `metadata.json` precisam estar na pasta.
+2. Registre o servidor (testa se o modelo carrega e grava caminhos absolutos, preservando outros servidores do arquivo, com copia `.bak`):
+   ```bash
+   .venv/bin/python scripts/setup/configure_claude_desktop.py               # opcional: --gemini-key <chave>
+   ```
+   Arquivo gravado: Windows `%APPDATA%\Claude\claude_desktop_config.json`, macOS `~/Library/Application Support/Claude/claude_desktop_config.json`. O Claude Desktop nao usa `cwd`, por isso a entrada fica com caminhos absolutos:
+   ```json
+   {"mcpServers": {"galaxies-preditivo": {
+     "command": "/caminho/case_galaxies/.venv/bin/python",
+     "args": ["-m", "galaxies_agent.mcp_server"],
+     "env": {"PYTHONPATH": "/caminho/case_galaxies/src", "GALAXIES_ROOT": "/caminho/case_galaxies",
+             "PYTHONIOENCODING": "utf-8", "GEMINI_API_KEY": "<opcional>"}}}}
+   ```
+3. Feche o Claude Desktop por completo (inclusive da bandeja do sistema) e abra de novo; as 6 tools abaixo aparecem no menu de ferramentas.
+
+Sem `GEMINI_API_KEY`, Shorts da base usam a rubrica em cache e Shorts novos caem no modelo reserva sem rubrica (confianca baixa). Teste do servidor fora do Claude: `PYTHONPATH=src python -m galaxies_agent.mcp_server` fica esperando entrada no stdio (Ctrl+C para sair); validado em 21/10/2026 com um cliente MCP real (6 tools listadas, `info_modelo` devolve `tool_v3_20261021T175806Z`).
 
 | Tool | Entrada | Saida |
 | --- | --- | --- |
@@ -264,7 +285,7 @@ report = train_client_model("base_do_cliente.csv", nome="cliente_x")   # post_id
 - **Modalidades:** thumbnail estatica + rubrica/fala do Gemini; sem frames, cortes de cena ou audio bruto (o video nao e baixado).
 - **Split de teste por canal**, nao por data global.
 - **Embedding opaco:** o SHAP indica que o estilo visual pesou, nao qual aspecto; comparaveis e rubrica complementam.
-- **Ambiente:** modelo e agente nao rodam no Windows do Inteli (DLLs bloqueadas); o embedding ao vivo exige `torch` e acesso ao Hugging Face, e a rubrica ao vivo exige `GEMINI_API_KEY` (cada Short novo custa uma chamada, ~5 s).
+- **Ambiente:** no Windows do Inteli, o Python do sistema tem DLLs bloqueadas; o modelo e o MCP rodam pelo `.venv` do instalador (testado em 21/10/2026). O embedding ao vivo exige `torch` e acesso ao Hugging Face, e a rubrica ao vivo exige `GEMINI_API_KEY` (cada Short novo custa uma chamada, ~5 s).
 - **Rubrica gerada por LLM:** as notas do Gemini sao subjetivas e podem mudar com a versao do modelo; a versao do prompt e do modelo ficam registradas no pacote.
 
 ## 10. Evolucao
