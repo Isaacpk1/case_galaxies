@@ -1,7 +1,7 @@
 /* Adaptador mínimo para executar localmente o painel criado para Dashboard. */
 (() => {
   const names = ['base', 'modelos_teste', 'evolucao', 'ordenacao', 'recortes',
-    'canais', 'maiores_erros', 'intervalo', 'clusters', 'importancia', 'atributos', 'e17'];
+    'canais', 'videos_canal', 'intervalo', 'clusters', 'importancia', 'atributos', 'e17'];
   const values = new Map(names.map((name) => [name, { status: 'loading', data: [] }]));
   const calculations = new Map();
   let listener = null;

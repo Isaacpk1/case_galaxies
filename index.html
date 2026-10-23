@@ -194,6 +194,24 @@
   .gx-channel-chart{min-height:250px}.gx-channel-chart .row{display:grid;grid-template-columns:160px 1fr 75px;align-items:center;gap:16px;margin:26px 0;color:#34465e;font-weight:600}
   .gx-channel-chart .track{height:32px;background:#e8eef6;border-radius:5px;overflow:hidden}.gx-channel-chart .fill{height:100%;display:block;border-radius:5px;background:#2563eb}.gx-channel-chart .baseline{background:#64748b}
   .gx-channel-delta{font-size:17px;line-height:1.5;padding:18px 22px;border-radius:8px;background:#eef4ff;color:#1745a4}
+  .gx-channel-legend{display:flex;flex-wrap:wrap;gap:16px;color:#53657d;font-size:13px}
+  .gx-channel-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .gx-channel-plot{min-height:290px;overflow-x:auto}
+  .gx-channel-plot svg{display:block;width:100%;min-width:560px;height:auto}
+  .gx-channel-plot text{font:12px 'Source Sans 3',sans-serif;fill:#63748a}
+  .gx-channel-plot .domain,.gx-channel-plot .tick line{stroke:#d8e2ef}
+  .gx-short-head{display:flex;align-items:end;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .gx-short-head select{max-width:100%;width:440px}
+  .gx-short-title{font:600 21px 'Sora',sans-serif;color:#142747;line-height:1.35}
+  .gx-short-link{color:#145be8;font-weight:700;text-decoration:none}
+  .gx-short-compare{display:grid;gap:13px}
+  .gx-short-compare .row{display:grid;grid-template-columns:105px 1fr 85px;gap:12px;align-items:center;font-size:14px}
+  .gx-short-compare .track{height:16px;border-radius:20px;background:#e9eff8;overflow:hidden}
+  .gx-short-compare .fill{display:block;height:100%;border-radius:20px}
+  .gx-feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .gx-feature{padding:12px;border:1px solid #dce5f0;border-radius:9px;background:#f8fbff}
+  .gx-feature strong{display:block;font:600 23px 'Sora',sans-serif;color:#1c5ce5}
+  .gx-feature span{font-size:13px;color:#52647d}
   @media(max-width:760px){.gx-upload-grid{grid-template-columns:1fr}.gx-channel-kpis{grid-template-columns:1fr}.gx-channel-chart .row{grid-template-columns:105px 1fr 65px;gap:9px}}
   .gx, .gx button, .gx input, .gx select { font-family:'Source Sans 3',Arial,sans-serif; }
   .gx h1,.gx h2,.gx h3,.gx-big-num,.gx-val,.gx-tile .x { font-family:'Sora',Arial,sans-serif; }
@@ -258,14 +276,16 @@
 
   <!-- ONE CHANNEL: only metrics actually available in the published dataset -->
   <section class="gx-page" id="canal" role="tabpanel" aria-labelledby="tab-canal" hidden>
-    <div class="gx-channel-head"><div><h2 class="gx-workspace-title">Um canal de cada vez</h2><p class="gx-workspace-lead">Compare o erro do modelo com a mediana histórica nos Shorts de teste desse canal.</p></div><select class="gx-channel-picker" id="gx-channel-picker" aria-label="Escolher canal"><option value="">Selecione um canal</option></select></div>
+    <div class="gx-channel-head"><div><h2 class="gx-workspace-title">Um canal de cada vez</h2><p class="gx-workspace-lead">Veja o que a mediana histórica diria, como o modelo ajustou a previsão para cada vídeo e o que aconteceu após publicar.</p></div><select class="gx-channel-picker" id="gx-channel-picker" aria-label="Escolher canal"><option value="">Selecione um canal</option></select></div>
     <div id="gx-channel-content" hidden>
       <div class="gx-channel-kpis">
         <div class="gx-card"><span class="gx-label">SHORTS NO TESTE</span><strong class="gx-val" id="gx-channel-shorts">—</strong><span class="gx-sub">publicações recentes avaliadas</span></div>
-        <div class="gx-card"><span class="gx-label">SETOR</span><strong class="gx-val" id="gx-channel-sector">—</strong><span class="gx-sub" id="gx-channel-type">—</span></div>
+        <div class="gx-card"><span class="gx-label">MAE DO MODELO</span><strong class="gx-val" id="gx-channel-model-mae">—</strong><span class="gx-sub">vs. <span id="gx-channel-base-mae">—</span> da mediana · escala log</span></div>
         <div class="gx-card"><span class="gx-label">GANHO EM ERRO</span><strong class="gx-val" id="gx-channel-gain">—</strong><span class="gx-sub">MAE da mediana − MAE do modelo</span></div>
       </div>
-      <div class="gx-card"><h3>Erro médio no teste</h3><p class="gx-note">MAE em log por Short. Barras na mesma escala; menor significa menos erro.</p><div class="gx-channel-chart" id="gx-channel-chart"></div></div>
+      <div class="gx-card"><h3>De Short em Short</h3><p class="gx-note">Curtidas em escala logarítmica. A baseline fica na mediana do canal; o modelo varia com os sinais de cada vídeo. O resultado real só é conhecido depois da publicação.</p><div class="gx-channel-legend"><span><i style="background:#94a3b8"></i>Mediana histórica</span><span><i style="background:#2563eb"></i>Modelo</span><span><i style="background:#101828"></i>Real</span></div><div class="gx-channel-plot" id="gx-channel-timeline"></div></div>
+      <div class="gx-grid2"><div class="gx-card"><h3>Erro por vídeo</h3><p class="gx-note">Erro absoluto em log: menor é melhor. Cada par corresponde a um Short do teste.</p><div class="gx-channel-legend"><span><i style="background:#94a3b8"></i>Mediana</span><span><i style="background:#2563eb"></i>Modelo</span></div><div class="gx-channel-plot" id="gx-channel-errors"></div></div><div class="gx-card"><h3>Erro médio no canal</h3><p class="gx-note">MAE em log por Short, na mesma escala.</p><div class="gx-channel-chart" id="gx-channel-chart"></div></div></div>
+      <div class="gx-card"><div class="gx-short-head"><div><h3>Entenda um Short</h3><p class="gx-note">Selecione um vídeo para ver a mudança da baseline até a previsão.</p></div><select class="gx-channel-picker" id="gx-short-picker" aria-label="Escolher Short"></select></div><strong class="gx-short-title" id="gx-short-title"></strong><a class="gx-short-link" id="gx-short-link" target="_blank" rel="noopener noreferrer" hidden>Ver Short no YouTube ↗</a><div class="gx-short-compare" id="gx-short-compare"></div><p class="gx-channel-delta" id="gx-short-explain"></p><div class="gx-feature-grid" id="gx-short-features"></div><p class="gx-note">As notas de 0 a 10 são sinais extraídos do criativo antes de publicar. A comparação mostra o movimento da previsão; não atribui efeito causal a uma nota isolada.</p></div>
       <p class="gx-channel-delta" id="gx-channel-insight"></p>
     </div>
     <div class="gx-card" id="gx-channel-empty">Selecione um canal para ver a análise individual.</div>
@@ -340,22 +360,6 @@
             <th data-field="mae_b0" class="num"><button type="button" data-sort="mae_b0">Mediana</button></th>
             <th data-field="ganho" class="num"><button type="button" data-sort="ganho" aria-sort="descending">Ganho</button></th>
             <th class="gx-hide-narrow"><span class="gx-label">↔</span></th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-    <div class="gx-card" id="card-maiores">
-      <h3>Os maiores erros</h3>
-      <p class="gx-note">Notícia e celebridade em canais de mídia e campanhas de marca: nada disso aparece no criativo antes de publicar.</p>
-      <div class="gx-tablebox">
-        <table class="gx-table" id="tb-maiores" data-source="maiores_erros" data-row-key="titulo">
-          <thead><tr>
-            <th data-field="titulo">Short</th>
-            <th data-field="canal" class="gx-hide-narrow">Canal</th>
-            <th data-field="curtidas_reais" class="num">Reais</th>
-            <th data-field="previstas" class="num">Previstas</th>
-            <th data-field="mediana_canal" class="num gx-hide-narrow">Mediana</th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -595,16 +599,6 @@
       return tr;
     }));
   }
-  function drawMaiores() {
-    const all = rowsOf('maiores_erros'), body = document.querySelector('#tb-maiores tbody');
-    if (!all) { body.replaceChildren(); return; }
-    body.replaceChildren(...all.map((r) => {
-      const tr = document.createElement('tr');
-      const td = (t, c) => { const e = document.createElement('td'); if (c) e.className = c; e.textContent = t; tr.appendChild(e); };
-      td(r.titulo); td(r.canal, 'gx-hide-narrow'); td(F.int(r.curtidas_reais), 'num'); td(F.int(r.previstas), 'num'); td(F.int(r.mediana_canal), 'num gx-hide-narrow');
-      return tr;
-    }));
-  }
   function drawErros() {
     const fb = document.getElementById('ch-faixas'), rb = document.getElementById('ch-recortes');
     if (state(fb, 'recortes') && state(rb, 'recortes')) {
@@ -613,7 +607,7 @@
       pairs(fb, rec.filter((r) => r.recorte === 'Desempenho real'), { label: (r) => r.grupo, a: (r) => r.mae_modelo, b: (r) => r.mae_b0, fmt: (v) => F.dec(v, 2), extra });
       pairs(rb, rec.filter((r) => r.recorte !== 'Desempenho real'), { label: (r) => r.grupo, a: (r) => r.mae_modelo, b: (r) => r.mae_b0, fmt: (v) => F.dec(v, 2), extra: (r) => [['Recorte', r.recorte], ...extra(r)] });
     }
-    drawCanais(); drawMaiores();
+    drawCanais();
   }
 
   /* receita: cartões de destaque + um mini gráfico por característica */
@@ -733,8 +727,9 @@
     if (current === 'erros') drawErros();
     if (current === 'receita') drawReceita();
   }
-  /* Channel view uses only the published per-channel test rows. */
+  /* Channel view combines channel-level metrics with held-out per-video predictions. */
   const channelPicker = document.getElementById('gx-channel-picker');
+  const shortPicker = document.getElementById('gx-short-picker');
   const uploadChannel = document.getElementById('gx-video-channel');
   function populateChannels() {
     const rows = rowsOf('canais'); if (!rows) return;
@@ -748,12 +743,14 @@
   function drawCanalIndividual() {
     populateChannels();
     const row = (rowsOf('canais') || []).find((r) => r.canal.trim() === channelPicker.value);
-    document.getElementById('gx-channel-content').hidden = !row;
-    document.getElementById('gx-channel-empty').hidden = !!row;
-    if (!row) return;
-    document.getElementById('gx-channel-shorts').textContent = F.int(row.shorts);
-    document.getElementById('gx-channel-sector').textContent = row.setor;
-    document.getElementById('gx-channel-type').textContent = row.grupo;
+    const videos = (rowsOf('videos_canal') || []).filter((r) => r.canal === channelPicker.value)
+      .sort((a,b) => String(a.publicado_em).localeCompare(String(b.publicado_em)));
+    document.getElementById('gx-channel-content').hidden = !row || !videos.length;
+    document.getElementById('gx-channel-empty').hidden = !!row && !!videos.length;
+    if (!row || !videos.length) return;
+    document.getElementById('gx-channel-shorts').textContent = F.int(videos.length);
+    document.getElementById('gx-channel-model-mae').textContent = F.dec(row.mae_modelo);
+    document.getElementById('gx-channel-base-mae').textContent = F.dec(row.mae_b0);
     document.getElementById('gx-channel-gain').textContent = (row.ganho >= 0 ? '+' : '') + F.dec(row.ganho);
     const chart = document.getElementById('gx-channel-chart'); chart.replaceChildren();
     const scale = Math.max(row.mae_modelo,row.mae_b0,0.01);
@@ -768,8 +765,80 @@
     document.getElementById('gx-channel-insight').textContent = row.ganho >= 0
       ? `Neste canal, o modelo teve menor erro médio que a mediana histórica nos ${row.shorts} Shorts do teste.`
       : `Neste canal, a mediana histórica errou menos. Considere esse limite ao usar a previsão.`;
+    drawChannelTimeline(videos);
+    drawChannelErrors(videos);
+    const old = shortPicker.value;
+    shortPicker.replaceChildren(...videos.map((v,i) => new Option(`${i+1}. ${v.titulo || 'Short sem título'}`, v.video_id)));
+    if (videos.some((v) => v.video_id === old)) shortPicker.value = old;
+    drawShortDetail(videos);
   }
   channelPicker.addEventListener('change',drawCanalIndividual);
+  shortPicker.addEventListener('change',drawCanalIndividual);
+
+  function drawChannelTimeline(videos) {
+    const box = document.getElementById('gx-channel-timeline'); box.replaceChildren();
+    const W=900,H=280,m={top:18,right:20,bottom:45,left:60};
+    const points=videos.map((v,i)=>({...v,i}));
+    const max=d3.max(points.flatMap((v)=>[v.reais,v.baseline,v.modelo]));
+    const x=d3.scaleLinear().domain([0,Math.max(1,points.length-1)]).range([m.left,W-m.right]);
+    const y=d3.scaleLinear().domain([0,Math.log1p(max)*1.08]).range([H-m.bottom,m.top]);
+    const svg=d3.select(box).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('role','img')
+      .attr('aria-label','Curtidas reais, previstas pelo modelo e mediana histórica em sequência temporal');
+    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).ticks(Math.min(10,points.length)).tickFormat((i)=>Number.isInteger(i)?i+1:''));
+    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).ticks(5).tickFormat((v)=>F.int(Math.round(Math.expm1(v)))));
+    svg.append('text').attr('x',W/2).attr('y',H-5).attr('text-anchor','middle').text('Shorts em ordem de publicação');
+    for(const [key,color,dash] of [['baseline','#94a3b8','6 4'],['modelo','#2563eb',null],['reais','#101828',null]]) {
+      const line=d3.line().x((v)=>x(v.i)).y((v)=>y(Math.log1p(v[key])));
+      svg.append('path').datum(points).attr('fill','none').attr('stroke',color).attr('stroke-width',key==='modelo'?3:2)
+        .attr('stroke-dasharray',dash).attr('d',line);
+      svg.selectAll(`.point-${key}`).data(points).enter().append('circle').attr('cx',(v)=>x(v.i))
+        .attr('cy',(v)=>y(Math.log1p(v[key]))).attr('r',key==='modelo'?4:3).attr('fill',color)
+        .append('title').text((v)=>`${v.titulo}\n${key}: ${F.int(v[key])} curtidas`);
+    }
+  }
+  function drawChannelErrors(videos) {
+    const box=document.getElementById('gx-channel-errors');box.replaceChildren();
+    const W=600,H=270,m={top:15,right:15,bottom:45,left:48};
+    const x=d3.scaleBand().domain(videos.map((_,i)=>i)).range([m.left,W-m.right]).padding(.2);
+    const y=d3.scaleLinear().domain([0,d3.max(videos.flatMap((v)=>[v.erro_baseline_log,v.erro_modelo_log]))*1.08||1]).range([H-m.bottom,m.top]);
+    const svg=d3.select(box).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('role','img')
+      .attr('aria-label','Erro absoluto da mediana e do modelo para cada Short');
+    svg.append('g').attr('transform',`translate(0,${H-m.bottom})`).call(d3.axisBottom(x).tickValues(x.domain().filter((_,i)=>i%Math.ceil(videos.length/10)===0)).tickFormat((i)=>i+1));
+    svg.append('g').attr('transform',`translate(${m.left},0)`).call(d3.axisLeft(y).ticks(5));
+    svg.append('text').attr('x',W/2).attr('y',H-5).attr('text-anchor','middle').text('Shorts em ordem de publicação');
+    for(const [key,color,offset] of [['erro_baseline_log','#94a3b8',0],['erro_modelo_log','#2563eb',.5]]) {
+      svg.selectAll(`.bar-${key}`).data(videos).enter().append('rect').attr('x',(_,i)=>x(i)+x.bandwidth()*offset)
+        .attr('y',(v)=>y(v[key])).attr('width',Math.max(1,x.bandwidth()/2)).attr('height',(v)=>H-m.bottom-y(v[key]))
+        .attr('fill',color).append('title').text((v)=>`${v.titulo}\n${key==='erro_modelo_log'?'Modelo':'Mediana'}: ${F.dec(v[key])}`);
+    }
+  }
+  function drawShortDetail(videos) {
+    const v=videos.find((item)=>item.video_id===shortPicker.value)||videos[0]; if(!v)return;
+    document.getElementById('gx-short-title').textContent=v.titulo||'Short sem título';
+    const link=document.getElementById('gx-short-link');
+    link.hidden=!/^[A-Za-z0-9_-]{11}$/.test(v.video_id);
+    if(!link.hidden)link.href=`https://www.youtube.com/watch?v=${v.video_id}`;
+    const compare=document.getElementById('gx-short-compare');compare.replaceChildren();
+    const max=Math.max(v.baseline,v.modelo,v.reais,1);
+    for(const [label,value,color] of [['Mediana',v.baseline,'#94a3b8'],['Modelo',v.modelo,'#2563eb'],['Real',v.reais,'#101828']]) {
+      const line=document.createElement('div');line.className='row';
+      const name=document.createElement('span');name.textContent=label;
+      const track=document.createElement('div');track.className='track';
+      const fill=document.createElement('span');fill.className='fill';fill.style.background=color;
+      fill.style.width=`${Math.max(1,Math.log1p(value)/Math.log1p(max)*100)}%`;track.append(fill);
+      const count=document.createElement('strong');count.textContent=F.int(value);
+      line.append(name,track,count);compare.append(line);
+    }
+    const ratio=(v.modelo+1)/(v.baseline+1);
+    document.getElementById('gx-short-explain').textContent=`Para este Short, a mediana indicava ${F.int(v.baseline)} curtidas. O modelo ${ratio>=1?'elevou':'reduziu'} a previsão para ${F.int(v.modelo)} (${F.dec(ratio,2)}× da baseline). Após publicar, foram observadas ${F.int(v.reais)} curtidas. O erro em log foi ${F.dec(v.erro_modelo_log)} no modelo e ${F.dec(v.erro_baseline_log)} na mediana.`;
+    const features=document.getElementById('gx-short-features');features.replaceChildren();
+    for(const [key,label] of [['forca_hook','Gancho'],['ritmo_cortes','Ritmo de cortes'],['estetica_geral','Estética'],['potencial_viral','Potencial viral']]) {
+      const card=document.createElement('div');card.className='gx-feature';
+      const score=document.createElement('strong');score.textContent=v[key]==null?'—':`${F.dec(v[key],1)}/10`;
+      const name=document.createElement('span');name.textContent=label;card.append(score,name);features.append(card);
+    }
+    if(v.tom_narracao){const card=document.createElement('div');card.className='gx-feature';const score=document.createElement('strong');score.textContent=v.tom_narracao;score.style.fontSize='16px';const name=document.createElement('span');name.textContent='Tom de narração';card.append(score,name);features.append(card);}
+  }
 
   /* The file stays local to the browser; no unsupported prediction is implied. */
   const videoFile=document.getElementById('gx-video-file'), videoPreview=document.getElementById('gx-video-preview');
