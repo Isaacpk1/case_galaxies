@@ -743,7 +743,7 @@
   function drawCanalIndividual() {
     populateChannels();
     const row = (rowsOf('canais') || []).find((r) => r.canal.trim() === channelPicker.value);
-    const videos = (rowsOf('videos_canal') || []).filter((r) => r.canal === channelPicker.value)
+    const videos = (rowsOf('videos_canal') || []).filter((r) => String(r.canal).trim() === channelPicker.value)
       .sort((a,b) => String(a.publicado_em).localeCompare(String(b.publicado_em)));
     document.getElementById('gx-channel-content').hidden = !row || !videos.length;
     document.getElementById('gx-channel-empty').hidden = !!row && !!videos.length;
